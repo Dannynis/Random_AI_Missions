@@ -35,9 +35,17 @@ label-efficiency AUC, with the same frozen self-supervised features and the same
   episodes (Gumbel-top-k = Plackett-Luce) on the same task and seed, reward = linear-probe AUC over
   10–160 labels, z-scored within the group; 150 iterations. Evaluation is greedy.
 
+- Learned policy v2 (`run.sh policy2`), added after v1's first evaluation seeds came back 0.05 AUC below
+  TypiClust: the same MLP gets three extra per-round cluster features (k-means with |L|+B clusters: cluster still
+  unlabeled, cluster size, point is the densest unlabeled point of its cluster), so TypiClust is expressible
+  exactly. It is first behaviour-cloned from TypiClust's ordered picks (100 episodes, Plackett-Luce likelihood),
+  then fine-tuned with the same GRPO objective (200 iterations, lr 1e-3). The BC-only policy (`policy2_bc`) is
+  evaluated as well, so any gain can be attributed to the RL stage. A quick sanity check on two held-out
+  10-way tasks showed the BC policy matching TypiClust (AUC 0.909 vs 0.908 and 0.902 vs 0.902, 1 seed).
+
 ## Pass / fail
 
-The policy passes if, on CIFAR-10 *and* on the held-out CIFAR-100 10-way tasks, its AUC beats the best baseline
+The policy (v1 or v2; v2 must also beat its own BC initialisation) passes if, on CIFAR-10 *and* on the held-out CIFAR-100 10-way tasks, its AUC beats the best baseline
 for that task (chosen after the fact, which favours the baselines) by a paired mean > 0 with at least 8/10 seed
 wins, for at least one of the two learners. Full CIFAR-100 is reported as a harder transfer test.
 Otherwise the result is negative and is reported as such.

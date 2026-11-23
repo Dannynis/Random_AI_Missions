@@ -194,27 +194,36 @@ def q_coreset(task, lab, B, pred, gen):
     return torch.tensor(picks, device=X.device)
 
 
+def typiclust_order(task, lab, B, a, min_size: int = 5):
+    """TypiClust picks (in order) given a cluster assignment ``a`` of the pool."""
+    K = int(a.max()) + 1
+    size = torch.bincount(a, minlength=K)
+    nlab = torch.bincount(a[lab], minlength=K) if len(lab) else torch.zeros_like(size)
+    typ = task.density                             # 1 / mean distance to 20 NN, monotone proxy
+    unl = _unl_mask(task, lab)
+    dead = torch.zeros(K, dtype=torch.bool, device=a.device)   # clusters with no unlabeled point left
+    picks = []
+    while len(picks) < B and not bool(dead.all()):
+        key = nlab.float() * 1e7 - size.float()
+        key[size < min_size] = 1e12
+        key[dead] = float("inf")
+        c = int(key.argmin())
+        cand = ((a == c) & unl).nonzero().squeeze(1)
+        if len(cand) == 0:
+            dead[c] = True
+            continue
+        j = int(cand[typ[cand].argmax()])
+        picks.append(j); unl[j] = False; nlab[c] += 1
+    return picks
+
+
 def q_typiclust(task, lab, B, pred, gen, max_clusters: int = 500, min_size: int = 5):
     """TypiClust (Hacohen et al. 2022): k-means with |L|+B clusters, most typical point of the
     largest clusters that hold the fewest labels."""
     X = task.X
     K = min(len(lab) + B, max_clusters)
     _, a = kmeans(X, K, iters=20, seed=int(torch.randint(1 << 30, (1,), generator=gen)))
-    size = torch.bincount(a, minlength=K)
-    nlab = torch.bincount(a[lab], minlength=K) if len(lab) else torch.zeros_like(size)
-    typ = task.density.clone()                     # 1 / mean distance to 20 NN, monotone proxy
-    unl = _unl_mask(task, lab)
-    picks = []
-    for _ in range(B):
-        key = nlab.float() * 1e7 - size.float()
-        key[size < min_size] = 1e12
-        c = int(key.argmin())
-        cand = ((a == c) & unl).nonzero().squeeze(1)
-        if len(cand) == 0:
-            size[c] = 0
-            continue
-        j = int(cand[typ[cand].argmax()])
-        picks.append(j); unl[j] = False; nlab[c] += 1
+    picks = typiclust_order(task, lab, B, a, min_size)
     if len(picks) < B:
         extra = q_random(task, torch.cat([lab, torch.tensor(picks, device=X.device, dtype=torch.long)]),
                          B - len(picks), pred, gen)
@@ -339,6 +348,31 @@ def policy_features(task: Task, lab: torch.Tensor, pred, progress: float):
     return z
 
 
+POLICY_FEATURES_V2 = POLICY_FEATURES + ["clus_unlabeled", "clus_size", "clus_most_typical"]
+
+
+def round_clusters(task, lab, B, gen, max_clusters: int = 500):
+    """Per-round k-means with |L| + B clusters (TypiClust's choice), shared by the sub-batches."""
+    K = min(len(lab) + B, max_clusters)
+    return kmeans(task.X, K, iters=20, seed=int(torch.randint(1 << 30, (1,), generator=gen)))[1]
+
+
+def cluster_features(task, cur, a):
+    """(n, 3): cluster has no label yet; log cluster size share (z-scored); point is the densest
+    unlabeled point of its cluster. Together they let the policy express TypiClust exactly."""
+    K = int(a.max()) + 1
+    n = len(task.X)
+    size = torch.bincount(a, minlength=K).float()
+    nlab = torch.bincount(a[cur], minlength=K) if len(cur) else torch.zeros(K, device=a.device)
+    unl = _unl_mask(task, cur)
+    dens = task.density.masked_fill(~unl, -1e9)
+    mx = torch.full((K,), -1e9, device=a.device).scatter_reduce(0, a, dens, reduce="amax")
+    top = ((dens >= mx[a]) & unl).float()
+    cs = (size[a] / n).log()
+    cs = (cs - cs.mean()) / cs.std().clamp_min(1e-6)
+    return torch.stack([(nlab[a] == 0).float(), cs, top], 1)
+
+
 class Policy(nn.Module):
     def __init__(self, n_feat: int = len(POLICY_FEATURES), hidden: int = 64):
         super().__init__()
@@ -350,22 +384,38 @@ class Policy(nn.Module):
 
 
 def q_policy_factory(policy: Policy, sub_batches: int = 4, greedy: bool = True, record: list | None = None,
-                     n_cand: int | None = None):
+                     n_cand: int | None = None, v2: bool = False, bc_target: bool = False):
     """Picks B points in ``sub_batches`` steps (features recomputed between steps so that
     distance / coverage features see the picks). Sampling is Plackett-Luce over a random
     candidate subset of size ``n_cand`` (default: all unlabeled; greedy top-k at evaluation). ``record`` collects
-    (features, candidate ids, picks) for the policy-gradient update."""
+    (features, candidate ids, picks) for the policy-gradient update.
+    ``v2`` adds the per-round cluster features. ``bc_target`` (behaviour cloning) follows
+    TypiClust's ordered picks on the same clusters instead of the policy, and records them."""
 
     def q(task, lab, B, pred, gen, progress=0.0):
         picks = torch.zeros(0, dtype=torch.long, device=task.X.device)
         sizes = [B // sub_batches + (1 if i < B % sub_batches else 0) for i in range(sub_batches)]
+        a = round_clusters(task, lab, B, gen) if v2 else None
+        target = typiclust_order(task, lab, B, a) if bc_target else None
         for b in sizes:
             if b == 0:
                 continue
             cur = torch.cat([lab, picks])
             f = policy_features(task, cur, pred, progress)
+            if v2:
+                f = torch.cat([f, cluster_features(task, cur, a)], 1)
             unl = _unl_mask(task, cur).nonzero().squeeze(1)
             cand = unl if n_cand is None else unl[torch.randperm(len(unl), generator=gen)[:n_cand].to(unl.device)]
+            if bc_target:
+                tgt = torch.tensor(target[len(picks):len(picks) + b], device=unl.device, dtype=torch.long)
+                pos = torch.full((len(task.X),), -1, dtype=torch.long, device=unl.device)
+                pos[cand] = torch.arange(len(cand), device=unl.device)
+                sel = pos[tgt]
+                sel = sel[sel >= 0]
+                if record is not None:
+                    record.append((f[cand].detach(), sel.detach()))
+                picks = torch.cat([picks, cand[sel]])
+                continue
             with torch.no_grad():
                 s = policy(f[cand])
             if greedy:
