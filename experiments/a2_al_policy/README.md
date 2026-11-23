@@ -108,7 +108,7 @@ Paired AUC differences against TypiClust (wins out of 10 seeds):
   architecture can express the best rule. GRPO fine-tuning (200 iterations, reward = linear-probe AUC over
   10–160 labels on 10-way tasks from CIFAR-100 classes 0–49) then moves it *below* TypiClust in all 6 cells and
   below its own initialisation (training reward 0.911 → 0.916, first vs last 20 iterations: essentially flat).
-- What the RL stage changes: on CIFAR-10 it loses 2–5 points at 20–100 labels (e.g. 0.771 vs 0.804 at 20) and
+- What the RL stage changes: on CIFAR-10 (linear) it loses 0.5–3.3 points at 20–150 labels (0.771 vs 0.804 at 20) and
   gains slightly at 300–1000 (0.984 vs 0.981 at 1000). Policy v1 showed the same high-budget edge. This points
   at a simpler hypothesis for a follow-up: TypiClust for the cold start, then switch to an uncertainty or learned
   rule after a few hundred labels (cf. the TCM heuristic), tested with a reward that weights high budgets.
