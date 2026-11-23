@@ -1,0 +1,15 @@
+infra/local.env
+LOCAL.md
+__pycache__/
+*.pyc
+*.pt
+*.ckpt
+*.safetensors
+*.npy
+*.npz
+*.wav
+.ipynb_checkpoints/
+infra/
+QUEUE.md
+provenance.txt
+stderr_tail.txt
