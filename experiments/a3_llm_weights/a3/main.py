@@ -51,6 +51,22 @@ def log(*a):
     print(time.strftime("%H:%M:%S"), *a, flush=True)
 
 
+def local_model(hf_id):
+    """Copy a cached model snapshot to node-local scratch once (sequential reads; memory-mapping the weights
+    straight from a slow network filesystem is far slower) and return the local path."""
+    import shutil
+    from huggingface_hub import snapshot_download
+    src = snapshot_download(hf_id, allow_patterns=["*.json", "*.safetensors", "*.txt"])
+    dst = os.path.join(os.environ.get("TMPDIR") or "/tmp", "a3_models", hf_id.replace("/", "--"))
+    if not os.path.exists(os.path.join(dst, ".complete")):
+        t0 = time.time()
+        shutil.rmtree(dst, ignore_errors=True)
+        shutil.copytree(src, dst)                         # follows the cache's symlinks
+        open(os.path.join(dst, ".complete"), "w").close()
+        log(f"copied {hf_id} to local scratch in {time.time() - t0:.0f}s")
+    return dst
+
+
 def save_json(obj, name):
     p = os.path.join(OUT, name)
     with open(p + ".tmp", "w") as f:
@@ -86,7 +102,7 @@ class TaskStream(torch.utils.data.IterableDataset):
 
 def train_arm(name, cfg, tiny):
     path = os.path.join(CKPT, name + ".pt")
-    model = Generator(LLMS[cfg["llm"]], lora_r=cfg.get("lora_r", 16), random_init=cfg.get("random_init", False))
+    model = Generator(local_model(LLMS[cfg["llm"]]), lora_r=cfg.get("lora_r", 16), random_init=cfg.get("random_init", False))
     model.to(DEV)
     llm_p, new_p, scaf_p = model.groups()
     lr_llm = 5e-5 if model.full_ft else 1e-4
@@ -237,7 +253,7 @@ def run_icl(llm_key, eps, names, max_prefix=7000, nq=20):
     prediction is the label letter with the highest next-token logit. Draw 0 only, first nq queries."""
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from transformers.cache_utils import DynamicCache
-    path = LLMS[llm_key]
+    path = local_model(LLMS[llm_key])
     tok = AutoTokenizer.from_pretrained(path)
     lm = AutoModelForCausalLM.from_pretrained(path, torch_dtype=torch.bfloat16).to(DEV).eval()
     lab_ids = [tok(" " + c, add_special_tokens=False)["input_ids"][-1] for c in LABELS]
@@ -442,7 +458,13 @@ def main():
         save_json(dict(hist=hist, ok=bool(hist and hist[-1][0] == 5)), "resume_test.json")
         return
     tables = ["iris", "banknote", "cmc"] if a.tiny else None
-    eps, names = all_episodes(tables, draws=1 if a.tiny else 4)
+    import pickle
+    ep_cache = os.path.join(CKPT, "episodes_tiny.pkl" if a.tiny else "episodes.pkl")
+    if os.path.exists(ep_cache):
+        eps, names = pickle.load(open(ep_cache, "rb"))
+    else:
+        eps, names = all_episodes(tables, draws=1 if a.tiny else 4)
+        pickle.dump((eps, names), open(ep_cache, "wb"))
     log(f"{len(eps)} episodes over {len(names)} tables on {DEV}")
     plan = arm_plan(a.tiny)
     if a.arms:
@@ -476,6 +498,8 @@ def main():
         if os.path.exists(ck):
             os.remove(ck)                               # disk budget: drop checkpoints of finished arms
     report()
+    import shutil
+    shutil.rmtree(os.path.join(os.environ.get("TMPDIR") or "/tmp", "a3_models"), ignore_errors=True)
     log("all arms done")
 
 
