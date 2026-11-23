@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 export LAB_DATA=${LAB_DATA:-$HF_HOME/lab_data}
 [ "${1:-}" = "tiny" ] && export NCA_TINY=1
-N=${NCA_WORKERS:-$(nproc)}
+N=${NCA_WORKERS:-4}
 pids=()
 for w in $(seq 0 $((N - 1))); do python b4_bench.py worker $w $N & pids+=($!); done
 trap 'kill ${pids[*]} 2>/dev/null' USR1 TERM
