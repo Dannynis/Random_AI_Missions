@@ -5,7 +5,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 
 ## Tier A: paper candidates
 
-### A1. Over-the-air audio watermarking against published neural watermarks  (`todo`)
+### A1. Over-the-air audio watermarking against published neural watermarks  (`running`: `experiments/a1_ota_watermark`)
 - **Origin:** Random-Ideas PRs #19, #33, #45, #57. Learned code + soft-Viterbi convolutional code + blind sync + CRC took
   simulated over-the-air message success from 0.025 to ~0.8 (16 bits in 8 s), on small models and 2-3 seeds.
 - **Why scale matters:** needs a full-size encoder/decoder trained on real speech and music (LibriSpeech, FMA, MUSDB)
@@ -16,7 +16,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   bit error rate, and detection AUC, per channel.
 - **Pass:** ours beats both baselines on re-recorded (speaker to microphone) channels by a clear margin at equal audibility.
 
-### A2. Learned query policies for cold-start active learning, beyond MNIST  (`todo`)
+### A2. Learned query policies for cold-start active learning, beyond MNIST  (`running`: `experiments/a2_al_policy`)
 - **Origin:** GAL sessions and PRs #16, #36. A 15-feature MLP policy trained with group-relative RL beat BALD and
   TypiClust-style warmup on 10/10 seeds on MNIST and transferred to Fashion-MNIST.
 - **Why scale matters:** CIFAR-10/100 and ImageNet-100 with a self-supervised backbone (DINOv2 features) and a
@@ -26,7 +26,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   10 seeds; budgets 10 to 1000 labels.
 - **Pass:** policy trained on dataset A beats the best hand-made rule on datasets B and C in label-efficiency AUC.
 
-### A3. LLM-generated network weights with a real LLM  (`todo`)
+### A3. LLM-generated network weights with a real LLM  (`running`: `experiments/a3_llm_weights`)
 - **Origin:** PRs #14, #34 and the `llm_weights` project. All runs used a CPU stand-in for Qwen; a fitted ridge
   scaffold matched logistic regression and the generator hurt.
 - **Why scale matters:** the actual hypothesis (an LLM conditioned on a dataset description emits useful weights)
@@ -53,7 +53,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 - **Strong test:** small transformer language model (GPT-2 small scale) with MoE layers on a multi-domain corpus,
   dense at equal compute, oracle domain routing as the ceiling.
 
-### B4. Neural cellular automata: persistence schedule  (`todo`)
+### B4. Neural cellular automata: persistence schedule  (`running`: `experiments/b4_nca_schedule`)
 - **Origin:** PRs #28, #44, #58. Reversed re-seed schedule (2 to 8) was best on 1 seed.
 - **Strong test:** 5 seeds, plus mid-switch schedule; CIFAR-10 / larger canvases. Cheap.
 
