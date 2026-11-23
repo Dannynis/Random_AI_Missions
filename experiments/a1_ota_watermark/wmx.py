@@ -34,9 +34,10 @@ def data_dir() -> str:
 class Corpus:
     """Concatenated int16 audio + file index. ``segment`` returns contiguous slices inside one file."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, in_ram: bool = True):
         d = data_dir()
-        self.x = np.load(os.path.join(d, f"{name}.npy"), mmap_mode="r")
+        # random access into a memory map on a network filesystem is slow: load into RAM by default
+        self.x = np.load(os.path.join(d, f"{name}.npy"), mmap_mode=None if in_ram else "r")
         idx = json.load(open(os.path.join(d, f"{name}.json")))
         self.start = np.array([i[0] for i in idx], np.int64)
         self.len = np.array([i[1] for i in idx], np.int64)

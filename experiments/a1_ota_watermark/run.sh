@@ -11,6 +11,10 @@ if [ "$MODE" = tiny ]; then
   python run_a1.py summary
   exit 0
 fi
+if [ "$MODE" = speed ]; then
+  python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
+  exit 0
+fi
 SEEDS=${SEEDS:-"0 1 2 3 4"}; STEPS=${STEPS:-40000}
 for s in $SEEDS; do
   python run_a1.py train --seed "$s" --steps "$STEPS"

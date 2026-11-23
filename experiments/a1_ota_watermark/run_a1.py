@@ -86,20 +86,24 @@ def train(a):
     chan = wmx.Channel(DEV, "train")
     S = 3
     run = {"loss": 0.0, "ber": 0.0, "lsd": 0.0, "n": 0}
-    t1 = time.time()
+    t1 = time.time(); t_data = 0.0
     while step < a.steps:
         step += 1
         rng = np.random.default_rng([a.seed, step])
         g = torch.Generator(device=DEV).manual_seed(a.seed * 10 ** 7 + step)
+        td = time.time()
         host = host_batch(corp, rng, a.batch, S * wmx.N)
+        torch.cuda.synchronize() if DEV.type == "cuda" else None
+        t_data += time.time() - td
         bits = torch.randint(0, 2, (a.batch, S, wmx.K), generator=g, device=DEV)
-        w = wmx.embed_chunks(enc, host, bits, a.whr)
         frac = step / a.steps
-        y, off = chan.train(host + w, g, strength=min(1.0, frac / 0.3))
-        feats = dec.frames(y)
-        jit = torch.randint(-3, 4, (a.batch,), generator=g, device=DEV)
-        s = torch.round((wmx.N + off) / wmx.HOP).long() + jit
-        logits = dec.head(window_mean(feats, s))
+        with torch.autocast(DEV.type, dtype=torch.bfloat16, enabled=DEV.type == "cuda"):
+            w = wmx.embed_chunks(enc, host, bits, a.whr).float()
+            y, off = chan.train(host + w, g, strength=min(1.0, frac / 0.3))
+            feats = dec.frames(y.float())
+            jit = torch.randint(-3, 4, (a.batch,), generator=g, device=DEV)
+            s = torch.round((wmx.N + off) / wmx.HOP).long() + jit
+            logits = dec.head(window_mean(feats.float(), s)).float()
         loss = F.binary_cross_entropy_with_logits(logits, bits[:, 1].float())
         d = wmx.lsd(host, w).mean()
         a_ = min(1.0, max(0.0, (frac - 0.25) / 0.5))
@@ -113,9 +117,9 @@ def train(a):
         if step % 100 == 0 or step == a.steps:
             n = run["n"]
             hist.append({"step": step, "loss": run["loss"] / n, "ber": run["ber"] / n, "lsd": run["lsd"] / n,
-                         "lsd_target": tgt, "s_per_step": (time.time() - t1) / n})
+                         "lsd_target": tgt, "s_per_step": (time.time() - t1) / n, "data_s": t_data / n})
             say(f"seed {a.seed} step {step}: " + ", ".join(f"{k}={v:.4g}" for k, v in hist[-1].items() if k != "step"))
-            run = {k: 0.0 for k in run}; run["n"] = 0; t1 = time.time()
+            run = {k: 0.0 for k in run}; run["n"] = 0; t1 = time.time(); t_data = 0.0
         if step % a.ckpt_every == 0 or step == a.steps:
             save_atomic({"enc": enc.state_dict(), "dec": dec.state_dict(), "opt": opt.state_dict(),
                          "sched": sched.state_dict(), "step": step, "hist": hist, "args": vars(a)}, path)
@@ -293,7 +297,8 @@ class WavMarkM:
         B = len(y)
         ms = np.zeros((B, 16), np.int64); out = np.zeros(B, bool); sc = np.zeros(B)
         for i in range(B):
-            p, inf = self.wm.decode_watermark(self.model, y[i].numpy().astype(np.float32), show_progress=False)
+            p, inf = self.wm.decode_watermark(self.model, y[i].numpy().astype(np.float32), decode_batch_size=70,
+                                              show_progress=False)
             n = len(inf["results"])
             sc[i] = n
             if p is not None:
@@ -399,6 +404,7 @@ def evaluate(a):
         y, off, sp = chan.test(host.to(DEV), c, a.seed * 100 + ci)
         unmarked[c] = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
     say("unmarked passes done")
+    neg_cache = {}
     for m in methods:
         r = m.residual(host, g0, info, phi0)
         rc = m.residual(chost, cg0, cinfo, cphi)
@@ -425,7 +431,10 @@ def evaluate(a):
                 y, off, sp = chan.test(xm.to(DEV), c, a.seed * 100 + ci)
                 ym = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
                 truth = truth_for(g0, phi0, t0, off.cpu().numpy().astype(np.float64), sp.cpu().numpy().astype(np.float64))
-                dp, dn = m.decode(ym, truth), m.decode(unmarked[c], truth)
+                dp = m.decode(ym, truth)
+                if (m.name, c) not in neg_cache:            # unmarked twins do not depend on the target
+                    neg_cache[(m.name, c)] = m.decode(unmarked[c], truth)
+                dn = neg_cache[(m.name, c)]
                 for rule in dp:
                     ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
                     correct = (ip[:, :16] == info).all(1)
