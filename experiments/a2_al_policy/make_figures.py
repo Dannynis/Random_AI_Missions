@@ -34,16 +34,16 @@ for feat in feats:
             for m in methods:
                 cs = [cells[f"{feat}/{t}/{m}"] for t in ts if f"{feat}/{t}/{m}" in cells]
                 curve = np.mean([c[f"{learner}_curve"] for c in cs], 0)
-                ax.plot(budgets, curve, label=m, lw=2.5 if m == "policy" else 1.2)
+                ax.plot(budgets, curve, label=m, lw=2.5 if m.startswith("policy") else 1.2)
                 n = min(len(c[f"per_seed_auc_{learner}"]) for c in cs)
                 auc[m] = np.mean([c[f"per_seed_auc_{learner}"][:n] for c in cs], 0)
             ax.set_xscale("log"); ax.set_title(f"{feat} {g} ({learner})"); ax.set_xlabel("labels")
             ax.grid(alpha=0.3); ax.legend(fontsize=7)
-            base = {m: v for m, v in auc.items() if m != "policy"}
+            base = {m: v for m, v in auc.items() if not m.startswith("policy")}
             best = max(base, key=lambda m: base[m].mean()) if base else None
             for m, v in sorted(auc.items(), key=lambda kv: -kv[1].mean()):
                 row = f"| {feat} | {g} | {learner} | {m} | {v.mean():.4f} ± {v.std():.4f} | {len(v)} |"
-                if m == "policy" and best is not None:
+                if m.startswith("policy") and best is not None:
                     n = min(len(v), len(base[best]))
                     d = v[:n] - base[best][:n]
                     row += f" vs {best}: {d.mean():+.4f}, wins {int((d > 0).sum())}/{n} |"
@@ -58,7 +58,7 @@ for name, log in ptrain.items():
     r = [e["reward_mean"] for e in log]
     ax.plot(r, alpha=0.4); ax.plot(np.convolve(r, np.ones(10) / 10, mode="valid"))
     ax.set_xlabel("GRPO iteration"); ax.set_ylabel("train reward (AUC)"); ax.set_title(f"policy training {name}")
-    fig.tight_layout(); fig.savefig(out / f"policy_train_{name}.png", dpi=120); plt.close(fig)
+    fig.tight_layout(); fig.savefig(out / f"policy_train_{name.replace('/', '_')}.png", dpi=120); plt.close(fig)
 
 table = "| features | task | learner | method | AUC (mean ± std over seeds) | seeds | policy vs best baseline |\n|---|---|---|---|---|---|---|\n"
 (out / "table.md").write_text(table + "\n".join(lines) + "\n", encoding="utf-8")

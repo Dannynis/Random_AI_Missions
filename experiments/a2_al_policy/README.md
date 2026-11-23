@@ -92,6 +92,25 @@ one of the 12 (feature × learner × task) cells, by 0.015–0.07 AUC.
   features cannot express "most typical point of an unlabeled cluster at the |L|+B scale", which is what wins the
   cold start. GRPO training reward rose from 0.845 to 0.895 (first vs last 20 iterations), so it learned
   something, but not the cold-start rule.
-- Policy v2 (cluster features + behaviour cloning from TypiClust + GRPO) was launched from this result.
 - Caveat: our ProbCover is approximate (δ-balls truncated to the 100 nearest neighbours, δ by a 95 % purity
   rule) and is weaker here than in its paper; TypiClust follows the paper's recipe more closely.
+
+## Results, policy v2 (10 seeds, DINOv2 ViT-B/14)
+
+Paired AUC differences against TypiClust (wins out of 10 seeds):
+
+| | CIFAR-10 linear | CIFAR-100 linear | held-out linear | CIFAR-10 LP | CIFAR-100 LP | held-out LP |
+|---|---|---|---|---|---|---|
+| v2 after behaviour cloning only | +0.0000 (5) | −0.0003 (2) | +0.0002 (7) | +0.0000 (3) | −0.0001 (4) | +0.0002 (8) |
+| v2 after GRPO fine-tuning | −0.0069 (2) | −0.0071 (0) | −0.0032 (2) | −0.0161 (0) | −0.0033 (0) | −0.0055 (0) |
+
+- **Verdict for policy v2: fails.** Behaviour cloning reproduces TypiClust to within ±0.0003 AUC, so the
+  architecture can express the best rule. GRPO fine-tuning (200 iterations, reward = linear-probe AUC over
+  10–160 labels on 10-way tasks from CIFAR-100 classes 0–49) then moves it *below* TypiClust in all 6 cells and
+  below its own initialisation (training reward 0.911 → 0.916, first vs last 20 iterations: essentially flat).
+- What the RL stage changes: on CIFAR-10 it loses 2–5 points at 20–100 labels (e.g. 0.771 vs 0.804 at 20) and
+  gains slightly at 300–1000 (0.984 vs 0.981 at 1000). Policy v1 showed the same high-budget edge. This points
+  at a simpler hypothesis for a follow-up: TypiClust for the cold start, then switch to an uncertainty or learned
+  rule after a few hundred labels (cf. the TCM heuristic), tested with a reward that weights high budgets.
+- Overall A2 status: on frozen DINOv2 features, no learned policy beats TypiClust; the MNIST result from the
+  daily runs does not transfer. Negative result, 10 seeds, pre-stated criterion.

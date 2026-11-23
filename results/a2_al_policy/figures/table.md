@@ -1,6 +1,8 @@
 | features | task | learner | method | AUC (mean ± std over seeds) | seeds | policy vs best baseline |
 |---|---|---|---|---|---|---|
+| dinov2-base | cifar10 | linear | policy2_bc | 0.9198 ± 0.0076 | 10 | vs typiclust: +0.0000, wins 5/10 |
 | dinov2-base | cifar10 | linear | typiclust | 0.9197 ± 0.0076 | 10 | |
+| dinov2-base | cifar10 | linear | policy2 | 0.9128 ± 0.0061 | 10 | vs typiclust: -0.0069, wins 2/10 |
 | dinov2-base | cifar10 | linear | margin | 0.8889 ± 0.0208 | 10 | |
 | dinov2-base | cifar10 | linear | badge | 0.8884 ± 0.0206 | 10 | |
 | dinov2-base | cifar10 | linear | random | 0.8787 ± 0.0139 | 10 | |
@@ -9,6 +11,8 @@
 | dinov2-base | cifar10 | linear | entropy | 0.8227 ± 0.0419 | 10 | |
 | dinov2-base | cifar10 | linear | probcover | 0.8207 ± 0.0241 | 10 | |
 | dinov2-base | cifar100 | linear | typiclust | 0.5362 ± 0.0051 | 10 | |
+| dinov2-base | cifar100 | linear | policy2_bc | 0.5359 ± 0.0050 | 10 | vs typiclust: -0.0003, wins 2/10 |
+| dinov2-base | cifar100 | linear | policy2 | 0.5290 ± 0.0054 | 10 | vs typiclust: -0.0071, wins 0/10 |
 | dinov2-base | cifar100 | linear | probcover | 0.4747 ± 0.0031 | 10 | |
 | dinov2-base | cifar100 | linear | policy | 0.4677 ± 0.0079 | 10 | vs typiclust: -0.0685, wins 0/10 |
 | dinov2-base | cifar100 | linear | coreset | 0.4528 ± 0.0047 | 10 | |
@@ -16,7 +20,9 @@
 | dinov2-base | cifar100 | linear | badge | 0.4458 ± 0.0114 | 10 | |
 | dinov2-base | cifar100 | linear | random | 0.4209 ± 0.0101 | 10 | |
 | dinov2-base | cifar100 | linear | entropy | 0.3672 ± 0.0111 | 10 | |
+| dinov2-base | c100_heldout | linear | policy2_bc | 0.9428 ± 0.0029 | 10 | vs typiclust: +0.0002, wins 7/10 |
 | dinov2-base | c100_heldout | linear | typiclust | 0.9426 ± 0.0029 | 10 | |
+| dinov2-base | c100_heldout | linear | policy2 | 0.9394 ± 0.0031 | 10 | vs typiclust: -0.0032, wins 2/10 |
 | dinov2-base | c100_heldout | linear | probcover | 0.9257 ± 0.0050 | 10 | |
 | dinov2-base | c100_heldout | linear | badge | 0.9006 ± 0.0043 | 10 | |
 | dinov2-base | c100_heldout | linear | policy | 0.8972 ± 0.0044 | 10 | vs typiclust: -0.0454, wins 0/10 |
@@ -24,7 +30,9 @@
 | dinov2-base | c100_heldout | linear | margin | 0.8946 ± 0.0059 | 10 | |
 | dinov2-base | c100_heldout | linear | random | 0.8826 ± 0.0066 | 10 | |
 | dinov2-base | c100_heldout | linear | entropy | 0.8548 ± 0.0131 | 10 | |
+| dinov2-base | cifar10 | lp | policy2_bc | 0.9528 ± 0.0053 | 10 | vs typiclust: +0.0000, wins 3/10 |
 | dinov2-base | cifar10 | lp | typiclust | 0.9528 ± 0.0053 | 10 | |
+| dinov2-base | cifar10 | lp | policy2 | 0.9367 ± 0.0062 | 10 | vs typiclust: -0.0161, wins 0/10 |
 | dinov2-base | cifar10 | lp | random | 0.9116 ± 0.0136 | 10 | |
 | dinov2-base | cifar10 | lp | badge | 0.9068 ± 0.0176 | 10 | |
 | dinov2-base | cifar10 | lp | margin | 0.9013 ± 0.0172 | 10 | |
@@ -33,6 +41,8 @@
 | dinov2-base | cifar10 | lp | probcover | 0.8759 ± 0.0160 | 10 | |
 | dinov2-base | cifar10 | lp | entropy | 0.8589 ± 0.0400 | 10 | |
 | dinov2-base | cifar100 | lp | typiclust | 0.5610 ± 0.0038 | 10 | |
+| dinov2-base | cifar100 | lp | policy2_bc | 0.5610 ± 0.0037 | 10 | vs typiclust: -0.0001, wins 4/10 |
+| dinov2-base | cifar100 | lp | policy2 | 0.5577 ± 0.0045 | 10 | vs typiclust: -0.0033, wins 0/10 |
 | dinov2-base | cifar100 | lp | coreset | 0.5024 ± 0.0041 | 10 | |
 | dinov2-base | cifar100 | lp | probcover | 0.4980 ± 0.0028 | 10 | |
 | dinov2-base | cifar100 | lp | policy | 0.4939 ± 0.0075 | 10 | vs typiclust: -0.0671, wins 0/10 |
@@ -40,7 +50,9 @@
 | dinov2-base | cifar100 | lp | badge | 0.4814 ± 0.0115 | 10 | |
 | dinov2-base | cifar100 | lp | random | 0.4603 ± 0.0084 | 10 | |
 | dinov2-base | cifar100 | lp | entropy | 0.4197 ± 0.0114 | 10 | |
+| dinov2-base | c100_heldout | lp | policy2_bc | 0.9501 ± 0.0024 | 10 | vs typiclust: +0.0002, wins 8/10 |
 | dinov2-base | c100_heldout | lp | typiclust | 0.9499 ± 0.0024 | 10 | |
+| dinov2-base | c100_heldout | lp | policy2 | 0.9444 ± 0.0029 | 10 | vs typiclust: -0.0055, wins 0/10 |
 | dinov2-base | c100_heldout | lp | probcover | 0.9354 ± 0.0040 | 10 | |
 | dinov2-base | c100_heldout | lp | coreset | 0.9232 ± 0.0062 | 10 | |
 | dinov2-base | c100_heldout | lp | badge | 0.9109 ± 0.0051 | 10 | |
