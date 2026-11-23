@@ -161,7 +161,7 @@ class Generator(nn.Module):
         B, C, k, d = xs.shape
         E = self.build(xs, names)
         T = d + C + 1
-        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=xs.is_cuda):
+        with torch.autocast(xs.device.type, dtype=torch.bfloat16):
             o = self.llm(inputs_embeds=E, use_cache=False)
         t = self.out_norm(o.last_hidden_state.float()[:, -T:])
         return (self.head_f(t[:, :d]) * G_SCALE, self.head_c(t[:, d:d + C]) * G_SCALE, self.head_b(t[:, -1]) * G_SCALE)

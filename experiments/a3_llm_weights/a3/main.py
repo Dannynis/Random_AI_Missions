@@ -26,6 +26,8 @@ from model import Generator, mlp_logits, ridge_head, ridge_loo_acc  # noqa: E402
 from prior import sample_scm_task  # noqa: E402
 
 RUN = os.environ.get("RUN_DIR", "./run_local")
+if "--continue" in sys.argv:          # continue an earlier run (sibling run id) after a time-limit stop
+    RUN = os.path.join(os.path.dirname(RUN.rstrip("/")), sys.argv[sys.argv.index("--continue") + 1])
 OUT, CKPT = os.path.join(RUN, "out"), os.path.join(RUN, "ckpt")
 os.makedirs(OUT, exist_ok=True)
 os.makedirs(CKPT, exist_ok=True)
@@ -427,6 +429,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tiny", action="store_true")
     ap.add_argument("--arms", default="")
+    ap.add_argument("--continue", dest="cont", default="", help="run id of an earlier run to continue in place")
     a = ap.parse_args()
     tables = ["iris", "banknote", "cmc"] if a.tiny else None
     eps, names = all_episodes(tables, draws=1 if a.tiny else 4)
