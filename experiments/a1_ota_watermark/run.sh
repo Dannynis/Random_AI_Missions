@@ -1,0 +1,19 @@
+#!/bin/bash
+# A1 entry point. usage: run.sh [tiny|full|eval] ; env SEEDS (default "0 1 2 3 4"), STEPS (default 40000).
+# Resumable: training checkpoints in $RUN_DIR/ckpt, per-seed evaluation results in $RUN_DIR/out are skipped when complete.
+set -euo pipefail
+cd "$(dirname "$0")"
+MODE=${1:-full}
+python prep_data.py
+if [ "$MODE" = tiny ]; then
+  python run_a1.py train --seed 0 --steps 300 --batch 8 --ckpt_every 100
+  python run_a1.py eval --seed 0 --tiny --conditions clean ota mp3_64k --pesq_targets 4.0
+  python run_a1.py summary
+  exit 0
+fi
+SEEDS=${SEEDS:-"0 1 2 3 4"}; STEPS=${STEPS:-40000}
+for s in $SEEDS; do
+  python run_a1.py train --seed "$s" --steps "$STEPS"
+  python run_a1.py eval --seed "$s"
+  python run_a1.py summary
+done
