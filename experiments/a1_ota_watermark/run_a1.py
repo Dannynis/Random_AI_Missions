@@ -142,8 +142,9 @@ def _pesq_one(args):
         return float("nan")
 
 
-def pesq_batch(ref, deg, pool):
-    return np.array(pool.map(_pesq_one, list(zip(ref.astype(np.float64), deg.astype(np.float64)))))
+def pesq_batch(ref, deg, pool=None):
+    # sequential on purpose: process pools need shared memory that batch jobs may not have
+    return np.array([_pesq_one(a) for a in zip(ref.astype(np.float64), deg.astype(np.float64))])
 
 
 def si_snr(ref, deg):
@@ -371,11 +372,10 @@ def evaluate(a):
     TINY = a.tiny
     outp = os.path.join(OUT, f"eval_seed{a.seed}.json")
     res = json.load(open(outp)) if os.path.exists(outp) else {"seed": a.seed, "rows": [], "audibility": [], "done": []}
-    from multiprocessing import Pool
-    pool = Pool(8)
+    pool = None
     n_rec = 16 if TINY else a.n_rec
     host, src, g0, phi0, t0, info = make_streams(a.seed, n_rec)
-    chost, _, cg0, cphi, _, cinfo = make_streams(10_000 + a.seed, 16 if TINY else 64)   # calibration set
+    chost, _, cg0, cphi, _, cinfo = make_streams(10_000 + a.seed, 16 if TINY else 48)   # calibration set
     nsp_cal = len(chost) // 2
     chan = wmx.Channel(DEV, "test")
     corp = (wmx.Corpus("speech_train"), wmx.Corpus("music_train"))
@@ -446,7 +446,6 @@ def evaluate(a):
             dump(res, outp)
     res["complete"] = True
     dump(res, outp)
-    pool.close()
 
 
 def summary(a):

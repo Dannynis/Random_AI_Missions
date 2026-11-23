@@ -16,7 +16,7 @@ re-recorded audio than the public AudioSeal and WavMark checkpoints **at the sam
 
 | | Small runs (origin) | This experiment |
 |---|---|---|
-| Hosts | LibriSpeech test-clean + ESC-50, 2 s crops | LibriSpeech train-clean-100 (15 h) + Free Music Archive (12 h) for training; LibriSpeech test-clean + held-out FMA shard for test |
+| Hosts | LibriSpeech test-clean + ESC-50, 2 s crops | LibriSpeech train-clean-100 (15 h) + Free Music Archive (8.8 h) for training; LibriSpeech test-clean + held-out FMA shard for test |
 | Model | 16-channel 3-layer encoder, 32-channel decoder | 64-channel 6-block dilated residual encoder with payload injected at every block; 4-stage residual decoder (64-128 channels) |
 | Training | 3000 steps, batch 16, isolated 2 s clips | 40k steps, batch 32 three-chunk streams, decoder trained on windows with timing jitter at real chunk boundaries |
 | Channel | exponential-noise RIRs, band-pass, AWGN, mu-law | image-source room impulse responses (3000 train rooms, 400 disjoint test rooms, 0.3-4 m, RT60 0.15-1.0 s), loudspeaker response + saturation, microphone response, real background sounds (ESC-50, disjoint folds), white / pink sensor noise, clock drift, plus the original channel |
