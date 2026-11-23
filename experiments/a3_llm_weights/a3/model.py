@@ -81,6 +81,7 @@ class Generator(nn.Module):
         self.full_ft = random_init
         if random_init:                       # no pretrained weights to adapt: train the whole network
             self.llm = llm.float()
+            llm.get_input_embeddings().weight.requires_grad_(False)   # only the few text tokens use it
         else:
             from peft import LoraConfig, get_peft_model
             for p in llm.parameters():
