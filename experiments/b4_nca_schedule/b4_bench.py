@@ -9,7 +9,7 @@ The model, training recipe and evaluation are unchanged (``nca_classifier.py``,
     python b4_bench.py collect        # merge per-run JSONs into $RUN_DIR/out/results.json
 
 Env: RUN_DIR (ckpt/ and out/), LAB_DATA (MNIST root containing MNIST/raw),
-NCA_ITERS (default 4000), NCA_WORKERS (default 4), NCA_SEEDS (default 5),
+NCA_ITERS (default 4000), NCA_WORKERS (default 4), NCA_SEEDS (default 10),
 NCA_TINY=1 (50 iterations, 100 test digits, 2 seeds: pipeline check only).
 """
 
@@ -36,8 +36,9 @@ CKPT = RUN_DIR / "ckpt"
 OUT = RUN_DIR / "out"
 DATA = Path(os.environ.get("LAB_DATA", "data")) / "MNIST" / "raw"
 ITERS = 50 if TINY else int(os.environ.get("NCA_ITERS", 4000))
-N_SEEDS = 2 if TINY else int(os.environ.get("NCA_SEEDS", 5))
+N_SEEDS = 2 if TINY else int(os.environ.get("NCA_SEEDS", 10))
 N_TEST = 100 if TINY else 1000
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 POOL = dict(scheme="pool", reseed=2, reseed_mode="random", overflow=1.0, overflow_bound=5.0)
 DET = dict(fire_rate=1.0)
@@ -76,16 +77,18 @@ def run_one(spec):
     pt = stem(arm, seed).with_suffix(".pt")
     if not pt.exists():
         torch.manual_seed(seed)
-        model = PersistentNCA(**DET)
+        model = PersistentNCA(**DET).to(DEV)
         log = train_persistent(model, xtr, ytr, PersistConfig(iters=ITERS, seed=seed, **ARMS[arm]))
         torch.save({"state": model.state_dict(), "seconds": log.seconds, "losses": log.losses,
                     "pool_age": log.pool_age, "iters": ITERS}, str(pt) + ".tmp")
         os.replace(str(pt) + ".tmp", pt)
-    model = PersistentNCA(**DET)
-    blob = torch.load(pt)
+    model = PersistentNCA(**DET).to(DEV)
+    blob = torch.load(pt, map_location=DEV)
     model.load_state_dict(blob["state"])
     model.eval()
     sets, swap = npb.build_test_sets(xte, yte, n=N_TEST, n_pair=N_TEST // 2)
+    sets = {k: tuple(t.to(DEV) for t in v) for k, v in sets.items()}
+    swap = tuple(t.to(DEV) for t in swap)
     clean_x, clean_y = sets["clean28"][0], sets["clean28"][2][:, 0]
     t0 = time.time()
     r = {"arm": arm, "seed": seed, "train_min": blob["seconds"] / 60, "final_loss": blob["losses"][-1]}

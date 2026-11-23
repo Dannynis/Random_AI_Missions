@@ -93,7 +93,7 @@ class PersistentNCA(NCA):
         may replace the state or the image (used by the damage / swap probes).
         Returns final state and {t: logits} for t in ``record``."""
         n, h, w = img.shape
-        x = torch.zeros(n, self.c, h, w) if x0 is None else x0
+        x = torch.zeros(n, self.c, h, w, device=img.device) if x0 is None else x0
         im, alive = img.unsqueeze(1), self.alive_mask(img)
         recs = {}
         for t in range(1, steps + 1):
@@ -178,13 +178,15 @@ def train_persistent(model: PersistentNCA, xtr: torch.Tensor, ytr: torch.Tensor,
     model.train()
     h, w = xtr.shape[1:]
 
+    dev = next(model.parameters()).device
+
     def fresh(k):
         idx = torch.randint(0, len(xtr), (k,), generator=gen)
-        return random_shift(xtr[idx], cfg.max_shift, gen), ytr[idx]
+        return random_shift(xtr[idx], cfg.max_shift, gen).to(dev), ytr[idx].to(dev)
 
     if cfg.scheme == "pool":
         p_img, p_y = fresh(cfg.pool_size)
-        p_x = torch.zeros(cfg.pool_size, model.c, h, w)
+        p_x = torch.zeros(cfg.pool_size, model.c, h, w, device=dev)
         p_age = torch.zeros(cfg.pool_size, dtype=torch.long)
 
     t0 = time.time()
@@ -279,11 +281,13 @@ def damage_curve(model: PersistentNCA, imgs, labels, t_damage: int, patch: int, 
     rng = np.random.default_rng(seed)
     n, h, w = imgs.shape
     dmask = torch.zeros(n, 1, h, w)
+    imgs_np = imgs.cpu().numpy()
     for i in range(n):
-        ys, xs = np.nonzero(imgs[i].numpy() > ALIVE_THR)
+        ys, xs = np.nonzero(imgs_np[i] > ALIVE_THR)
         j = rng.integers(len(ys))
         y0, x0 = max(ys[j] - patch // 2, 0), max(xs[j] - patch // 2, 0)
         dmask[i, 0, y0:y0 + patch, x0:x0 + patch] = 1
+    dmask = dmask.to(imgs.device)
     ink = (imgs > ALIVE_THR).unsqueeze(1)
     dmask_ink = (dmask.bool() & ink)
 

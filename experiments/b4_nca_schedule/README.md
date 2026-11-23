@@ -1,8 +1,9 @@
-# B4: re-seed schedule for the persistent self-classifying NCA (5 seeds)
+# B4: re-seed schedule for the persistent self-classifying NCA (10 seeds)
 
 Origin: Random-Ideas PRs #28 (self-classifying NCA), #44 (sample-pool persistence), #58 (re-seed annealing).
 Code: `nca_classifier.py`, `nca_persist.py`, `nca_persist_bench.py` are copied from those runs unchanged, except
-for a step-switch option (`reseed_switch_frac`) in `nca_persist.reseed_count`. `b4_bench.py` is the new driver.
+for a step-switch option (`reseed_switch_frac`) in `nca_persist.reseed_count` and device handling so that
+training and evaluation run on a GPU (several runs share one 11 GB GPU). `b4_bench.py` is the new driver.
 
 ## Hypothesis
 
@@ -12,7 +13,7 @@ training (linear 2 → 8 per batch of 32, `anneal_rev`) beats the constant-2 bas
 loses persistence. Reading: the persistent attractor forms early from long rollouts of old states; late fresh-digit
 throughput then refines classification inside it.
 
-H1: `anneal_rev` beats `pool_det` in anytime accuracy (mean over readout steps 40–1000) on a paired 5-seed test.
+H1: `anneal_rev` beats `pool_det` in anytime accuracy (mean over readout steps 40–1000) on a paired 10-seed test.
 H2: the benefit comes from *when* fresh digits arrive, not how many: `anneal_rev` beats `const5`
 (equal fresh-digit count) and a step switch 2 → 8 at 50 % (`switch_rev`) matches or beats the linear ramp.
 
@@ -22,7 +23,7 @@ H2: the benefit comes from *when* fresh digits arrive, not how many: `anneal_rev
   ink > 0.1, deterministic updates, 7.7k parameters (unchanged).
 - Training: pool 1024, rollouts T ~ U[16, 32] from stored states, cross-entropy at T−12/−8/−4/T, overflow
   penalty, 4000 iterations × 32, Adam 2e-3 cosine. Only the per-batch re-seed count changes.
-- Arms (5 seeds each, same seed = same init and initial pool):
+- Arms (10 seeds each, same seed = same init and initial pool):
 
   | arm | re-seeds per batch |
   |---|---|
@@ -40,9 +41,9 @@ H2: the benefit comes from *when* fresh digits arrive, not how many: `anneal_rev
 
 ## Pass / fail
 
-- H1 passes if the paired mean anytime difference `anneal_rev − pool_det` is > 0 with at least 4/5 seeds positive
+- H1 passes if the paired mean anytime difference `anneal_rev − pool_det` is > 0 with at least 8/10 seeds positive
   and the step-2000 difference is not negative on average.
-- H2 passes if `anneal_rev` (or `switch_rev`) beats `const5` on anytime accuracy in at least 4/5 paired seeds.
+- H2 passes if `anneal_rev` (or `switch_rev`) beats `const5` on anytime accuracy in at least 8/10 paired seeds.
 - Anything else is reported as a negative result.
 
 ## Prior work

@@ -1,5 +1,5 @@
 #!/bin/bash
-# B4: persistent NCA re-seed schedules, 6 arms x 5 seeds (CPU workers; tiny model).
+# B4: persistent NCA re-seed schedules, 6 arms x 10 seeds (4 runs share one GPU).
 # Resumable: each (arm, seed) writes its checkpoint and result JSON to $RUN_DIR/ckpt.
 # usage: run.sh [tiny]
 set -euo pipefail
