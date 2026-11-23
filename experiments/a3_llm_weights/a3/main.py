@@ -430,7 +430,16 @@ def main():
     ap.add_argument("--tiny", action="store_true")
     ap.add_argument("--arms", default="")
     ap.add_argument("--continue", dest="cont", default="", help="run id of an earlier run to continue in place")
+    ap.add_argument("--resume-test", action="store_true", help="train 3 steps, then resume to 5 (validation)")
     a = ap.parse_args()
+    if a.resume_test:
+        cfg = dict(llm="0.5b", seed=0, steps=3, B=2)
+        train_arm("rt", cfg, True)
+        cfg["steps"] = 5
+        _, hist, _ = train_arm("rt", cfg, True)
+        log("resume test hist", hist)
+        save_json(dict(hist=hist, ok=bool(hist and hist[-1][0] == 5)), "resume_test.json")
+        return
     tables = ["iris", "banknote", "cmc"] if a.tiny else None
     eps, names = all_episodes(tables, draws=1 if a.tiny else 4)
     log(f"{len(eps)} episodes over {len(names)} tables on {DEV}")
