@@ -13,3 +13,5 @@ infra/
 QUEUE.md
 provenance.txt
 stderr_tail.txt
+ORCHESTRATOR.md
+results/_smoke/
