@@ -106,7 +106,8 @@ def train_arm(name, cfg, tiny):
     if step < steps:
         torch.manual_seed(cfg["seed"] * 1000 + step)
         dl = torch.utils.data.DataLoader(TaskStream(cfg["seed"], cfg.get("B", 8), 20, salt=step), batch_size=None,
-                                         num_workers=0 if tiny else min(6, max(1, (os.cpu_count() or 4) - 2)))
+                                         num_workers=0 if tiny else max(1, len(os.sched_getaffinity(0)) - 1),
+                                         prefetch_factor=None if tiny else 4)
         it = iter(dl)
         model.train()
         t0, last_ck, run_loss = time.time(), time.time(), []
