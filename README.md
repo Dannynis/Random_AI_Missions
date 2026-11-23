@@ -1,4 +1,4 @@
-# gpu-lab
+# Random AI Missions
 
 Follow-up experiments for hypotheses from [Random-Ideas](https://github.com/Dannynis/Random-Ideas),
 run at a scale the original daily runs could not reach: large models, LLMs, more seeds,
