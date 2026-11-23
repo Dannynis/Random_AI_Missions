@@ -69,3 +69,29 @@ ImageNet-100 and a fine-tuned semi-supervised learner (e.g. FlexMatch) are follo
 
 `run.sh tiny` (512-image subsets, 2 seeds), `run.sh baselines dinov2-base`, `run.sh policy dinov2-base`.
 Results: `$RUN_DIR/out/summary.json` (per task × method mean/std AUC, curves, per-seed AUC, policy training log).
+
+## Results, stage 1 (10 seeds, budgets 10–1000; full table: `results/a2_al_policy/figures/table.md`)
+
+AUC over the log-budget schedule, mean ± std over 10 seeds (per-seed 80 % pools). Held-out = mean of the five
+disjoint 10-way CIFAR-100 tasks from classes 50–99.
+
+| DINOv2 ViT-B/14, linear probe | CIFAR-10 | CIFAR-100 | held-out 10-way |
+|---|---|---|---|
+| TypiClust | **0.920 ± 0.008** | **0.536 ± 0.005** | **0.943 ± 0.003** |
+| best other baseline | 0.889 (Margin) | 0.475 (ProbCover) | 0.926 (ProbCover) |
+| Random | 0.879 ± 0.014 | 0.421 ± 0.010 | 0.883 ± 0.007 |
+| learned policy v1 | 0.858 ± 0.016 | 0.468 ± 0.008 | 0.897 ± 0.004 |
+| v1 − TypiClust (paired) | −0.062, 0/10 wins | −0.069, 0/10 | −0.045, 0/10 |
+
+The same ordering holds with label propagation and with ViT-S/14 features: TypiClust is the best rule in every
+one of the 12 (feature × learner × task) cells, by 0.015–0.07 AUC.
+
+- **Verdict for policy v1: fails** the pre-stated criterion (0/10 wins in every cell). It is below Random on
+  CIFAR-10. Its curve shows why: at 10 labels it reaches 0.39 on CIFAR-10 (TypiClust 0.66, Random 0.51), but from
+  300 labels on it matches or slightly exceeds every rule (0.983 vs 0.981 for TypiClust at 1000). The 11 v1
+  features cannot express "most typical point of an unlabeled cluster at the |L|+B scale", which is what wins the
+  cold start. GRPO training reward rose from 0.845 to 0.895 (first vs last 20 iterations), so it learned
+  something, but not the cold-start rule.
+- Policy v2 (cluster features + behaviour cloning from TypiClust + GRPO) was launched from this result.
+- Caveat: our ProbCover is approximate (δ-balls truncated to the 100 nearest neighbours, δ by a 95 % purity
+  rule) and is weaker here than in its paper; TypiClust follows the paper's recipe more closely.
