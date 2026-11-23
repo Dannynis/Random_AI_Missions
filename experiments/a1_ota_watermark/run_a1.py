@@ -361,7 +361,7 @@ def calibrate_alpha(r, host, g0, target, pool, nsp):
     n = REC_S * wmx.SR
     ref = np.stack([host[b, g0[b]:g0[b] + n].numpy() for b in range(nsp)])
     rr = np.stack([r[b, g0[b]:g0[b] + n].numpy() for b in range(nsp)])
-    lo, hi = -40.0, 20.0
+    lo, hi = -40.0, 30.0
     for _ in range(9 if not TINY else 4):
         mid = (lo + hi) / 2
         p = np.nanmean(pesq_batch(ref, ref + rr * 10 ** (mid / 20), pool))
@@ -421,7 +421,7 @@ def evaluate(a):
             pq = pesq_batch(ref[src == 0], deg[src == 0], pool)
             with torch.no_grad():
                 ls = wmx.lsd(torch.from_numpy(ref), torch.from_numpy(deg - ref)).numpy()
-            aud = {"method": m.name, "target": tname, "gain_db": gdb, "pesq_speech": float(np.nanmean(pq)),
+            aud = {"method": m.name, "target": tname, "gain_db": gdb, "gain_at_bound": bool(gdb > 29 or gdb < -39), "pesq_speech": float(np.nanmean(pq)),
                    "si_snr_db": float(si_snr(ref, deg).mean()), "si_snr_speech": float(si_snr(ref, deg)[src == 0].mean()),
                    "si_snr_music": float(si_snr(ref, deg)[src == 1].mean()), "lsd_db": float(ls.mean())}
             res["audibility"].append(aud)
