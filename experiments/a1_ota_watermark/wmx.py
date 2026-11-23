@@ -206,8 +206,13 @@ class Channel:
         seg = torch.from_numpy(self.noise.segments(rng, B, n)).to(self.dev)
         return seg
 
-    def train(self, x, g, strength=1.0):
-        """x (B, n) on device. Returns y and the integer sample offset applied (B,)."""
+    def train(self, x, g, strength=1.0, mode="full"):
+        """x (B, n) on device. Returns y and the integer sample offset applied (B,).
+        ``mode="legacy"`` is the ablation: only the original channel family (exponential-tail RIRs,
+        band-pass + EQ, AWGN, mu-law, low-pass, drift), no loudspeaker saturation, image-source rooms,
+        microphone response, background sounds or pink noise."""
+        if mode == "legacy":
+            return self._train_legacy(x, g, strength)
         B, n = x.shape
         dev = x.device
         r = lambda: torch.rand(B, generator=g, device=dev)
@@ -240,6 +245,29 @@ class Channel:
         w = torch.where(r()[:, None] < 0.5, torch.randn((B, n), generator=g, device=dev), pink((B, n), g, dev))
         y = y + m * (add_noise(y, w, 10 + 35 * r()[:, None]) - y)
         m = p(0.2)
+        y = m * mulaw(y) + (1 - m) * y
+        return y, off
+
+    def _train_legacy(self, x, g, strength):
+        B, n = x.shape
+        dev = x.device
+        r = lambda: torch.rand(B, generator=g, device=dev)
+        p = lambda q: (r() < q * strength).float()[:, None]
+        off = torch.randint(0, MAX_OFFSET + 1, (B,), generator=g, device=dev).float()
+        speed = 1 + (0.02 * r() - 0.01) * p(0.5)[:, 0]
+        y = warp(x, speed, off)
+        m = p(0.5)
+        y = m * fft_conv(y, self.rir_legacy[torch.randint(0, len(self.rir_legacy), (B,), generator=g, device=dev)]) + (1 - m) * y
+        m = p(0.5)
+        resp = band_response(100 + 200 * r(), 4000 + 4000 * r(), 4 * (2 * torch.rand(B, 3, generator=g, device=dev) - 1), n)
+        y = m * freq_gain(y, resp) + (1 - m) * y
+        m = p(0.3)
+        f = torch.fft.rfftfreq(n, 1 / SR, device=dev)[None]
+        y = m * freq_gain(y, torch.sigmoid((3000 + 5000 * r()[:, None] - f) / 50)) + (1 - m) * y
+        y = y * 10 ** ((6 * r()[:, None] - 3) / 20)
+        m = p(0.7)
+        y = y + m * (add_noise(y, torch.randn((B, n), generator=g, device=dev), 5 + 35 * r()[:, None]) - y)
+        m = p(0.3)
         y = m * mulaw(y) + (1 - m) * y
         return y, off
 

@@ -99,7 +99,7 @@ def train(a):
         frac = step / a.steps
         with torch.autocast(DEV.type, dtype=torch.bfloat16, enabled=DEV.type == "cuda"):
             w = wmx.embed_chunks(enc, host, bits, a.whr).float()
-            y, off = chan.train(host + w, g, strength=min(1.0, frac / 0.3))
+            y, off = chan.train(host + w, g, strength=min(1.0, frac / 0.3), mode=a.train_channel)
             feats = dec.frames(y.float())
             jit = torch.randint(-3, 4, (a.batch,), generator=g, device=DEV)
             s = torch.round((wmx.N + off) / wmx.HOP).long() + jit
@@ -506,6 +506,7 @@ def main():
     ap.add_argument("--conditions", nargs="*", default=None)
     ap.add_argument("--pesq_targets", type=float, nargs="*", default=[4.0, 4.3])
     ap.add_argument("--tiny", action="store_true")
+    ap.add_argument("--train_channel", default="full", choices=["full", "legacy"])
     a = ap.parse_args()
     if a.cmd == "train":
         train(a)

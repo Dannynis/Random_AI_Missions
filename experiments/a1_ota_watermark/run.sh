@@ -16,6 +16,14 @@ if [ "$MODE" = speed ]; then
   exit 0
 fi
 SEEDS=${SEEDS:-"0 1 2 3 4"}; STEPS=${STEPS:-40000}
+if [ "$MODE" = ablate_channel ]; then      # ours only, trained on the original simple channel
+  for s in $SEEDS; do
+    python run_a1.py train --seed "$s" --steps "$STEPS" --train_channel legacy
+    python run_a1.py eval --seed "$s" --methods ours
+    python run_a1.py summary
+  done
+  exit 0
+fi
 for s in $SEEDS; do
   python run_a1.py train --seed "$s" --steps "$STEPS"
   python run_a1.py eval --seed "$s"
