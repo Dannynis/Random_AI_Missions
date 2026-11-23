@@ -21,7 +21,9 @@ label-efficiency AUC, with the same frozen self-supervised features and the same
     kNN over the propagated pool labels.
 - Budget schedule (cumulative labels): 10, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000.
   AUC = mean accuracy over the schedule, trapezoid in log(budget) (each doubling weighs equally).
-- 10 seeds per (task, method). Same seed = same random draws for every method.
+- 10 seeds per (task, method). Each seed uses a different random 80 % of the training split as the pool (so
+  deterministic rules such as ProbCover also have seed variance); same seed = same pool and random draws for
+  every method, which makes the comparisons paired.
 - Baselines (all in `al_lib.py`): Random; Entropy; Margin; Coreset (greedy k-center); TypiClust (|L|+B
   k-means clusters, most typical point of the largest least-labeled cluster); ProbCover (δ-ball max coverage,
   δ chosen by 95 % ball purity); BADGE (k-means++ on gradient embeddings, computed in factored form).

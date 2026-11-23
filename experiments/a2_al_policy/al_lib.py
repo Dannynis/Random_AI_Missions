@@ -350,10 +350,10 @@ class Policy(nn.Module):
 
 
 def q_policy_factory(policy: Policy, sub_batches: int = 4, greedy: bool = True, record: list | None = None,
-                     n_cand: int = 4000):
+                     n_cand: int | None = None):
     """Picks B points in ``sub_batches`` steps (features recomputed between steps so that
     distance / coverage features see the picks). Sampling is Plackett-Luce over a random
-    candidate subset of size ``n_cand`` (greedy top-k at evaluation). ``record`` collects
+    candidate subset of size ``n_cand`` (default: all unlabeled; greedy top-k at evaluation). ``record`` collects
     (features, candidate ids, picks) for the policy-gradient update."""
 
     def q(task, lab, B, pred, gen, progress=0.0):
@@ -365,7 +365,7 @@ def q_policy_factory(policy: Policy, sub_batches: int = 4, greedy: bool = True, 
             cur = torch.cat([lab, picks])
             f = policy_features(task, cur, pred, progress)
             unl = _unl_mask(task, cur).nonzero().squeeze(1)
-            cand = unl[torch.randperm(len(unl), generator=gen)[:n_cand].to(unl.device)]
+            cand = unl if n_cand is None else unl[torch.randperm(len(unl), generator=gen)[:n_cand].to(unl.device)]
             with torch.no_grad():
                 s = policy(f[cand])
             if greedy:

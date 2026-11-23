@@ -54,17 +54,34 @@ def subset_task(X, y, Xt, yt, classes, seed=0):
     return L.Task(X[m], remap[y[m]], Xt[mt], remap[yt[mt]], len(classes)).prepare(seed=seed)
 
 
-def eval_tasks(feat: str):
+_FEAT_CACHE: dict = {}
+POOL_FRAC = 0.8
+
+
+def _feats(feat, ds):
+    if (feat, ds) not in _FEAT_CACHE:
+        _FEAT_CACHE[(feat, ds)] = load_feats(feat, ds)
+    return _FEAT_CACHE[(feat, ds)]
+
+
+def _subsample(X, y, seed):
+    """Each seed sees a different random 80 % of the pool, so deterministic rules have seed variance."""
+    g = torch.Generator().manual_seed(10_000 + seed)
+    keep = torch.randperm(len(X), generator=g)[: int(POOL_FRAC * len(X))].sort().values.to(X.device)
+    return X[keep], y[keep]
+
+
+def eval_tasks(feat: str, seed: int):
     tasks = {}
-    X, y, Xt, yt = load_feats(feat, "cifar10")
-    tasks["cifar10"] = L.Task(X, y, Xt, yt, 10).prepare()
-    X, y, Xt, yt = load_feats(feat, "cifar100")
+    X, y, Xt, yt = _feats(feat, "cifar10")
+    Xs, ys = _subsample(X, y, seed)
+    tasks["cifar10"] = L.Task(Xs, ys, Xt, yt, 10).prepare(seed=seed)
+    X, y, Xt, yt = _feats(feat, "cifar100")
+    Xs, ys = _subsample(X, y, seed)
+    tasks["cifar100"] = L.Task(Xs, ys, Xt, yt, 100).prepare(seed=seed)
     if not TINY:
-        tasks["cifar100"] = L.Task(X, y, Xt, yt, 100).prepare()
         for i, cl in enumerate(HELDOUT):
-            tasks[f"c100_heldout_{i}"] = subset_task(X, y, Xt, yt, cl, seed=i)
-    else:
-        tasks["cifar100"] = L.Task(X, y, Xt, yt, 100).prepare()
+            tasks[f"c100_heldout_{i}"] = subset_task(Xs, ys, Xt, yt, cl, seed=seed)
     return tasks
 
 
@@ -86,8 +103,8 @@ def run_and_save(task_name, task, method, strategy, seed, feat, init_random=0):
 
 
 def baselines(feat: str):
-    tasks = eval_tasks(feat)
     for seed in SEEDS:
+        tasks = eval_tasks(feat, seed)
         for tn, task in tasks.items():
             for m, fn in L.BASELINES.items():
                 run_and_save(tn, task, m, fn, seed, feat)
@@ -98,7 +115,7 @@ def train_policy(feat: str):
     """GRPO: groups of G sampled episodes on the same (task, seed); advantage = z-scored AUC."""
     pt = CKPT / feat / "policy.pt"
     pt.parent.mkdir(parents=True, exist_ok=True)
-    X, y, Xt, yt = load_feats(feat, "cifar100")
+    X, y, Xt, yt = _feats(feat, "cifar100")
     pool_classes = list(range(50))
     iters = 3 if TINY else int(os.environ.get("AL_ITERS", 150))
     G = 4 if TINY else 8
@@ -151,9 +168,9 @@ def train_policy(feat: str):
 
 def policy_eval(feat: str):
     policy = train_policy(feat).eval()
-    tasks = eval_tasks(feat)
     q = L.q_policy_factory(policy, greedy=True)
     for seed in SEEDS:
+        tasks = eval_tasks(feat, seed)
         for tn, task in tasks.items():
             run_and_save(tn, task, "policy", q, seed, feat)
         collect()
