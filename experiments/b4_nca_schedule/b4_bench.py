@@ -5,7 +5,7 @@ The model, training recipe and evaluation are unchanged (``nca_classifier.py``,
 ``nca_persist.py``, ``nca_persist_bench.py`` copied verbatim, plus a step-switch option in
 ``reseed_count``). Only the arms and the number of seeds differ.
 
-    python b4_bench.py all            # train + evaluate every (arm, seed), then collect
+    python b4_bench.py worker W N     # train + evaluate every N-th (arm, seed), starting at W
     python b4_bench.py collect        # merge per-run JSONs into $RUN_DIR/out/results.json
 
 Env: RUN_DIR (ckpt/ and out/), LAB_DATA (MNIST root containing MNIST/raw),
@@ -19,7 +19,6 @@ import json
 import os
 import sys
 import time
-from multiprocessing import get_context
 from pathlib import Path
 
 import numpy as np
@@ -158,11 +157,13 @@ def collect() -> dict:
 
 if __name__ == "__main__":
     CKPT.mkdir(parents=True, exist_ok=True)
-    if sys.argv[1] == "all":
-        # seed-major order so every arm gets its first seeds early
-        specs = [(a, s) for s in range(N_SEEDS) for a in ARMS]
-        with get_context("spawn").Pool(int(os.environ.get("NCA_WORKERS", 4))) as pool:
-            for arm, seed, st in pool.imap_unordered(run_one, specs):
-                print(f"[{time.strftime('%H:%M:%S')}] {arm} s{seed}: {st}", flush=True)
-                collect()
-    collect()
+    if sys.argv[1] == "worker":
+        # worker W of N: seed-major order so every arm gets its first seeds early.
+        # (Plain processes started by run.sh; multiprocessing pools need /dev/shm, which jobs may lack.)
+        w, n = int(sys.argv[2]), int(sys.argv[3])
+        specs = [(a, s) for s in range(N_SEEDS) for a in ARMS][w::n]
+        for spec in specs:
+            arm, seed, st = run_one(spec)
+            print(f"[{time.strftime('%H:%M:%S')}] worker {w}: {arm} s{seed}: {st}", flush=True)
+    else:
+        collect()

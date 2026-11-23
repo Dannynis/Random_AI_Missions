@@ -115,9 +115,12 @@ class Task:
     reg: torch.Tensor = None     # coarse k-means region of each pool point (policy features)
     reg_share: torch.Tensor = None
     pc_delta: float = None
+    pc_sim: torch.Tensor = None  # wider kNN lists (k=100) that approximate ProbCover's delta-balls
+    pc_idx: torch.Tensor = None
 
     def prepare(self, k: int = 20, seed: int = 0, n_regions: int | None = None):
         self.nb_sim, self.nb_idx = knn(self.X, k)
+        self.pc_sim, self.pc_idx = knn(self.X, min(100, len(self.X) - 1))
         self.t_sim, self.t_idx = knn(self.X, k, self.Xt)
         self.density = self.nb_sim.mean(1)
         _, self.reg = kmeans(self.X, n_regions or 2 * self.n_cls, seed=seed)
@@ -223,8 +226,8 @@ def probcover_delta(task, seed=0, purity=0.95, grid=None):
     """Largest ball radius (cosine distance) whose balls are >= 95 % pure w.r.t. k-means with
     n_cls clusters (Yehuda et al. 2022), estimated on the kNN lists."""
     _, a = kmeans(task.X, task.n_cls, seed=seed)
-    d = 1 - task.nb_sim
-    same = a[task.nb_idx] == a[:, None]
+    d = 1 - task.pc_sim
+    same = a[task.pc_idx] == a[:, None]
     best = None
     for delta in grid or [0.05 * i for i in range(1, 15)]:
         inball = d < delta
@@ -237,15 +240,15 @@ def probcover_delta(task, seed=0, purity=0.95, grid=None):
 def q_probcover(task, lab, B, pred, gen):
     """ProbCover greedy max coverage on the delta-ball graph (approximated by the kNN lists)."""
     X = task.X
-    E = (1 - task.nb_sim) < task.pc_delta              # (n, k) edge mask i -> nb_idx[i]
+    E = (1 - task.pc_sim) < task.pc_delta              # (n, k) edge mask i -> nb_idx[i]
     covered = torch.zeros(len(X), dtype=torch.bool, device=X.device)
     if len(lab):
         covered[lab] = True
-        covered[task.nb_idx[lab][E[lab]]] = True
+        covered[task.pc_idx[lab][E[lab]]] = True
     unl = _unl_mask(task, lab)
     picks = []
     for _ in range(B):
-        gain = (E & ~covered[task.nb_idx]).sum(1) + (~covered).long()
+        gain = (E & ~covered[task.pc_idx]).sum(1) + (~covered).long()
         gain[~unl] = -1
         j = int(gain.argmax())
         if gain[j] <= 0:
@@ -253,7 +256,7 @@ def q_probcover(task, lab, B, pred, gen):
                              1, pred, gen)[0])
         picks.append(j); unl[j] = False
         covered[j] = True
-        covered[task.nb_idx[j][E[j]]] = True
+        covered[task.pc_idx[j][E[j]]] = True
     return torch.tensor(picks, device=X.device)
 
 
@@ -317,12 +320,12 @@ def policy_features(task: Task, lab: torch.Tensor, pred, progress: float):
         dl = torch.full((n,), 2.0, device=X.device)
         covered = torch.zeros(len(task.reg_share), dtype=torch.bool, device=X.device)
         share = torch.zeros(n, device=X.device)
-    E = (1 - task.nb_sim) < task.pc_delta
+    E = (1 - task.pc_sim) < task.pc_delta
     cov = torch.zeros(n, dtype=torch.bool, device=X.device)
     if len(lab):
         cov[lab] = True
-        cov[task.nb_idx[lab][E[lab]]] = True
-    pcg = (E & ~cov[task.nb_idx]).sum(1).float() / E.shape[1]
+        cov[task.pc_idx[lab][E[lab]]] = True
+    pcg = (E & ~cov[task.pc_idx]).sum(1).float() / E.shape[1]
     A = p - F.one_hot(p.argmax(1), task.n_cls).float()
     gn = A.norm(dim=1)
     f = torch.stack([ent, t2[:, 0] - t2[:, 1], t2[:, 0], dl, task.density,

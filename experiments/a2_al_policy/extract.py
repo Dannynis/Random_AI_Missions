@@ -1,4 +1,4 @@
-"""Frozen self-supervised features for CIFAR-10 / CIFAR-100 (DINOv2 CLS + mean patch token).
+"""Frozen self-supervised features for CIFAR-10 / CIFAR-100 (DINOv2 CLS + mean patch token, timm weights).
 
     python extract.py <model> <dataset> [--tiny]
       model:   dinov2-small | dinov2-base
@@ -41,7 +41,7 @@ def embed(model, x_u8: torch.Tensor, res: int, bs: int = 256) -> torch.Tensor:
         x = F.interpolate(x, size=(res, res), mode="bicubic", align_corners=False)
         x = (x - mean) / std
         with torch.autocast("cuda", dtype=torch.float16):
-            h = model(pixel_values=x).last_hidden_state
+            h = model.forward_features(x)                    # (B, 1 + patches, D)
         out.append(torch.cat([h[:, 0], h[:, 1:].mean(1)], -1).half().cpu())
         if i // bs % 40 == 0:
             print(f"  {i}/{len(x_u8)} {time.time() - t0:.0f}s", flush=True)
@@ -56,9 +56,11 @@ def main():
     if path.exists():
         print("exists", path.name)
         return
-    from transformers import AutoModel
-    model = AutoModel.from_pretrained(f"facebook/{mname}").cuda().eval()
+    import timm
     res = int(os.environ.get("FEAT_RES", 224))
+    arch = {"dinov2-small": "vit_small_patch14_dinov2.lvd142m",
+            "dinov2-base": "vit_base_patch14_dinov2.lvd142m"}[mname]
+    model = timm.create_model(arch, pretrained=True, img_size=res, num_classes=0).cuda().eval()
     blob = {"model": mname, "dataset": ds, "res": res}
     for split, train in (("train", True), ("test", False)):
         x, y = load(ds, train)
