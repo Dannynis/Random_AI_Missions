@@ -57,3 +57,41 @@ re-seed rate.
 
 `$RUN_DIR/out/results.json`: per-arm means/std, per-seed metrics, paired differences vs `pool_det`.
 Checkpoints and per-run JSONs in `$RUN_DIR/ckpt` (each run resumes independently).
+
+## Results (10 seeds per arm, 60 runs; `results/b4_nca_schedule/`)
+
+| arm | anytime (40–1000) | peak | acc@40 | acc@2000 | damage@200 | swap@300 | final pool age |
+|---|---|---|---|---|---|---|---|
+| `pool_det` (2) | 0.825 ± 0.019 | 0.845 | 0.792 | 0.808 ± 0.021 | 0.85 | 0.70 | 385 |
+| `const5` | 0.824 ± 0.022 | 0.846 | 0.821 | 0.781 ± 0.030 | 0.84 | 0.60 | 153 |
+| `const8` | 0.793 ± 0.017 | 0.855 | 0.845 | 0.509 ± 0.108 | 0.83 | 0.29 | 96 |
+| `anneal` (8 → 2) | 0.807 ± 0.015 | 0.834 | 0.800 | 0.695 ± 0.057 | 0.82 | 0.41 | 306 |
+| **`anneal_rev` (2 → 8)** | **0.843 ± 0.006** | **0.863** | **0.845** | 0.805 ± 0.021 | 0.85 | **0.71** | 97 |
+| `switch_rev` (2 → 8 at 50 %) | 0.831 ± 0.014 | 0.854 | 0.839 | 0.787 ± 0.022 | 0.84 | 0.69 | 97 |
+
+Paired differences against `pool_det` (same seed; wins out of 10):
+
+| arm | anytime | peak | acc@40 | acc@2000 |
+|---|---|---|---|---|
+| `anneal_rev` | **+0.018 (10/10)**, se 0.006 | +0.018 (9/10) | +0.053 (10/10) | −0.002 (5/10) |
+| `switch_rev` | +0.007 (7/10) | +0.009 (6/10) | +0.047 (10/10) | −0.021 (3/10) |
+| `const5` | −0.001 (4/10) | +0.001 (5/10) | +0.028 (8/10) | −0.027 (3/10) |
+| `anneal` | −0.018 (2/10) | −0.011 (2/10) | +0.007 (7/10) | −0.113 (1/10) |
+| `const8` | −0.032 (1/10) | +0.010 (8/10) | +0.052 (10/10) | −0.299 (0/10) |
+
+**Verdict.**
+- **H1 confirmed on the primary metric.** The rising 2 → 8 re-seed schedule beats the constant-2 baseline in
+  anytime accuracy on 10/10 paired seeds (+0.018), with higher peak and much faster convergence (+0.053 at step
+  40), while long-horizon persistence is unchanged (step 2000: −0.002, 5/10 seeds; by the letter of the
+  pre-stated clause "not negative on average" this is parity, not a gain). It is also the most stable arm
+  (anytime std 0.006 vs 0.015–0.022). PR #58's single-seed observation replicates.
+- **H2 not confirmed.** Against `const5`, which sees the same number of fresh digits, `anneal_rev` wins only 6/10
+  seeds on anytime accuracy (+0.019 mean; criterion was 8/10), and the step switch `switch_rev` is worse than the
+  linear ramp (−0.011, 3/10). So "when" matters for persistence (constant high rates destroy it: `const8`
+  step-2000 0.51, `anneal` 0.70), but the timing advantage of the ramp over a constant equal-data schedule is not
+  resolved with 10 seeds.
+- The 8 → 2 anneal proposed in PR #44 is confirmed harmful (step 2000 −0.113, 1/10).
+- Reading: old (long-rolled) states are needed while the attractor forms; once formed, the rule tolerates and
+  benefits from high fresh-digit throughput. A constant high rate from the start never forms it.
+
+Figures: `results/b4_nca_schedule/figures/fig1_step_curve.png`, `fig2_headline.png`, `fig3_paired.png`.

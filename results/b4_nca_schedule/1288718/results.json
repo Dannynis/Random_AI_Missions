@@ -1,0 +1,102 @@
+{
+ "config": {
+  "iters": 4000,
+  "tiny": false,
+  "n_test": 1000,
+  "seeds": 10,
+  "step_grid": [
+   5,
+   10,
+   20,
+   30,
+   40,
+   60,
+   80,
+   120,
+   200,
+   300,
+   500,
+   1000,
+   2000
+  ],
+  "anytime_steps": [
+   40,
+   60,
+   80,
+   120,
+   200,
+   300,
+   500,
+   1000
+  ],
+  "params": 8176,
+  "arms": {
+   "pool_det": {
+    "train": {
+     "scheme": "pool",
+     "reseed": 2,
+     "reseed_mode": "random",
+     "overflow": 1.0,
+     "overflow_bound": 5.0
+    },
+    "fresh_digits": 9024
+   },
+   "const5": {
+    "train": {
+     "scheme": "pool",
+     "reseed": 5,
+     "reseed_mode": "random",
+     "overflow": 1.0,
+     "overflow_bound": 5.0
+    },
+    "fresh_digits": 21024
+   },
+   "const8": {
+    "train": {
+     "scheme": "pool",
+     "reseed": 8,
+     "reseed_mode": "random",
+     "overflow": 1.0,
+     "overflow_bound": 5.0
+    },
+    "fresh_digits": 33024
+   },
+   "anneal": {
+    "train": {
+     "scheme": "pool",
+     "reseed": 8,
+     "reseed_mode": "random",
+     "overflow": 1.0,
+     "overflow_bound": 5.0,
+     "reseed_end": 2
+    },
+    "fresh_digits": 21027
+   },
+   "anneal_rev": {
+    "train": {
+     "scheme": "pool",
+     "reseed": 2,
+     "reseed_mode": "random",
+     "overflow": 1.0,
+     "overflow_bound": 5.0,
+     "reseed_end": 8
+    },
+    "fresh_digits": 21021
+   },
+   "switch_rev": {
+    "train": {
+     "scheme": "pool",
+     "reseed": 2,
+     "reseed_mode": "random",
+     "overflow": 1.0,
+     "overflow_bound": 5.0,
+     "reseed_end": 8,
+     "reseed_switch_frac": 0.5
+    },
+    "fresh_digits": 21024
+   }
+  }
+ },
+ "arms": {},
+ "paired_vs_pool_det": {}
+}
