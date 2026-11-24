@@ -59,6 +59,20 @@ Newest entry first.
   *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
   bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
   `results/a1_ota_watermark/1293800/real_full.json`.
+- **A1 real recording, then a codec** (the same 2.8 h full-set recording, re-encoded after the room; CRC, list of 4,
+  message success at <= 1 % false alarm, n = 100 per cell):
+
+  | after the room | ours, PESQ 4.0 | ours, PESQ 4.3 | AudioSeal 4.0 / 4.3 | WavMark 4.0 / 4.3 |
+  |---|---|---|---|---|
+  | none | 1.00 | 0.94 | 0.00 / 0.02 | 0 / 0 |
+  | MP3 64k | 0.98 | 0.82 | 0.00 / 0.00 | 0 / 0 |
+  | AAC 32k | 0.99 | 0.82 | 0.01 / 0.02 | 0 / 0 |
+  | telephone band (300-3400 Hz + mu-law) | 0.97 | 0.47 | 0.03 / 0.01 | 0 / 0 |
+  | Opus 12k | 0.40 | 0.04 | 0.00 / 0.00 | 0 / 0 |
+
+  Ours keeps working through MP3 / AAC after a real room and mostly through a phone band at PESQ 4.0; low-rate Opus
+  (12 kbit/s, never seen in training) breaks it. CRC false alarm stays at 0-2 % on the unmarked twins. The baselines
+  were already at chance before the codec. Results: `results/a1_ota_watermark/1293888/real_full_post.json`.
 - **A1 audibility caveat and a first blind listening check.** Matching is on speech PESQ only, and at PESQ 4.0 ours
   carries about 11 dB more residual energy than WavMark (SI-SNR 22 vs 33.5 dB; AudioSeal 18 dB), so a PESQ blind spot
   is possible (the mask is host-shaped, i.e. EQ-like, which PESQ partly compensates). One listener, headphones not
