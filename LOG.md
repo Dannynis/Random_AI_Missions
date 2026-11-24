@@ -21,7 +21,7 @@ Newest entry first.
   | MP3 64k | 1.000 | 1.000 | 0.66 | 0.61 | 0.990 |
   | reverb (held-out rooms) | 1.000 | 0.990 | 0.03 | 0.04 | 0.500 |
   | over the air (`ota`) | 1.000 | 0.987 | 0.04 | 0.04 | 0.263 |
-  | over the air + MP3 | 0.983 | 0.960 | 0.03 | 0.02 | pending |
+  | over the air + MP3 | 0.983 | 0.960 | 0.03 | 0.02 | 0.150 |
 
   The WavMark column is at its native strength (PESQ 4.17); its matched-PESQ rows were still running.
 

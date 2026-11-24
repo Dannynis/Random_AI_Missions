@@ -2100,6 +2100,181 @@
     "false_alarm": 0.1
    },
    "sec": 9.751424312591553
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 391.0514256954193
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.0014583333333333334,
+   "raw_success": 0.99,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.9983333333333333,
+   "fa1": {
+    "success": 0.99,
+    "wrong": 0.006666666666666667,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.006666666666666667,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.0
+   },
+   "sec": 393.6114773750305
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.0075,
+   "raw_success": 0.9633333333333334,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.9266666666666666,
+   "auc": 0.995,
+   "fa1": {
+    "success": 0.9633333333333334,
+    "wrong": 0.02666666666666667,
+    "none": 0.01,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.9633333333333334,
+    "wrong": 0.02666666666666667,
+    "none": 0.01,
+    "false_alarm": 0.0
+   },
+   "sec": 396.1018192768097
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.15375,
+   "raw_success": 0.5,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.48,
+   "success_music": 0.52,
+   "auc": 0.88,
+   "fa1": {
+    "success": 0.5,
+    "wrong": 0.26,
+    "none": 0.24,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.5,
+    "wrong": 0.26,
+    "none": 0.24,
+    "false_alarm": 0.0
+   },
+   "sec": 390.394202709198
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.44604166666666667,
+   "raw_success": 0.03,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.0,
+   "success_music": 0.06,
+   "auc": 0.5783333333333334,
+   "fa1": {
+    "success": 0.03,
+    "wrong": 0.12666666666666668,
+    "none": 0.8433333333333333,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.03,
+    "wrong": 0.12666666666666668,
+    "none": 0.8433333333333333,
+    "false_alarm": 0.0
+   },
+   "sec": 390.336891412735
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.30666666666666664,
+   "raw_success": 0.2633333333333333,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.18666666666666668,
+   "success_music": 0.34,
+   "auc": 0.7166666666666667,
+   "fa1": {
+    "success": 0.26333333333333336,
+    "wrong": 0.16999999999999998,
+    "none": 0.5666666666666667,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.26333333333333336,
+    "wrong": 0.16999999999999998,
+    "none": 0.5666666666666667,
+    "false_alarm": 0.0
+   },
+   "sec": 390.47064757347107
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.35520833333333335,
+   "raw_success": 0.15,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.12666666666666668,
+   "success_music": 0.17333333333333334,
+   "auc": 0.6733333333333333,
+   "fa1": {
+    "success": 0.15000000000000002,
+    "wrong": 0.19666666666666666,
+    "none": 0.6533333333333333,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.15000000000000002,
+    "wrong": 0.19666666666666666,
+    "none": 0.6533333333333333,
+    "false_alarm": 0.0
+   },
+   "sec": 393.64915657043457
   }
  ],
  "audibility": [
@@ -2168,6 +2343,17 @@
    "si_snr_speech": 23.333524703979492,
    "si_snr_music": 19.546401977539062,
    "lsd_db": 1.8741546869277954
+  },
+  {
+   "method": "wavmark",
+   "target": "native",
+   "gain_db": 0.0,
+   "gain_at_bound": false,
+   "pesq_speech": 4.167743484179179,
+   "si_snr_db": 34.96513748168945,
+   "si_snr_speech": 35.7545280456543,
+   "si_snr_music": 34.17574691772461,
+   "lsd_db": 4.748772144317627
   }
  ],
  "done": [
@@ -2176,7 +2362,8 @@
   "ours/pesq4.3",
   "audioseal/native",
   "audioseal/pesq4",
-  "audioseal/pesq4.3"
+  "audioseal/pesq4.3",
+  "wavmark/native"
  ],
  "cal_nll_bits": 0.11068903137210945
 }
