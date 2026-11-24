@@ -39,8 +39,8 @@ Newest entry first.
 - **Running / queued:**
   - A1 main run: seeds 0-2 (training + evaluation, about 3.5 h per seed), then seeds 3-4 in a chained job, then the
     training-channel ablation (3 seeds, ours only), all on one 80 GB GPU in sequence.
-  - A1 corrected re-evaluation of seed 0, then (after seeds 3-4 exist) the stress-set evaluation of all 5 seeds,
-    on 11 GB GPUs.
+  - A1 corrected re-evaluation of seed 0 on an 11 GB GPU. The stress-set evaluation of all 5 seeds is NOT queued
+    (small-GPU job cap); submit it once the seed 3-4 job has finished and a small slot is free (`run.sh stress`).
   - A3 remaining arms (7B seeds 1-2, 1.5B x 3, random-init control) on one 80 GB GPU.
   - B4 follow-up: seeds 10-29 of constant 2, constant 5, 2 -> 8 and the ramp end-points 2 -> 12, 1 -> 8 (two jobs).
 - **Check next:**
