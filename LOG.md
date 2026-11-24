@@ -121,7 +121,9 @@ Newest entry first.
   realistic loudspeaker / room / microphone training channel matters mostly at the quieter strength.
 - **A1 Opus in the training channel** (queued): real-room + Opus 12k was the one condition that broke ours, so an
   optional straight-through Opus stage (8-24 kbit/s, p = 0.5) was added to training, with a new `ota_opus12` test
-  condition for all methods. A 4000-step go/no-go check (no loss on clean / `ota`) runs before 3 x 20k-step training.
+  condition for all methods. The first attempt's 4000-step go/no-go check was uninformative (ours is still at chance
+  at 4000 steps with or without the codec stage) and its training step hit a seed-list bug (fixed); 3 x 20k-step
+  training now runs directly, compared against the main-run models on the same conditions.
 - **A1 real set 2: baselines at matched energy** (same laptop and room, 2.8 h, 100 streams per arm; ours seed 1 at
   PESQ 4.0 / 4.3; AudioSeal and WavMark scaled to host-to-watermark SNR 22 and 26 dB, i.e. the energy ours carries at
   PESQ 4.0 / about 4.3; WavMark is +12.7 dB louder than at matched PESQ). Message success at <= 1 % false alarm:
