@@ -115,6 +115,19 @@ Newest entry first.
   *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
   bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
   `results/a1_ota_watermark/1293800/real_full.json`.
+- **A1 real set 2: baselines at matched energy** (same laptop and room, 2.8 h, 100 streams per arm; ours seed 1 at
+  PESQ 4.0 / 4.3; AudioSeal and WavMark scaled to host-to-watermark SNR 22 and 26 dB, i.e. the energy ours carries at
+  PESQ 4.0 / about 4.3; WavMark is +12.7 dB louder than at matched PESQ). Message success at <= 1 % false alarm:
+
+  | method | PESQ 4.0 / SNR 22 | PESQ 4.3 / SNR 26 |
+  |---|---|---|
+  | ours, seed 1 (CRC, list of 4) | 1.00 | 0.85 |
+  | AudioSeal | 0.00 (bit error 0.32) | 0.00 (0.40) |
+  | WavMark | 0.00 (0.48) | 0.00 (0.49) |
+
+  Giving the baselines our energy does not help them in the room, so the gap is not just a loudness difference.
+  Ours seed 1 shows a raw CRC false alarm of 5 % on the unmarked twins (seed 0: 0 %); the table uses the thresholded
+  score, which holds false alarm at <= 1 %. Results: `results/a1_ota_watermark/1294317/real_set2.json`.
 - **A1 real recording, then a codec** (the same 2.8 h full-set recording, re-encoded after the room; CRC, list of 4,
   message success at <= 1 % false alarm, n = 100 per cell):
 
