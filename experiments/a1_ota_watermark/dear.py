@@ -37,6 +37,11 @@ What the paper does not specify and had to be chosen here:
   levelled like the other trained model's (RMS 0.05 +- 6 dB, random polarity) and multiplied by AMP = 2 inside
   the model, so the typical host sits near -20 dBFS (mastered music level) where the paper's loss weights
   were tuned; the residual is divided by AMP again on output.
+- warm start (not in the paper): with the paper's weights from step 0 the embedding loss shrinks the residual
+  before the decoder finds it and training stalls at chance (observed: BER 0.49 after 1300 steps while SNR rose
+  from -2 to 18 dB). The fidelity terms (L_e, L_d) therefore start at 1 % of their weights until the 100-step
+  training BER drops below 0.2 (or step 20000), then ramp linearly to the paper's weights over 5000 steps;
+  everything after the ramp is the paper's objective.
 - batch size and number of steps (not given): batch 64 one-second segments; steps set on the command line.
 - receiver synchronisation: the paper aligns re-recordings by trying shifts in a small range and keeping the
   shift with the highest bit accuracy (an oracle). Here the alignment is blind: dense decoder outputs are
@@ -191,12 +196,12 @@ def train(a):
     enc, dec, dis = Encoder().to(DEV), Decoder().to(DEV), Discriminator().to(DEV)
     opt = torch.optim.Adam(list(enc.parameters()) + list(dec.parameters()), lr=a.lr)
     opt_d = torch.optim.Adam(dis.parameters(), lr=a.lr)
-    step, hist = 0, []
+    step, hist, t_on = 0, [], None
     if os.path.exists(path):
         st = torch.load(path, map_location=DEV, weights_only=False)
         for m, k in ((enc, "enc"), (dec, "dec"), (dis, "dis"), (opt, "opt"), (opt_d, "opt_d")):
             m.load_state_dict(st[k])
-        step, hist = st["step"], st["hist"]
+        step, hist, t_on = st["step"], st["hist"], st.get("t_on")
         say("resumed dear seed", a.seed, "at step", step)
     say("params enc", sum(p.numel() for p in enc.parameters()), "dec", sum(p.numel() for p in dec.parameters()),
         "dis", sum(p.numel() for p in dis.parameters()))
@@ -231,7 +236,8 @@ def train(a):
         lw = F.mse_loss(Wp, W)
         le = F.mse_loss(aw, aac)
         ld = F.binary_cross_entropy_with_logits(d_gen, torch.ones(a.batch, device=DEV))
-        loss = a.le * le + a.ld * ld + a.lw * lw
+        ramp = a.warm_floor if t_on is None else min(1.0, a.warm_floor + (step - t_on) / a.ramp)
+        loss = ramp * (a.le * le + a.ld * ld) + a.lw * lw
         opt.zero_grad(set_to_none=True); loss.backward(); opt.step()
         with torch.no_grad():
             r = aw - aac
@@ -242,12 +248,14 @@ def train(a):
         nrun += 1
         if step % 100 == 0 or step == a.steps:
             hist.append({"step": step, **{k: v / nrun for k, v in run.items()}, "s_per_step": (time.time() - t1) / nrun,
-                         "data_s": t_data / nrun})
+                         "data_s": t_data / nrun, "ramp": ramp})
+            if t_on is None and (hist[-1]["ber"] < a.warm_ber or step >= a.warm_max):
+                t_on = step; say("fidelity ramp starts at step", step)
             say(f"dear seed {a.seed} step {step}: " + ", ".join(f"{k}={v:.4g}" for k, v in hist[-1].items() if k != "step"))
             run = {k: 0.0 for k in run}; nrun = 0; t1 = time.time(); t_data = 0.0
         if step % a.ckpt_every == 0 or step == a.steps:
             save_atomic({"enc": enc.state_dict(), "dec": dec.state_dict(), "dis": dis.state_dict(), "opt": opt.state_dict(),
-                         "opt_d": opt_d.state_dict(), "step": step, "hist": hist, "args": vars(a)}, path)
+                         "opt_d": opt_d.state_dict(), "step": step, "hist": hist, "t_on": t_on, "args": vars(a)}, path)
     save_atomic({"enc": enc.state_dict(), "dec": dec.state_dict(), "hist": hist, "args": vars(a)}, final)
     tmp = os.path.join(OUT, f"train_dear_seed{a.seed}.json.tmp")
     json.dump(hist, open(tmp, "w"), indent=1); os.replace(tmp, tmp[:-4])
@@ -348,6 +356,10 @@ def main():
     ap.add_argument("--lw", type=float, default=1.0)
     ap.add_argument("--ld", type=float, default=0.01)
     ap.add_argument("--strength", type=float, default=1.0)
+    ap.add_argument("--warm_floor", type=float, default=0.01, help="fidelity-loss scale before the decoder locks on")
+    ap.add_argument("--warm_ber", type=float, default=0.2, help="training BER (100-step mean) that starts the ramp")
+    ap.add_argument("--warm_max", type=int, default=20000, help="start the ramp at this step at the latest")
+    ap.add_argument("--ramp", type=int, default=5000, help="steps to ramp the fidelity terms to full weight")
     ap.add_argument("--ckpt_every", type=int, default=1000)
     ap.add_argument("--bf16", action="store_true", help="bf16 autocast (slower than fp32 for these 1-D convs on our GPUs)")
     a = ap.parse_args()
