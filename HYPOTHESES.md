@@ -28,7 +28,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   10 seeds; budgets 10 to 1000 labels.
 - **Pass:** policy trained on dataset A beats the best hand-made rule on datasets B and C in label-efficiency AUC.
 
-### A3. LLM-generated network weights with a real LLM  (`done`, fail: `experiments/a3_llm_weights`; 7B generator 0.668 vs its scaffold 0.687)
+### A3. LLM-generated network weights with a real LLM  (`done`, fail: `reports/2026-11-24-a3-llm-weights`; 7B generator 0.668 vs its scaffold 0.687)
 - **Origin:** PRs #14, #34 and the `llm_weights` project. All runs used a CPU stand-in for Qwen; a fitted ridge
   scaffold matched logistic regression and the generator hurt.
 - **Why scale matters:** the actual hypothesis (an LLM conditioned on a dataset description emits useful weights)
@@ -55,9 +55,14 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 - **Strong test:** small transformer language model (GPT-2 small scale) with MoE layers on a multi-domain corpus,
   dense at equal compute, oracle domain routing as the ceiling.
 
-### B4. Neural cellular automata: persistence schedule  (`done` for H1, H2 follow-up `running`: `reports/2026-11-24-b4-nca-schedule`)
+### B4. Neural cellular automata: persistence schedule  (`done`: `reports/2026-11-24-b4-nca-schedule`)
 - **Origin:** PRs #28, #44, #58. Reversed re-seed schedule (2 to 8) was best on 1 seed.
 - **Strong test:** 5 seeds, plus mid-switch schedule; CIFAR-10 / larger canvases. Cheap.
+- **Result (30 seeds):** H1 confirmed — rising 2 -> 8 beats constant 2 on anytime accuracy 30/30 seeds (+0.019,
+  CI [+0.014, +0.025]). H2 (timing not amount) not confirmed by the pre-stated 80%-of-seeds bar: 2 -> 8 beats
+  equal-data const5 on only 21/30 (70%), though the mean gain is real (+0.017, CI excludes 0); const5 ties const2.
+  A lower-starting wider ramp 1 -> 8 is the best arm (ties 2 -> 8, beats const2 18/20); 2 -> 12 overshoots and hurts
+  persistence. The rising *shape* from a low start is what helps.
 
 ### B5. Network growth controller versus size sweep at CIFAR scale  (`todo`)
 - **Origin:** nn_builder sessions, PRs #15, #32, #54. Ties a 5-size sweep at one third of the compute on toy tasks.
