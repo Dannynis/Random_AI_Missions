@@ -17,10 +17,13 @@ Newest entry first.
 
   | channel | ours, PESQ 4.0 | ours, PESQ 4.3 | AudioSeal, PESQ 4.0 | AudioSeal, PESQ 4.3 | WavMark |
   |---|---|---|---|---|---|
-  | clean | 1.000 | 1.000 | 0.69 | 0.63 | 1.000 (native) |
-  | MP3 64k | 1.000 | 1.000 | 0.66 | 0.61 | pending |
-  | over the air (`ota`) | 1.000 | 0.987 | 0.04 | 0.04 | pending |
+  | clean | 1.000 | 1.000 | 0.69 | 0.63 | 1.000 |
+  | MP3 64k | 1.000 | 1.000 | 0.66 | 0.61 | 0.990 |
+  | reverb (held-out rooms) | 1.000 | 1.000 | 0.03 | 0.04 | 0.500 |
+  | over the air (`ota`) | 1.000 | 0.987 | 0.04 | 0.04 | 0.263 |
   | over the air + MP3 | 0.983 | 0.960 | 0.03 | 0.02 | pending |
+
+  The WavMark column is at its native strength (PESQ 4.17); its matched-PESQ rows were still running.
 
   Ours uses CRC-8 with no threshold (raw false alarm 0-0.3 %). At native strength our watermark sits at PESQ 3.83
   (SI-SNR 20 dB); WavMark's native PESQ is 4.17 and AudioSeal's 4.47. AudioSeal numbers in this table come from the
