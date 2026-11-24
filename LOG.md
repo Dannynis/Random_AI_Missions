@@ -115,6 +115,13 @@ Newest entry first.
   *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
   bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
   `results/a1_ota_watermark/1293800/real_full.json`.
+- **A1 training-channel ablation** (ours trained on the original simple channel only, 3 seeds, simulated test
+  channels, message success at <= 1 % false alarm): `ota` 0.982 +- 0.010 / 0.853 +- 0.067 at PESQ 4.0 / 4.3 (full
+  channel: 0.998 / 0.981), `ota_mp3` 0.970 / 0.817 (full: 0.993 / 0.976), held-out reverb 0.996 / 0.943. The
+  realistic loudspeaker / room / microphone training channel matters mostly at the quieter strength.
+- **A1 Opus in the training channel** (queued): real-room + Opus 12k was the one condition that broke ours, so an
+  optional straight-through Opus stage (8-24 kbit/s, p = 0.5) was added to training, with a new `ota_opus12` test
+  condition for all methods. A 4000-step go/no-go check (no loss on clean / `ota`) runs before 3 x 20k-step training.
 - **A1 real set 2: baselines at matched energy** (same laptop and room, 2.8 h, 100 streams per arm; ours seed 1 at
   PESQ 4.0 / 4.3; AudioSeal and WavMark scaled to host-to-watermark SNR 22 and 26 dB, i.e. the energy ours carries at
   PESQ 4.0 / about 4.3; WavMark is +12.7 dB louder than at matched PESQ). Message success at <= 1 % false alarm:
