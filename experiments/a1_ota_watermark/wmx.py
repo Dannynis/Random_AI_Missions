@@ -189,6 +189,77 @@ def codec(x: torch.Tensor, kind: str, bitrate: str) -> tuple[torch.Tensor, int]:
     return torch.from_numpy(y).to(x.device), d
 
 
+# ---------------------------------------------------------------- low-bitrate speech codec for training
+# The real Opus encoder runs in a CPU process pool on the forward pass; the backward pass is the
+# straight-through estimator (identity), y_out = y + (opus(y) - y).detach().
+def _opus_row(args):
+    """One row through libopus at ``bps`` bit/s (in-process PyAV if available, else ffmpeg). Delay-free
+    (the Ogg pre-skip is removed by the decoder); output is trimmed / padded to the input length."""
+    x, bps = args
+    n = len(x)
+    pcm = (np.clip(x, -1, 1) * 32767).astype(np.int16)
+    try:
+        import io
+        import av
+        buf = io.BytesIO()
+        with av.open(buf, "w", format="ogg") as o:
+            s = o.add_stream("libopus", rate=SR); s.bit_rate = int(bps); s.layout = "mono"
+            fr = av.AudioFrame.from_ndarray(pcm[None], format="s16", layout="mono"); fr.sample_rate = SR
+            for p in s.encode(fr):
+                o.mux(p)
+            for p in s.encode(None):
+                o.mux(p)
+        buf.seek(0); out = []
+        rs = av.AudioResampler(format="s16", layout="mono", rate=SR)
+        with av.open(buf, "r") as i:
+            for f in i.decode(audio=0):
+                out += [q.to_ndarray().reshape(-1) for q in rs.resample(f)]
+            out += [q.to_ndarray().reshape(-1) for q in rs.resample(None)]
+        y = np.concatenate(out)
+    except ImportError:
+        exe = _ffmpeg()
+        a = subprocess.run([exe, "-v", "quiet", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-", *CODEC_ARGS["opus"],
+                            "-b:a", str(int(bps)), "-"], input=pcm.tobytes(), capture_output=True, check=True).stdout
+        y = np.frombuffer(subprocess.run([exe, "-v", "quiet", "-i", "-", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-"],
+                                         input=a, capture_output=True, check=True).stdout, "<i2")
+    y = y.astype(np.float32) / 32767
+    return np.pad(y, (0, max(0, n - len(y))))[:n]
+
+
+_POOL = None
+
+
+def _codec_pool():
+    global _POOL
+    if _POOL is None:
+        import multiprocessing as mp
+        from concurrent.futures import ProcessPoolExecutor
+        try:
+            ncpu = len(os.sched_getaffinity(0))
+        except AttributeError:
+            ncpu = os.cpu_count() or 2
+        _POOL = ProcessPoolExecutor(max(1, min(8, ncpu - 1)), mp_context=mp.get_context("spawn"))
+        import atexit
+        atexit.register(_POOL.shutdown)
+    return _POOL
+
+
+def opus_ste(y, rows, kbps, span=None):
+    """Straight-through Opus on the selected rows of y (B, n). ``kbps`` (B,) bit rates in kbit/s;
+    ``span=(lo, hi)`` restricts coding to y[:, lo:hi] (the rest is passed through unchanged)."""
+    idx = torch.nonzero(rows).flatten().tolist()
+    if not idx:
+        return y
+    lo, hi = span or (0, y.shape[-1])
+    seg = y[idx, lo:hi].detach().float().cpu().numpy()
+    br = (kbps[idx].float().cpu().numpy() * 1000).round()
+    coded = list(_codec_pool().map(_opus_row, zip(seg, br)))
+    c = torch.from_numpy(np.stack(coded)).to(y.device, y.dtype)
+    delta = torch.zeros_like(y)
+    delta[idx, lo:hi] = c - y[idx, lo:hi].detach()
+    return y + delta
+
+
 # ---------------------------------------------------------------- channels
 class Channel:
     """Randomised play-and-record channel. ``train`` mode is differentiable and broad; the
@@ -206,13 +277,27 @@ class Channel:
         seg = torch.from_numpy(self.noise.segments(rng, B, n)).to(self.dev)
         return seg
 
-    def train(self, x, g, strength=1.0, mode="full"):
+    def train(self, x, g, strength=1.0, mode="full", opus_p=0.0, opus_kbps=(8.0, 24.0), codec_span=None):
         """x (B, n) on device. Returns y and the integer sample offset applied (B,).
         ``mode="legacy"`` is the ablation: only the original channel family (exponential-tail RIRs,
         band-pass + EQ, AWGN, mu-law, low-pass, drift), no loudspeaker saturation, image-source rooms,
-        microphone response, background sounds or pink noise."""
+        microphone response, background sounds or pink noise.
+        ``opus_p > 0`` appends a low-bitrate speech-codec stage after the whole play-and-record chain:
+        with probability opus_p * strength a row goes through real Opus at a uniform random rate in
+        ``opus_kbps`` (straight-through gradient). Its random draws come last, so opus_p = 0 leaves the
+        channel (and its random stream) exactly as before."""
         if mode == "legacy":
-            return self._train_legacy(x, g, strength)
+            y, off = self._train_legacy(x, g, strength)
+        else:
+            y, off = self._train_full(x, g, strength)
+        if opus_p > 0:
+            B, dev = x.shape[0], x.device
+            rows = torch.rand(B, generator=g, device=dev) < opus_p * strength
+            kbps = opus_kbps[0] + (opus_kbps[1] - opus_kbps[0]) * torch.rand(B, generator=g, device=dev)
+            y = opus_ste(y, rows, kbps, codec_span)
+        return y, off
+
+    def _train_full(self, x, g, strength):
         B, n = x.shape
         dev = x.device
         r = lambda: torch.rand(B, generator=g, device=dev)
@@ -273,6 +358,7 @@ class Channel:
 
     TESTS = ("clean", "mp3_64k", "opus_32k", "reverb", "ota_legacy", "ota", "ota_mp3")
     STRESS = ("ota_noisy", "speed_1pct", "phone", "opus_12k", "aac_32k")      # never seen in training
+    EXTRA = ("ota_opus12",)                  # play-and-record chain, then Opus 12 kbit/s (recording sent over a call)
 
     def test(self, x, name: str, seed: int):
         """Fixed test recipe on long streams. Returns (y, offset_samples (B,), speed (B,))."""
@@ -282,7 +368,7 @@ class Channel:
         r = lambda: torch.rand(B, generator=g, device=dev)
         off = torch.randint(0, MAX_OFFSET + 1, (B,), generator=g, device=dev).float()
         speed = torch.ones(B, device=dev)
-        if name in ("ota", "ota_mp3", "ota_noisy"):
+        if name in ("ota", "ota_mp3", "ota_noisy", "ota_opus12"):
             speed = 1 + (200e-6 * r() - 100e-6)              # +-100 ppm clock mismatch
         elif name == "speed_1pct":                           # unseen: 1 % playback speed error (training saw <= 0.2 %)
             speed = 1 + 0.01 * torch.where(r() < 0.5, -1.0, 1.0)
@@ -295,7 +381,7 @@ class Channel:
             y = freq_gain(y, band_response(150 + 150 * r(), 5000 + 2000 * r(), 3 * (2 * torch.rand(B, 3, generator=g, device=dev) - 1), n))
             y = add_noise(y, torch.randn((B, n), generator=g, device=dev), torch.full((B, 1), 20.0, device=dev))
             y = mulaw(y)
-        elif name in ("ota", "ota_mp3", "ota_noisy"):
+        elif name in ("ota", "ota_mp3", "ota_noisy", "ota_opus12"):
             y = freq_gain(y, band_response(100 + 250 * r(), 5000 + 3000 * r(), 5 * (2 * torch.rand(B, 4, generator=g, device=dev) - 1), n))
             y = soft_clip(y, 1.0 + 1.5 * r())
             y = fft_conv(y, self.rir[torch.randint(0, len(self.rir), (B,), generator=g, device=dev)])
@@ -313,7 +399,7 @@ class Channel:
             y, extra = codec(y, "mp3", "64k")
         elif name == "opus_32k":
             y, extra = codec(y, "opus", "32k")
-        elif name == "opus_12k":
+        elif name == "opus_12k" or name == "ota_opus12":
             y, extra = codec(y, "opus", "12k")
         elif name == "aac_32k":
             y, extra = codec(y, "aac", "32k")

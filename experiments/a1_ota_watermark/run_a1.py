@@ -85,6 +85,8 @@ def train(a):
     corp = (wmx.Corpus("speech_train"), wmx.Corpus("music_train"))
     chan = wmx.Channel(DEV, "train")
     S = 3
+    # the codec stage only codes the decoded middle chunk plus a margin wider than the decoder's receptive field
+    span = (wmx.N - 6000, 2 * wmx.N + wmx.MAX_OFFSET + 6000)
     run = {"loss": 0.0, "ber": 0.0, "lsd": 0.0, "n": 0}
     t1 = time.time(); t_data = 0.0
     while step < a.steps:
@@ -99,7 +101,8 @@ def train(a):
         frac = step / a.steps
         with torch.autocast(DEV.type, dtype=torch.bfloat16, enabled=DEV.type == "cuda"):
             w = wmx.embed_chunks(enc, host, bits, a.whr).float()
-            y, off = chan.train(host + w, g, strength=min(1.0, frac / 0.3), mode=a.train_channel)
+            y, off = chan.train(host + w, g, strength=min(1.0, frac / 0.3), mode=a.train_channel,
+                                opus_p=a.opus_p, opus_kbps=a.opus_kbps, codec_span=span)
             feats = dec.frames(y.float())
             jit = torch.randint(-3, 4, (a.batch,), generator=g, device=DEV)
             s = torch.round((wmx.N + off) / wmx.HOP).long() + jit
@@ -396,6 +399,9 @@ def target_gain(tname, rc, chost, cg0, pool, nsp):
     raise ValueError(tname)
 
 
+FIXED_COND_INDEX = {"ota_opus12": 50}
+
+
 def evaluate(a):
     global TINY
     TINY = a.tiny
@@ -425,10 +431,13 @@ def evaluate(a):
             say("method", m, "failed to load:", repr(e)); res.setdefault("errors", []).append(f"{m}: {e!r}")
     n = REC_S * wmx.SR
     conds = a.conditions or list(wmx.Channel.TESTS)
+    # channel seed per condition: its position in the list (as before), except conditions added later,
+    # which get a fixed index so their draws do not depend on which other conditions are evaluated
+    cseed = {c: a.seed * 100 + FIXED_COND_INDEX.get(c, ci) for ci, c in enumerate(conds)}
     # unmarked twins: one channel pass per condition, shared by every method
     unmarked = {}
-    for ci, c in enumerate(conds):
-        y, off, sp = chan.test(host.to(DEV), c, a.seed * 100 + ci)
+    for c in conds:
+        y, off, sp = chan.test(host.to(DEV), c, cseed[c])
         unmarked[c] = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
     say("unmarked passes done")
     neg_cache = {}
@@ -454,9 +463,9 @@ def evaluate(a):
                    "si_snr_music": float(si_snr(ref, deg)[src == 1].mean()), "lsd_db": float(ls.mean())}
             res["audibility"].append(aud)
             say("audibility", aud)
-            for ci, c in enumerate(conds):
+            for c in conds:
                 t1 = time.time()
-                y, off, sp = chan.test(xm.to(DEV), c, a.seed * 100 + ci)
+                y, off, sp = chan.test(xm.to(DEV), c, cseed[c])
                 ym = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
                 truth = truth_for(g0, phi0, t0, off.cpu().numpy().astype(np.float64), sp.cpu().numpy().astype(np.float64))
                 dp = m.decode(ym, truth)
@@ -542,6 +551,9 @@ def main():
     ap.add_argument("--no_native", action="store_true")
     ap.add_argument("--tiny", action="store_true")
     ap.add_argument("--train_channel", default="full", choices=["full", "legacy"])
+    ap.add_argument("--opus_p", type=float, default=0.0,
+                    help="probability of the Opus stage after the training channel (0 = off, the original channel)")
+    ap.add_argument("--opus_kbps", type=float, nargs=2, default=[8.0, 24.0], help="Opus bit-rate range, kbit/s")
     ap.add_argument("--tag", default="", help="suffix for the eval output file, e.g. _stress")
     a = ap.parse_args()
     if a.cmd == "train":

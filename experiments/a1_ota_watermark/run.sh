@@ -30,6 +30,33 @@ if [ "$MODE" = dear_train ]; then          # DeAR baseline (dear.py): train the 
   python run_a1.py summary
   exit 0
 fi
+OPUS_CONDS="clean mp3_64k opus_32k reverb ota_legacy ota ota_mp3 ota_opus12"   # standard conditions + ota_opus12
+if [ "$MODE" = opus_tiny ]; then           # codec-stage smoke test: same short training with and without the Opus stage
+  root=$RUN_DIR
+  for p in 0 ${OPUS_P:-0.5}; do          # one after the other, so s_per_step is a clean timing
+    RUN_DIR=$root/out/p$p python run_a1.py train --seed 0 --steps "${STEPS:-2000}" --opus_p "$p" --ckpt_every 500
+  done
+  for p in 0 ${OPUS_P:-0.5}; do
+    RUN_DIR=$root/out/p$p python run_a1.py eval --seed 0 --methods ours --no_native --pesq_targets 4.0 \
+      --n_rec "${N_REC:-96}" --conditions clean ota ota_opus12
+    rm -rf "$root/out/p$p/ckpt"
+  done
+  exit 0
+fi
+if [ "$MODE" = opus_train ]; then          # ours trained with the Opus stage (main-run steps / settings), tag _opus
+  for s in ${SEEDS:-"0 1 2"}; do
+    python run_a1.py train --seed "$s" --steps "${STEPS:-20000}" --opus_p "${OPUS_P:-0.5}"
+    python run_a1.py eval --seed "$s" --methods ours --tag _opus --conditions $OPUS_CONDS
+    python run_a1.py summary
+  done
+  if [ -n "${A1_BASE_CKPT:-}" ]; then      # the main-run models and the baselines on ota_opus12, kept in a separate summary
+    for s in ${SEEDS:-"0 1 2"}; do
+      RUN_DIR=$RUN_DIR/out/base A1_CKPT=$A1_BASE_CKPT python run_a1.py eval --seed "$s" --tag _base_opus12 --conditions ota_opus12
+    done
+    RUN_DIR=$RUN_DIR/out/base python run_a1.py summary
+  fi
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0

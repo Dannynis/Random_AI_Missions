@@ -86,10 +86,23 @@ Results on `clean` / codec-only channels are reported but are not part of the cr
 - **Training-channel ablation.** The same model trained on the original simple channel only
   (`run.sh ablate_channel`, 3 seeds) measures what the realistic channel adds.
 
+- **Low-bitrate codec follow-up (added 2026-11-24).** A real-room recording followed by Opus 12 kbit/s broke
+  the decoder while MP3 64k, AAC 32k and the telephone band did not. `run.sh opus_train` retrains ours (3 seeds,
+  main-run steps and settings) with a speech-codec stage appended to the training channel after the whole
+  play-and-record chain: with probability `--opus_p` (0.5, ramped with the channel strength) a recording goes
+  through the real libopus encoder at a uniform random 8-24 kbit/s. The codec is not differentiable, so the
+  backward pass is the straight-through estimator (identity); only the decoded middle chunk plus a 6000-sample
+  margin is coded, to keep the CPU cost down. `--opus_p 0` (the default) leaves the original channel and its
+  random stream unchanged. New test condition `ota_opus12` (the `ota` chain, then Opus 12 kbit/s), available to
+  every method, with a fixed channel seed so it is paired across evaluations. Results: `eval_opus_seed*.json`
+  (ours, standard conditions + `ota_opus12`); the main-run models and the baselines on `ota_opus12` go to
+  `base/out/eval_base_opus12_seed*.json` when `A1_BASE_CKPT` is set. `run.sh opus_tiny` is the smoke test
+  (2000 steps with and without the stage, ours on `clean` / `ota` / `ota_opus12` at PESQ 4.0).
+
 ## Run
 
 `run.sh tiny` (validation, a few minutes) or `run.sh` (5 seeds; `SEEDS` / `STEPS` override; the full run uses
-`STEPS=20000`, about 70 min per seed on one 80 GB GPU). Other modes: `evalonly`, `stress`, `ablate_channel`
+`STEPS=20000`, about 70 min per seed on one 80 GB GPU). Other modes: `evalonly`, `stress`, `ablate_channel`, `opus_tiny`, `opus_train`
 (trained models can be read from `A1_CKPT`). Everything resumes
 from `$RUN_DIR/ckpt` and skips finished evaluation blocks. Audio is prepared by `prep_data.py` into `$A1_DATA`
 (default under `$HF_HOME`).
