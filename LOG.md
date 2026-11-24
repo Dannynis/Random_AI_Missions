@@ -45,6 +45,20 @@ Newest entry first.
   Ours decodes 6/6 at PESQ 4.0 and 4.3 with CRC and no false alarm on the 6 unmarked twins; AudioSeal 0/6 (bit
   error 0.24-0.29) and WavMark 0/6 (bit error 0.56) at both strengths. Too small for a claim; the 2.8 h full set
   (100 streams per arm) is recording. Results: `results/a1_ota_watermark/1293103/real_pilot.json`.
+- **A1 real loudspeaker / microphone, full set** (same laptop and room, 100 host streams per arm, 50 speech / 50
+  music, 2.8 h, 1000 items; alignment correlation median 0.40; level -55 dB RMS, quieter than the pilot, no
+  clipping). Message success at <= 1 % false alarm (two-fold thresholds), n = 100 per cell:
+
+  | method | PESQ 4.0 | PESQ 4.3 |
+  |---|---|---|
+  | ours (CRC, list of 4) | 1.00 | 0.94 |
+  | AudioSeal | 0.00 | 0.02 |
+  | WavMark | 0.00 | 0.00 |
+
+  Ours: no CRC false alarm on the 100 unmarked twins; bit error 0.000 at PESQ 4.0, 0.032 at 4.3. AudioSeal still
+  *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
+  bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
+  `results/a1_ota_watermark/1293800/real_full.json`.
 - **A1 audibility caveat and a first blind listening check.** Matching is on speech PESQ only, and at PESQ 4.0 ours
   carries about 11 dB more residual energy than WavMark (SI-SNR 22 vs 33.5 dB; AudioSeal 18 dB), so a PESQ blind spot
   is possible (the mask is host-shaped, i.e. EQ-like, which PESQ partly compensates). One listener, headphones not
@@ -71,8 +85,7 @@ Newest entry first.
   - A1 real loudspeaker / microphone check (`real_ota.py`, `real_play.py`): playlists built for a 10 min pilot
     (6 streams per arm) and a 2.8 h full set (100 streams per arm; ours seed 0, AudioSeal, WavMark at PESQ 4.0 and 4.3,
     plus unmarked twins, shuffled). Playback on a laptop's built-in speakers and microphone array:
-    pilot done (below); the full set is recording. Then
-    score it with `run.sh real_score` and `REAL_TAG=full`.
+    pilot and full set done (results above).
 - **Check next:**
   1. A1: use the corrected seed-0 rerun and seeds 1-4 (fixed folds; per-recording scores saved). Build the table with
      `python experiments/a1_ota_watermark/make_figures.py results/a1_ota_watermark <out>`; apply the pre-stated
