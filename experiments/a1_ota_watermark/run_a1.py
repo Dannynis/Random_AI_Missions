@@ -251,8 +251,8 @@ class AudioSealM:
         crops = torch.stack([yb[:, s:s + probe] for s in shifts], 1)          # (b, S, probe)
         b, S, _ = crops.shape
         conf = []
-        for j in range(0, b * S, 64):
-            raw = self._raw(crops.reshape(b * S, probe)[j:j + 64])
+        for j in range(0, b * S, 16):
+            raw = self._raw(crops.reshape(b * S, probe)[j:j + 16])
             conf.append(raw[:, 2:].mean(-1).abs().mean(-1))
         return torch.cat(conf).reshape(b, S)
 
@@ -262,14 +262,14 @@ class AudioSealM:
         recording from that shift. Detection score = mean frame watermark probability."""
         sc, ms = [], []
         n = y.shape[-1] - self.PERIOD
-        probe = 2 * wmx.SR
+        probe = n            # whole recording (a 2 s probe picked the wrong grid shift too often)
         with torch.no_grad():
             for i in range(0, len(y), 8):
                 yb = y[i:i + 8].to(DEV)
                 coarse = list(range(0, self.PERIOD, 4))
                 c = self._shift_conf(yb, coarse, probe)
                 s0 = torch.tensor(coarse, device=DEV)[c.argmax(1)]
-                fine = list(range(-3, 4))
+                fine = list(range(-2, 3))
                 cand = torch.stack([(s0 + d) % self.PERIOD for d in fine], 1)       # (b, 7)
                 cf = torch.stack([self._shift_conf(yb[k:k + 1], cand[k].tolist(), probe)[0] for k in range(len(yb))])
                 best = cand[torch.arange(len(yb)), cf.argmax(1)]
@@ -344,7 +344,9 @@ def truth_for(g0, phi0, t0, off, speed):
 
 
 def two_fold(correct, out_p, sc_p, out_n, sc_n, fa):
-    B = len(correct); half = np.arange(B) < B // 2
+    # interleaved halves: the streams are ordered speech first, music second, so a first/second split
+    # would calibrate the threshold on one source type and apply it to the other
+    B = len(correct); half = np.arange(B) % 2 == 0
     pts = []
     for cal, ev in ((half, ~half), (~half, half)):
         thr = wcr.threshold_for(sc_n[cal], out_n[cal], fa) if fa < 1 else -np.inf
@@ -451,6 +453,10 @@ def evaluate(a):
                            "auc": auc(np.where(op, sp_, -1e9), np.where(on, sn, -1e9)),
                            "fa1": two_fold(correct, op, sp_, on, sn, 0.01),
                            "fa0": two_fold(correct, op, sp_, on, sn, 0.0),
+                           "per_rec": {"correct": correct.astype(int).tolist(), "out_pos": op.astype(int).tolist(),
+                                       "score_pos": np.round(np.nan_to_num(sp_, neginf=-1e9), 4).tolist(),
+                                       "out_neg": on.astype(int).tolist(),
+                                       "score_neg": np.round(np.nan_to_num(sn, neginf=-1e9), 4).tolist()},
                            "sec": time.time() - t1}
                     res["rows"].append(row)
                 say(f"{key} {c}: " + ", ".join(f"{x['rule']} raw={x['raw_success']:.3f} fa1={x['fa1']['success']:.3f} "
