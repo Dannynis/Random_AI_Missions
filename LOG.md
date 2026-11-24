@@ -52,6 +52,13 @@ Newest entry first.
   order, "which sounds best": WavMark 4, ours 2, AudioSeal 1, no difference 3. No method stands out as clearly
   worse; far too small to separate them. Still needed: ABX against the unmarked original, a second metric (ViSQOL
   audio mode), and the baselines at matched energy.
+- **A1 prior art (literature check).** Learned over-the-air watermarking is not new: DeAR (AAAI 2023, arXiv
+  2212.02339) trains an encoder/decoder through a re-recording distortion layer and reports about 98.5 % bit accuracy
+  at 20 cm on real re-recordings (SNR 25.9 dB). The SoK of arXiv 2503.19176 already reports that current watermarks,
+  AudioSeal included, fail physical-level distortion, so "AudioSeal/WavMark break over the air" is not new either. What
+  A1 adds: blind decoding (unknown timing and phase) with message-level success at a fixed false-alarm rate, a
+  matched-audibility comparison with the modern baselines, and a real-room test. For a paper it needs DeAR as a
+  baseline, energy-matched baselines, several rooms / distances / devices, and a formal listening test.
 
 ### Handoff for the next session
 - **Running / queued:**
