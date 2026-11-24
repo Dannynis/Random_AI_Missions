@@ -20,11 +20,11 @@ if [ "$MODE" = dear_tiny ]; then           # DeAR baseline smoke test: short tra
 fi
 if [ "$MODE" = dear_train ]; then          # DeAR baseline (dear.py): train the seeds side by side on the GPU, then the standard evaluation
   pids=""
-  for s in ${SEEDS:-"0 1 2"}; do
+  for s in ${SEEDS:-0 1 2}; do
     python dear.py train --seed "$s" --steps "${STEPS:-100000}" & pids="$pids $!"
   done
   for p in $pids; do wait "$p"; done
-  for s in ${SEEDS:-"0 1 2"}; do
+  for s in ${SEEDS:-0 1 2}; do
     python run_a1.py eval --seed "$s" --methods dear --tag _dear
   done
   python run_a1.py summary
@@ -65,13 +65,13 @@ PY
   MODE=opus_train
 fi
 if [ "$MODE" = opus_train ]; then          # ours trained with the Opus stage (main-run steps / settings), tag _opus
-  for s in ${SEEDS:-"0 1 2"}; do
+  for s in ${SEEDS:-0 1 2}; do
     python run_a1.py train --seed "$s" --steps "${STEPS:-20000}" --opus_p "${OPUS_P:-0.5}"
     python run_a1.py eval --seed "$s" --methods ours --tag _opus --conditions $OPUS_CONDS
     python run_a1.py summary
   done
   if [ -n "${A1_BASE_CKPT:-}" ]; then      # the main-run models and the baselines on ota_opus12, kept in a separate summary
-    for s in ${SEEDS:-"0 1 2"}; do
+    for s in ${SEEDS:-0 1 2}; do
       RUN_DIR=$RUN_DIR/out/base A1_CKPT=$A1_BASE_CKPT python run_a1.py eval --seed "$s" --tag _base_opus12 --conditions ota_opus12
     done
     RUN_DIR=$RUN_DIR/out/base python run_a1.py summary
