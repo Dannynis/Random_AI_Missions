@@ -15,6 +15,8 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   audibility (PESQ / ViSQOL / SI-SNR), 16 and 32 bit payloads, 5 seeds. Report message success at <= 1 % false alarm,
   bit error rate, and detection AUC, per channel.
 - **Pass:** ours beats both baselines on re-recorded (speaker to microphone) channels by a clear margin at equal audibility.
+- **Next after the simulated run (needs the owner's hardware):** play the 300 test streams of one seed through a real
+  loudspeaker and record them with a phone / laptop microphone in two rooms; rerun the same receivers on the recordings.
 
 ### A2. Learned query policies for cold-start active learning, beyond MNIST  (`done`, negative: `reports/2026-11-24-a2-al-policy`)
 - **Origin:** GAL sessions and PRs #16, #36. A 15-feature MLP policy trained with group-relative RL beat BALD and
@@ -64,6 +66,12 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 
 ### B6. Adversarial audio evaluation: simulated versus real channel transfer  (`todo`, manual)
 - **Origin:** PR #13. Not to be run automatically; listed for the owner to drive.
+
+### B7. Learned query policies where typicality is a poor prior  (`todo`, from A2)
+- **Origin:** A2 (2026-11-24): on clean CIFAR with DINOv2 features TypiClust leaves about 0.001 AUC of headroom and no
+  learned policy beats it. Typicality should fail on noisy labels (CIFAR-10N) and long-tailed pools.
+- **Strong test:** the A2 pipeline on CIFAR-10N (worst label set) and a long-tailed CIFAR-100 pool, 10 seeds; policy
+  meta-trained on synthetic label noise only.
 
 ## Tier C: cheap sweeps
 - Seeds and ablations for any Tier A/B experiment.
