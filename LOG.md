@@ -115,6 +115,17 @@ Newest entry first.
   *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
   bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
   `results/a1_ota_watermark/1293800/real_full.json`.
+- **A1 real full set, 6 dB quieter playback** (same 1000 items, laptop and room as the full set, playlist scaled by
+  -6 dB; alignment correlation median 0.37). Message success at <= 1 % false alarm, n = 100:
+
+  | method | PESQ 4.0 | PESQ 4.3 |
+  |---|---|---|
+  | ours (CRC, list of 4) | 0.94 (full level: 1.00) | 0.76 (0.94) |
+  | AudioSeal | 0.02 | 0.00 |
+  | WavMark | 0.00 | 0.00 |
+
+  No CRC false alarm on the unmarked twins. Ours degrades gracefully with less acoustic level; the baselines were
+  already at chance. Results: `results/a1_ota_watermark/1294730/real_full_m6.json`.
 - **A1 training-channel ablation** (ours trained on the original simple channel only, 3 seeds, simulated test
   channels, message success at <= 1 % false alarm): `ota` 0.982 +- 0.010 / 0.853 +- 0.067 at PESQ 4.0 / 4.3 (full
   channel: 0.998 / 0.981), `ota_mp3` 0.970 / 0.817 (full: 0.993 / 0.976), held-out reverb 0.996 / 0.943. The
