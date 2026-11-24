@@ -48,7 +48,13 @@ ARMS = {
     "anneal": {**POOL, "reseed": 8, "reseed_end": 2},                    # linear 8 -> 2 (PR #58)
     "anneal_rev": {**POOL, "reseed": 2, "reseed_end": 8},                # linear 2 -> 8 (PR #58, 1 seed)
     "switch_rev": {**POOL, "reseed": 2, "reseed_end": 8, "reseed_switch_frac": 0.5},  # step 2 -> 8 at 50 %
+    "anneal_rev12": {**POOL, "reseed": 2, "reseed_end": 12},             # follow-up: ramp end-point 12
+    "anneal_rev1": {**POOL, "reseed": 1, "reseed_end": 8},               # follow-up: ramp start 1
 }
+# Follow-up runs select arms and a seed range by environment (defaults reproduce the first run).
+_SEL = [a for a in os.environ.get("NCA_ARMS", "pool_det,const5,const8,anneal,anneal_rev,switch_rev").split(",") if a]
+ARMS = {a: ARMS[a] for a in _SEL}
+SEED0 = 0 if TINY else int(os.environ.get("NCA_SEED0", 0))
 STEP_GRID = (5, 10, 20, 30, 40, 60, 80, 120, 200, 300, 500, 1000, 2000)
 ANYTIME = (40, 60, 80, 120, 200, 300, 500, 1000)
 SCENES = ("occlude8", "pair_gap2")
@@ -115,14 +121,14 @@ def _ms(v):
 
 
 def collect() -> dict:
-    res = {"config": {"iters": ITERS, "tiny": TINY, "n_test": N_TEST, "seeds": N_SEEDS,
+    res = {"config": {"iters": ITERS, "tiny": TINY, "n_test": N_TEST, "seeds": N_SEEDS, "seed0": SEED0,
                       "step_grid": list(STEP_GRID), "anytime_steps": list(ANYTIME),
                       "params": n_params(PersistentNCA(**DET)),
                       "arms": {a: {"train": ARMS[a], "fresh_digits": fresh_digits(a)} for a in ARMS}},
            "arms": {}, "paired_vs_pool_det": {}}
     per = {}
     for arm in ARMS:
-        rs = [json.loads(stem(arm, s).with_suffix(".json").read_text()) for s in range(N_SEEDS)
+        rs = [json.loads(stem(arm, s).with_suffix(".json").read_text()) for s in range(SEED0, SEED0 + N_SEEDS)
               if stem(arm, s).with_suffix(".json").exists()]
         if not rs:
             continue
@@ -161,7 +167,7 @@ if __name__ == "__main__":
         # worker W of N: seed-major order so every arm gets its first seeds early.
         # (Plain processes started by run.sh; multiprocessing pools need /dev/shm, which jobs may lack.)
         w, n = int(sys.argv[2]), int(sys.argv[3])
-        specs = [(a, s) for s in range(N_SEEDS) for a in ARMS][w::n]
+        specs = [(a, s) for s in range(SEED0, SEED0 + N_SEEDS) for a in ARMS][w::n]
         for spec in specs:
             arm, seed, st = run_one(spec)
             print(f"[{time.strftime('%H:%M:%S')}] worker {w}: {arm} s{seed}: {st}", flush=True)
