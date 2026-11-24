@@ -49,6 +49,9 @@ def load_methods(names, seed, need_cal):
             out.append(R.AudioSealM())
         elif m == "wavmark":
             out.append(R.WavMarkM())
+        elif m == "dear":
+            from dear import DeARM
+            out.append(DeARM(seed))
     return out
 
 

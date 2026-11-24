@@ -11,6 +11,23 @@ if [ "$MODE" = tiny ]; then
   python run_a1.py summary
   exit 0
 fi
+if [ "$MODE" = dear_tiny ]; then           # DeAR baseline smoke test: short training + tiny evaluation
+  for s in ${SEEDS:-0}; do
+    python dear.py train --seed "$s" --steps "${STEPS:-300}" --ckpt_every 100
+    python run_a1.py eval --seed "$s" --methods dear --tag _dear --tiny --conditions clean ota --pesq_targets 4.0
+  done
+  exit 0
+fi
+if [ "$MODE" = dear_train ]; then          # DeAR baseline (dear.py): train each seed, then the standard evaluation
+  for s in ${SEEDS:-"0 1 2"}; do
+    python dear.py train --seed "$s" --steps "${STEPS:-100000}"
+  done
+  for s in ${SEEDS:-"0 1 2"}; do
+    python run_a1.py eval --seed "$s" --methods dear --tag _dear
+  done
+  python run_a1.py summary
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0

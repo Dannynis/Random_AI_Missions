@@ -418,6 +418,9 @@ def evaluate(a):
                 methods.append(AudioSealM())
             elif m == "wavmark":
                 methods.append(WavMarkM())
+            elif m == "dear":
+                from dear import DeARM
+                methods.append(DeARM(a.seed))
         except Exception as e:
             say("method", m, "failed to load:", repr(e)); res.setdefault("errors", []).append(f"{m}: {e!r}")
     n = REC_S * wmx.SR
