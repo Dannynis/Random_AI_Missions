@@ -1,6 +1,6 @@
 #!/bin/bash
 # A2: cold-start active learning on frozen DINOv2 features (CIFAR-10 / CIFAR-100).
-# usage: run.sh tiny | baselines [feat] | policy [feat] | policy2 [feat]
+# usage: run.sh tiny | baselines [feat] | extra [feat] | policy [feat] | policy2 [feat]
 #   features are extracted first if missing (shared cache in $LAB_DATA/features, atomic writes);
 #   per-(task, method, seed) results and the policy checkpoint live in $RUN_DIR/ckpt (resumable).
 set -euo pipefail

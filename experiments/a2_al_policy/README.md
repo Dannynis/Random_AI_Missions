@@ -114,3 +114,6 @@ Paired AUC differences against TypiClust (wins out of 10 seeds):
   rule after a few hundred labels (cf. the TCM heuristic), tested with a reward that weights high budgets.
 - Overall A2 status: on frozen DINOv2 features, no learned policy beats TypiClust; the MNIST result from the
   daily runs does not transfer. Negative result, 10 seeds, pre-stated criterion.
+- Follow-up queued (`run.sh extra dinov2-base`): TCM-style switch baselines, TypiClust until 100 or 300 labels
+  then Margin (`tcm100`, `tcm300`) or BADGE (`tcm100_badge`), to test whether the high-budget edge of the
+  learned policies is just "stop using TypiClust late".

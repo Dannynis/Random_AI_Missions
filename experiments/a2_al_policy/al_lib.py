@@ -296,6 +296,17 @@ def q_badge(task, lab, B, pred, gen):
     return torch.tensor(picks, device=X.device)
 
 
+def make_tcm(switch: int, late=q_margin):
+    """TypiClust until ``switch`` labels, then ``late`` (default margin), as in the TCM heuristic."""
+
+    def q(task, lab, B, pred, gen):
+        return q_typiclust(task, lab, B, pred, gen) if len(lab) < switch else late(task, lab, B, pred, gen)
+    return q
+
+
+EXTRA = {"tcm100": make_tcm(100), "tcm300": make_tcm(300), "tcm100_badge": make_tcm(100, q_badge)}
+
+
 BASELINES = {"random": q_random, "entropy": q_entropy, "margin": q_margin, "coreset": q_coreset,
              "typiclust": q_typiclust, "probcover": q_probcover, "badge": q_badge}
 

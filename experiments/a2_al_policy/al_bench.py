@@ -103,11 +103,11 @@ def run_and_save(task_name, task, method, strategy, seed, feat, init_random=0):
     return r
 
 
-def baselines(feat: str):
+def baselines(feat: str, table=None):
     for seed in SEEDS:
         tasks = eval_tasks(feat, seed)
         for tn, task in tasks.items():
-            for m, fn in L.BASELINES.items():
+            for m, fn in (table or L.BASELINES).items():
                 run_and_save(tn, task, m, fn, seed, feat)
         collect()
 
@@ -304,6 +304,8 @@ if __name__ == "__main__":
         baselines(sys.argv[2])
     elif mode == "policy":
         policy_eval(sys.argv[2])
+    elif mode == "extra":                      # TypiClust -> margin / BADGE switch heuristics (TCM)
+        baselines(sys.argv[2], L.EXTRA)
     elif mode == "policy2":
         policy2_eval(sys.argv[2])
     collect()
