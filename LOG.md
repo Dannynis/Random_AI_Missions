@@ -100,6 +100,14 @@ Newest entry first.
     (6 streams per arm) and a 2.8 h full set (100 streams per arm; ours seed 0, AudioSeal, WavMark at PESQ 4.0 and 4.3,
     plus unmarked twins, shuffled). Playback on a laptop's built-in speakers and microphone array:
     pilot and full set done (results above).
+  - A1 DeAR baseline (`dear.py`, reimplemented from the paper; no public code): 3 seeds x 250k steps training on
+    one 80 GB GPU, then the standard evaluation with `--tag _dear` in the same job. Deviations from the paper are in
+    the module docstring. Training stalled at chance with the paper's loss weights from step 0, so the fidelity terms
+    are warm-started (after that the objective is the paper's); body convolutions are dilated. The blind segment sync
+    has not yet been checked against the true offsets. 4000-step tiny test: training bit error 0.20 and still falling
+    (not a result).
+  - A1 energy-matched simulated evaluation (seeds 0-2; AudioSeal / WavMark at host-to-watermark SNR 22 and 26 dB)
+    and real set 2 (ours seed 1, baselines at matched SNR) are running.
 - **Check next:**
   1. A1: use the corrected seed-0 rerun and seeds 1-4 (fixed folds; per-recording scores saved). Build the table with
      `python experiments/a1_ota_watermark/make_figures.py results/a1_ota_watermark <out>`; apply the pre-stated
