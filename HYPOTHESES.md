@@ -16,7 +16,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   bit error rate, and detection AUC, per channel.
 - **Pass:** ours beats both baselines on re-recorded (speaker to microphone) channels by a clear margin at equal audibility.
 
-### A2. Learned query policies for cold-start active learning, beyond MNIST  (`running`: `experiments/a2_al_policy`)
+### A2. Learned query policies for cold-start active learning, beyond MNIST  (`done`, negative: `reports/2026-11-24-a2-al-policy`)
 - **Origin:** GAL sessions and PRs #16, #36. A 15-feature MLP policy trained with group-relative RL beat BALD and
   TypiClust-style warmup on 10/10 seeds on MNIST and transferred to Fashion-MNIST.
 - **Why scale matters:** CIFAR-10/100 and ImageNet-100 with a self-supervised backbone (DINOv2 features) and a
@@ -53,7 +53,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 - **Strong test:** small transformer language model (GPT-2 small scale) with MoE layers on a multi-domain corpus,
   dense at equal compute, oracle domain routing as the ceiling.
 
-### B4. Neural cellular automata: persistence schedule  (`running`: `experiments/b4_nca_schedule`)
+### B4. Neural cellular automata: persistence schedule  (`done` for H1, H2 follow-up `running`: `reports/2026-11-24-b4-nca-schedule`)
 - **Origin:** PRs #28, #44, #58. Reversed re-seed schedule (2 to 8) was best on 1 seed.
 - **Strong test:** 5 seeds, plus mid-switch schedule; CIFAR-10 / larger canvases. Cheap.
 
