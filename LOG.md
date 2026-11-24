@@ -78,8 +78,8 @@ Newest entry first.
 - **Running / queued:**
   - A1 main run: seeds 0-2 (training + evaluation, about 3.5 h per seed), then seeds 3-4 in a chained job, then the
     training-channel ablation (3 seeds, ours only), all on one 80 GB GPU in sequence.
-  - A1 corrected re-evaluation of seed 0 on an 11 GB GPU. The stress-set evaluation of all 5 seeds is NOT queued
-    (small-GPU job cap); submit it once the seed 3-4 job has finished and a small slot is free (`run.sh stress`).
+  - A1 corrected re-evaluation of seed 0: done. The stress-set evaluation of all 5 seeds is queued (all seeds trained;
+    the seed 0-2 and 3-4 jobs show as failed only because run.sh was updated under them after their last step).
   - B4 follow-up: seeds 10-29 of constant 2, constant 5, 2 -> 8 and the ramp end-points 2 -> 12, 1 -> 8 (two jobs,
     finished; results not merged yet).
   - A1 real loudspeaker / microphone check (`real_ota.py`, `real_play.py`): playlists built for a 10 min pilot
