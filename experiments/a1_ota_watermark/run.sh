@@ -34,14 +34,35 @@ OPUS_CONDS="clean mp3_64k opus_32k reverb ota_legacy ota ota_mp3 ota_opus12"   #
 if [ "$MODE" = opus_tiny ]; then           # codec-stage smoke test: same short training with and without the Opus stage
   root=$RUN_DIR
   for p in 0 ${OPUS_P:-0.5}; do          # one after the other, so s_per_step is a clean timing
-    RUN_DIR=$root/out/p$p python run_a1.py train --seed 0 --steps "${STEPS:-2000}" --opus_p "$p" --ckpt_every 500
+    RUN_DIR=$root/out/p$p python run_a1.py train --seed 0 --steps "${TINY_STEPS:-4000}" --opus_p "$p" --ckpt_every 500
   done
   for p in 0 ${OPUS_P:-0.5}; do
     RUN_DIR=$root/out/p$p python run_a1.py eval --seed 0 --methods ours --no_native --pesq_targets 4.0 \
       --n_rec "${N_REC:-96}" --conditions clean ota ota_opus12
-    rm -rf "$root/out/p$p/ckpt"
   done
   exit 0
+fi
+if [ "$MODE" = opus_full ]; then           # opus_tiny, a go / no-go check, then opus_train, in one job
+  gate=$RUN_DIR/out/opus_gate.json
+  if [ ! -f "$gate" ]; then
+    bash run.sh opus_tiny
+    python - "$RUN_DIR/out" "${OPUS_P:-0.5}" <<'PY'
+import json, os, sys
+d, p = sys.argv[1], sys.argv[2]
+row = lambda q, c: next(r for r in json.load(open(os.path.join(d, f"p{q}", "out", "eval_seed0.json")))["rows"]
+                        if r["target"] == "pesq4" and r["condition"] == c and r["rule"] == "crc@1")
+g = {c: {q: {"success_fa1": row(q, c)["fa1"]["success"], "ber": row(q, c)["ber"]} for q in ("0", p)}
+     for c in ("clean", "ota", "ota_opus12")}
+# no-go if the codec stage costs more than the sampling noise on clean / ota (96 recordings)
+g["go"] = all(g[c][p]["success_fa1"] >= g[c]["0"]["success_fa1"] - 0.10 and g[c][p]["ber"] <= g[c]["0"]["ber"] + 0.03
+              for c in ("clean", "ota"))
+json.dump(g, open(os.path.join(d, "opus_gate.json"), "w"), indent=1)
+print("opus gate", json.dumps(g))
+PY
+    rm -rf "$RUN_DIR"/out/p*/ckpt
+  fi
+  python -c "import json,sys; sys.exit(0 if json.load(open('$gate'))['go'] else 3)" || { echo "opus gate: no-go"; exit 3; }
+  MODE=opus_train
 fi
 if [ "$MODE" = opus_train ]; then          # ours trained with the Opus stage (main-run steps / settings), tag _opus
   for s in ${SEEDS:-"0 1 2"}; do

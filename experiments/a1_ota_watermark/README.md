@@ -97,12 +97,14 @@ Results on `clean` / codec-only channels are reported but are not part of the cr
   every method, with a fixed channel seed so it is paired across evaluations. Results: `eval_opus_seed*.json`
   (ours, standard conditions + `ota_opus12`); the main-run models and the baselines on `ota_opus12` go to
   `base/out/eval_base_opus12_seed*.json` when `A1_BASE_CKPT` is set. `run.sh opus_tiny` is the smoke test
-  (2000 steps with and without the stage, ours on `clean` / `ota` / `ota_opus12` at PESQ 4.0).
+  (4000 steps with and without the stage, ours on `clean` / `ota` / `ota_opus12` at PESQ 4.0, 96 recordings);
+  `run.sh opus_full` runs it, stops (no-go, `out/opus_gate.json`) if the stage costs more than 0.10 message
+  success or 0.03 BER on `clean` / `ota`, and otherwise continues with `opus_train`.
 
 ## Run
 
 `run.sh tiny` (validation, a few minutes) or `run.sh` (5 seeds; `SEEDS` / `STEPS` override; the full run uses
-`STEPS=20000`, about 70 min per seed on one 80 GB GPU). Other modes: `evalonly`, `stress`, `ablate_channel`, `opus_tiny`, `opus_train`
+`STEPS=20000`, about 70 min per seed on one 80 GB GPU). Other modes: `evalonly`, `stress`, `ablate_channel`, `opus_tiny`, `opus_train`, `opus_full`
 (trained models can be read from `A1_CKPT`). Everything resumes
 from `$RUN_DIR/ckpt` and skips finished evaluation blocks. Audio is prepared by `prep_data.py` into `$A1_DATA`
 (default under `$HF_HOME`).
