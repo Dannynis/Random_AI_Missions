@@ -2,6 +2,62 @@
 
 Newest entry first.
 
+## 2026-11-24 (session 2): reports written, H2 settled, B7 launched
+
+### Verdicts settled this session
+- **A1 (over-the-air watermarking): PASS, report written** (`reports/2026-11-24-a1-ota-watermark`). Built the 5-seed
+  simulated table from the corrected seed-0 eval (job supersede) + seeds 1-4 with fixed folds. On both re-recorded
+  channels (`ota`, `ota_mp3`) at both matched-PESQ levels, ours clears the nearest baseline by 0.65-0.90 absolute with
+  non-overlapping seed spreads (criterion was 0.10). Energy-matched eval (seed 0) confirms the win is not a PESQ
+  artifact: AudioSeal fails `ota` (0.05) even when given *more* residual energy than ours. Real loudspeaker/microphone
+  full set (seed 0) already measured: ours 1.00/0.94 at PESQ 4.0/4.3, baselines ~0. Stress set (seed 0 preview): ours
+  survives phone/aac/speed/noise; Opus-12k after a real room breaks it. Ablation (2 seeds): realistic-channel training
+  adds only ~0.01 on in-distribution `ota` — its value must be shown on stress/real (not yet run on the simple-channel
+  model). HYPOTHESES A1 -> done/pass.
+- **A3 (LLM-generated weights): FAIL, report written** (`reports/2026-11-24-a3-llm-weights`). 7B generator 0.668 vs its
+  own fitted scaffold 0.687 (−0.018, CI excludes 0); gated variant silences the generator and lands on the scaffold;
+  model size 0.5B/1.5B/7B all the same; TabPFN v2 0.699 leads. The LLM-written weights add nothing over the fitted
+  linear read-out, as at CPU scale. HYPOTHESES A3 -> report path updated.
+- **B4 (NCA re-seed schedule): H2 settled at 30 seeds** (`reports/2026-11-24-b4-nca-schedule` updated;
+  `experiments/b4_nca_schedule/merge_h2.py`, `results/b4_nca_schedule/h2_merged.json`,
+  `figures/fig4_h2_30seeds.png`). Pooling seeds 0-29: H1 holds (2->8 beats const2 on anytime 30/30, +0.019). H2 does
+  NOT meet the pre-stated 80%-of-seeds bar — 2->8 beats equal-data const5 on only 21/30 (70%) — though the mean gain
+  is real (+0.017, CI [+0.008, +0.027] excludes 0). const5 ties const2. A lower-starting wider ramp 1->8 is the best
+  arm (ties 2->8, beats const2 18/20); 2->12 overshoots and hurts persistence. HYPOTHESES B4 -> done.
+
+### Launched this session
+- **B7 step 1** (`experiments/b7_hard_al`, new): does typicality lose its edge when it is a poor prior? Reuses the A2
+  library and cached DINOv2 features; runs the 7 baseline rules on 3 hard pools — long-tailed CIFAR-100 (rho=100),
+  CIFAR-10 with 40% symmetric and 40% asymmetric label noise — 10 seeds, no policy. Pre-stated: if some rule beats
+  TypiClust by >=0.01 on >=8/10 seeds on any (task, readout), the full B7 policy build is justified; else B7 inherits
+  A2's negative. Tiny validated (job done). Full run submitted (small tier). Tiny preview (not a result): on
+  c100_longtail, Coreset/BADGE/Margin beat TypiClust by ~0.08 — the direction looks right.
+
+### Reviewed, not pursued
+- Newest Random-Ideas daily `2026-11-24-trig-fanchirp-poles` (per-partial de Moivre via ESPRIT poles) is a CPU DSP
+  audio-effects study, ~4.8 s/s of audio on numpy, not GPU-bound — outside the lab's strong-GPU mission. No new
+  GPU-worthy hypothesis from it.
+
+### Handoff for the next session
+- **Running (all within limits): strong = 2** (1288962 A1 ablation finishing seeds 0-2; 1294033 DeAR baseline training,
+  ~14 h); **small = 3** (1293870 A1 stress seeds 0-4; 1294034 A1 energy seeds 0-4; 1294221 B7 full baselines, 8 h).
+- **Check next:**
+  1. **B7** (1294221): read `results/b7_hard_al/.../out/summary.json` -> `headroom` list. If non-empty on a real
+     (non-tiny) run, write `reports/<date>-b7-hard-al` and decide whether to build the noise/imbalance-aware policy
+     (strong-GPU). If empty, record B7 as inheriting A2's negative. Do a quick web check on class-imbalanced /
+     noisy-label AL before investing in the policy.
+  2. **A1**: when stress (1293870) and energy (1294034) finish all 5 seeds, refresh the A1 report's stress and
+     energy tables from seed-0-only to 5-seed (rebuild via the clean-5-seed assembly in this session's notes). When
+     DeAR (1294033) finishes, add it as a baseline row. Run the simple-channel ablation on the stress + real sets to
+     justify the realistic channel.
+  3. **Strong slot** frees when 1288962 ends with nothing queued. Candidates to fill it, highest-value first: B1
+     (Forward-Forward: is the loss the problem, not locality? — needs CIFAR/ViT training, genuinely strong-GPU) or B3
+     (MoE vs dense at GPT-2 scale). A1 32-bit payload needs a link-layer code change (not an env var).
+- **Known problems:** A1 stress/energy are seed-0-only in the current report tables (jobs still running). A1 WavMark
+  decoder is slow (~2.5 h/seed). The A1 report's energy and stress sections are explicitly marked preliminary.
+- **Confidentiality:** grep clean on all pushed files (the only matches are HuggingFace dataset shard names like
+  `train-00000-of-...` matching the node-name regex incidentally — not host names).
+
 ## 2026-11-24, results so far and handoff
 
 ### Verdicts
