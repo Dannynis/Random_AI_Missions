@@ -45,6 +45,13 @@ Newest entry first.
   Ours decodes 6/6 at PESQ 4.0 and 4.3 with CRC and no false alarm on the 6 unmarked twins; AudioSeal 0/6 (bit
   error 0.24-0.29) and WavMark 0/6 (bit error 0.56) at both strengths. Too small for a claim; the 2.8 h full set
   (100 streams per arm) is recording. Results: `results/a1_ota_watermark/1293103/real_pilot.json`.
+- **A1 audibility caveat and a first blind listening check.** Matching is on speech PESQ only, and at PESQ 4.0 ours
+  carries about 11 dB more residual energy than WavMark (SI-SNR 22 vs 33.5 dB; AudioSeal 18 dB), so a PESQ blind spot
+  is possible (the mask is host-shaped, i.e. EQ-like, which PESQ partly compensates). One listener, headphones not
+  controlled, 10 blind sets (5 speech, 5 music), each the same clip with the three marks at PESQ 4.0 in shuffled
+  order, "which sounds best": WavMark 4, ours 2, AudioSeal 1, no difference 3. No method stands out as clearly
+  worse; far too small to separate them. Still needed: ABX against the unmarked original, a second metric (ViSQOL
+  audio mode), and the baselines at matched energy.
 
 ### Handoff for the next session
 - **Running / queued:**
