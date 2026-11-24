@@ -203,25 +203,34 @@ def train(a):
     corp = (wmx.Corpus("speech_train"), wmx.Corpus("music_train"))
     dar = DAR(DEV)
     run = {k: 0.0 for k in ("lw", "le", "ld", "lD", "ber", "snr")}; nrun = 0
-    t1 = time.time()
+    t1 = time.time(); t_data = 0.0
     while step < a.steps:
         step += 1
         rng = np.random.default_rng([a.seed, step, 7])
         g = torch.Generator(device=DEV).manual_seed(a.seed * 10 ** 7 + step)
+        td = time.time()
         A = host_batch(corp, rng, a.batch, SEG) * AMP
+        t_data += time.time() - td
         W = 2 * torch.randint(0, 2, (a.batch, NBITS), generator=g, device=DEV).float() - 1
         aac, adc = dwt(A)
-        aw = enc(aac, W) * a.strength + aac
+        ac = torch.autocast(DEV.type, dtype=torch.bfloat16, enabled=DEV.type == "cuda")
+        with ac:
+            r_ = enc(aac, W).float()
+        aw = r_ * a.strength + aac
         # discriminator step
-        lD = F.binary_cross_entropy_with_logits(dis(aac), torch.ones(a.batch, device=DEV)) + \
-            F.binary_cross_entropy_with_logits(dis(aw.detach()), torch.zeros(a.batch, device=DEV))
+        with ac:
+            d_real, d_fake = dis(aac).float(), dis(aw.detach()).float()
+        lD = F.binary_cross_entropy_with_logits(d_real, torch.ones(a.batch, device=DEV)) + \
+            F.binary_cross_entropy_with_logits(d_fake, torch.zeros(a.batch, device=DEV))
         opt_d.zero_grad(set_to_none=True); lD.backward(); opt_d.step()
         # encoder / decoder step
         att = dar(idwt(aw, adc), g)
-        Wp = dec(dwt(att)[0])
+        with ac:
+            Wp = dec(dwt(att)[0]).float()
+            d_gen = dis(aw).float()
         lw = F.mse_loss(Wp, W)
         le = F.mse_loss(aw, aac)
-        ld = F.binary_cross_entropy_with_logits(dis(aw), torch.ones(a.batch, device=DEV))
+        ld = F.binary_cross_entropy_with_logits(d_gen, torch.ones(a.batch, device=DEV))
         loss = a.le * le + a.ld * ld + a.lw * lw
         opt.zero_grad(set_to_none=True); loss.backward(); opt.step()
         with torch.no_grad():
@@ -232,9 +241,10 @@ def train(a):
             run[k] += v.item()
         nrun += 1
         if step % 100 == 0 or step == a.steps:
-            hist.append({"step": step, **{k: v / nrun for k, v in run.items()}, "s_per_step": (time.time() - t1) / nrun})
+            hist.append({"step": step, **{k: v / nrun for k, v in run.items()}, "s_per_step": (time.time() - t1) / nrun,
+                         "data_s": t_data / nrun})
             say(f"dear seed {a.seed} step {step}: " + ", ".join(f"{k}={v:.4g}" for k, v in hist[-1].items() if k != "step"))
-            run = {k: 0.0 for k in run}; nrun = 0; t1 = time.time()
+            run = {k: 0.0 for k in run}; nrun = 0; t1 = time.time(); t_data = 0.0
         if step % a.ckpt_every == 0 or step == a.steps:
             save_atomic({"enc": enc.state_dict(), "dec": dec.state_dict(), "dis": dis.state_dict(), "opt": opt.state_dict(),
                          "opt_d": opt_d.state_dict(), "step": step, "hist": hist, "args": vars(a)}, path)
