@@ -5,7 +5,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 
 ## Tier A: paper candidates
 
-### A1. Over-the-air audio watermarking against published neural watermarks  (`running`: `experiments/a1_ota_watermark`)
+### A1. Over-the-air audio watermarking against published neural watermarks  (`done`, pass: `reports/2026-11-24-a1-ota-watermark`; stress / real-set seeds 1-4 / DeAR still extending)
 - **Origin:** Random-Ideas PRs #19, #33, #45, #57. Learned code + soft-Viterbi convolutional code + blind sync + CRC took
   simulated over-the-air message success from 0.025 to ~0.8 (16 bits in 8 s), on small models and 2-3 seeds.
 - **Why scale matters:** needs a full-size encoder/decoder trained on real speech and music (LibriSpeech, FMA, MUSDB)
