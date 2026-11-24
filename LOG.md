@@ -38,6 +38,13 @@ Newest entry first.
 - **A1, seeds 0-2 with the corrected folds** (seed 0 from the eval-only rerun; WavMark only 1 seed so far), message
   success at <= 1 % false alarm on `ota` / `ota_mp3`: ours 0.998 / 0.993 at PESQ 4.0 and 0.981 / 0.976 at PESQ 4.3;
   AudioSeal 0.037 / 0.038 and 0.052 / 0.032; WavMark 0.313 / 0.243 and 0.103 / 0.083. Seeds 3-4 are training.
+  (The seeds 0-2 job is marked failed only because its shell script was updated under it after the last step; all
+  three seeds' training and evaluation files are complete.)
+- **A1 real loudspeaker / microphone pilot** (laptop built-in speakers and microphone array, one room, 6 host streams
+  per arm, 10 min): every item aligned (correlation median 0.41, min 0.26; recording level -49 dB RMS, no clipping).
+  Ours decodes 6/6 at PESQ 4.0 and 4.3 with CRC and no false alarm on the 6 unmarked twins; AudioSeal 0/6 (bit
+  error 0.24-0.29) and WavMark 0/6 (bit error 0.56) at both strengths. Too small for a claim; the 2.8 h full set
+  (100 streams per arm) is recording. Results: `results/a1_ota_watermark/1293103/real_pilot.json`.
 
 ### Handoff for the next session
 - **Running / queued:**
@@ -49,9 +56,9 @@ Newest entry first.
     finished; results not merged yet).
   - A1 real loudspeaker / microphone check (`real_ota.py`, `real_play.py`): playlists built for a 10 min pilot
     (6 streams per arm) and a 2.8 h full set (100 streams per arm; ours seed 0, AudioSeal, WavMark at PESQ 4.0 and 4.3,
-    plus unmarked twins, shuffled). Playback on a laptop's built-in speakers and microphone array has not run yet:
-    the recording machine's audio stack stopped responding during setup and needs a restart. Then: play the pilot,
-    `run.sh real_score` with `REAL_TAG=pilot`, and if alignment and decoding look sane, the full set (`REAL_TAG=full`).
+    plus unmarked twins, shuffled). Playback on a laptop's built-in speakers and microphone array:
+    pilot done (below); the full set is recording. Then
+    score it with `run.sh real_score` and `REAL_TAG=full`.
 - **Check next:**
   1. A1: use the corrected seed-0 rerun and seeds 1-4 (fixed folds; per-recording scores saved). Build the table with
      `python experiments/a1_ota_watermark/make_figures.py results/a1_ota_watermark <out>`; apply the pre-stated
