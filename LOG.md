@@ -11,6 +11,11 @@ Newest entry first.
 - **B4 (NCA re-seed schedule): rising 2 -> 8 beats constant 2** on anytime accuracy on 10/10 seeds (+0.018); whether it
   is the timing or just the amount of fresh data is open (6/10 against constant 5). Report:
   `reports/2026-11-24-b4-nca-schedule`. Follow-up with 20 more seeds is running.
+- **A3 (LLM-generated weights with a real LLM): fail.** Mean accuracy over 23 held-out OpenML tables, k = 1..20:
+  7B generator 0.668 +- 0.002 (3 seeds) against its own fitted scaffold 0.687; 1.5B and 0.5B generators 0.673 against
+  0.686. The gated variant only ties the scaffold (0.687). References: TabPFN v2 0.699, untrained ridge scaffold 0.685,
+  logistic regression 0.681, 7B in-context prompting 0.589. The written weights add nothing over the linear read-out,
+  as in the CPU-scale runs. Report still to be written.
 
 ### Interim (not verdicts)
 - **A1, seed 0 of 5** (300 recordings of 8 s, 16-bit messages, random start, message success at <= 1 % false alarm):
@@ -30,10 +35,9 @@ Newest entry first.
   first evaluation, whose threshold folds were split by source type (realised false alarm 7-11 %, so they are if
   anything optimistic for AudioSeal); a corrected rerun of seed 0 is queued. The test channels come from the same
   simulator family as training, so the stress set of unseen channels and real recordings are needed before any claim.
-- **A3, partial** (mean accuracy over 23 held-out OpenML tables and k = 1..20): TabPFN v2 0.699, untrained ridge
-  scaffold 0.685, logistic regression 0.681, 0.5B generator 0.673 (3 seeds, its scaffold 0.686), 7B generator 0.665
-  (seed 0, its scaffold 0.686), 7B in-context prompting 0.589. So far the generator is below its own scaffold at both
-  sizes, as in the CPU-scale runs. Remaining arms are running.
+- **A1, seeds 0-2 with the corrected folds** (seed 0 from the eval-only rerun; WavMark only 1 seed so far), message
+  success at <= 1 % false alarm on `ota` / `ota_mp3`: ours 0.998 / 0.993 at PESQ 4.0 and 0.981 / 0.976 at PESQ 4.3;
+  AudioSeal 0.037 / 0.038 and 0.052 / 0.032; WavMark 0.313 / 0.243 and 0.103 / 0.083. Seeds 3-4 are training.
 
 ### Handoff for the next session
 - **Running / queued:**
@@ -41,14 +45,18 @@ Newest entry first.
     training-channel ablation (3 seeds, ours only), all on one 80 GB GPU in sequence.
   - A1 corrected re-evaluation of seed 0 on an 11 GB GPU. The stress-set evaluation of all 5 seeds is NOT queued
     (small-GPU job cap); submit it once the seed 3-4 job has finished and a small slot is free (`run.sh stress`).
-  - A3 remaining arms (7B seeds 1-2, 1.5B x 3, random-init control) on one 80 GB GPU.
-  - B4 follow-up: seeds 10-29 of constant 2, constant 5, 2 -> 8 and the ramp end-points 2 -> 12, 1 -> 8 (two jobs).
+  - B4 follow-up: seeds 10-29 of constant 2, constant 5, 2 -> 8 and the ramp end-points 2 -> 12, 1 -> 8 (two jobs,
+    finished; results not merged yet).
+  - A1 real loudspeaker / microphone check (`real_ota.py`, `real_play.py`): playlists built for a 10 min pilot
+    (6 streams per arm) and a 2.8 h full set (100 streams per arm; ours seed 0, AudioSeal, WavMark at PESQ 4.0 and 4.3,
+    plus unmarked twins, shuffled). Playback on a laptop's built-in speakers and microphone array has not run yet:
+    the recording machine's audio stack stopped responding during setup and needs a restart. Then: play the pilot,
+    `run.sh real_score` with `REAL_TAG=pilot`, and if alignment and decoding look sane, the full set (`REAL_TAG=full`).
 - **Check next:**
   1. A1: use the corrected seed-0 rerun and seeds 1-4 (fixed folds; per-recording scores saved). Build the table with
      `python experiments/a1_ota_watermark/make_figures.py results/a1_ota_watermark <out>`; apply the pre-stated
      criterion on `ota` / `ota_mp3`; read the stress set and ablation; write `reports/<date>-a1-ota-watermark`.
-  2. A3: when `summary.json` shows a verdict, write the report. If the job stops on its time limit, it resumes with
-     the `--continue` option described in the experiment README.
+  2. A3: write the report from `results/a3_llm_weights/1288777/summary.json` (verdict above).
   3. B4: merge seeds 0-29 for the H2 test (constant 5 vs 2 -> 8) and the ramp end-points.
 - **Known problems:**
   - A1's WavMark decoder is slow (about 0.65 s per 8 s recording); each seed's evaluation takes about 2.5 h.

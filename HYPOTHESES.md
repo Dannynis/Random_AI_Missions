@@ -28,7 +28,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   10 seeds; budgets 10 to 1000 labels.
 - **Pass:** policy trained on dataset A beats the best hand-made rule on datasets B and C in label-efficiency AUC.
 
-### A3. LLM-generated network weights with a real LLM  (`running`: `experiments/a3_llm_weights`)
+### A3. LLM-generated network weights with a real LLM  (`done`, fail: `experiments/a3_llm_weights`; 7B generator 0.668 vs its scaffold 0.687)
 - **Origin:** PRs #14, #34 and the `llm_weights` project. All runs used a CPU stand-in for Qwen; a fitted ridge
   scaffold matched logistic regression and the generator hurt.
 - **Why scale matters:** the actual hypothesis (an LLM conditioned on a dataset description emits useful weights)

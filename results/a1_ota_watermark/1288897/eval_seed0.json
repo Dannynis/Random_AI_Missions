@@ -2275,6 +2275,356 @@
     "false_alarm": 0.0
    },
    "sec": 393.64915657043457
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 195.30326008796692
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.00020833333333333335,
+   "raw_success": 0.9966666666666667,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.9933333333333333,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0033333333333333335,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0033333333333333335,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 198.5188446044922
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.005208333333333333,
+   "raw_success": 0.97,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.94,
+   "auc": 0.9966666666666667,
+   "fa1": {
+    "success": 0.97,
+    "wrong": 0.023333333333333334,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.97,
+    "wrong": 0.023333333333333334,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0
+   },
+   "sec": 200.92540287971497
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.11791666666666667,
+   "raw_success": 0.5833333333333334,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.5733333333333334,
+   "success_music": 0.5933333333333334,
+   "auc": 0.9116666666666666,
+   "fa1": {
+    "success": 0.5833333333333334,
+    "wrong": 0.24,
+    "none": 0.17666666666666667,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.5833333333333334,
+    "wrong": 0.24,
+    "none": 0.17666666666666667,
+    "false_alarm": 0.0
+   },
+   "sec": 195.17610144615173
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.42770833333333336,
+   "raw_success": 0.056666666666666664,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.0,
+   "success_music": 0.11333333333333333,
+   "auc": 0.6033333333333334,
+   "fa1": {
+    "success": 0.056666666666666664,
+    "wrong": 0.15,
+    "none": 0.7933333333333333,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.056666666666666664,
+    "wrong": 0.15,
+    "none": 0.7933333333333333,
+    "false_alarm": 0.0
+   },
+   "sec": 195.15286874771118
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.2658333333333333,
+   "raw_success": 0.3233333333333333,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.2733333333333333,
+   "success_music": 0.37333333333333335,
+   "auc": 0.765,
+   "fa1": {
+    "success": 0.32333333333333336,
+    "wrong": 0.20666666666666667,
+    "none": 0.47000000000000003,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.32333333333333336,
+    "wrong": 0.20666666666666667,
+    "none": 0.47000000000000003,
+    "false_alarm": 0.0
+   },
+   "sec": 195.40058493614197
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.31604166666666667,
+   "raw_success": 0.20666666666666667,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.19333333333333333,
+   "success_music": 0.22,
+   "auc": 0.71,
+   "fa1": {
+    "success": 0.20666666666666667,
+    "wrong": 0.21333333333333332,
+    "none": 0.5800000000000001,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.20666666666666667,
+    "wrong": 0.21333333333333332,
+    "none": 0.5800000000000001,
+    "false_alarm": 0.0
+   },
+   "sec": 198.5768427848816
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 195.47371125221252
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.009583333333333333,
+   "raw_success": 0.9366666666666666,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.8733333333333333,
+   "auc": 0.9966666666666667,
+   "fa1": {
+    "success": 0.9366666666666666,
+    "wrong": 0.056666666666666664,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.9366666666666666,
+    "wrong": 0.056666666666666664,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0
+   },
+   "sec": 198.57628774642944
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.03729166666666667,
+   "raw_success": 0.8666666666666667,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.7333333333333333,
+   "auc": 0.97,
+   "fa1": {
+    "success": 0.8666666666666667,
+    "wrong": 0.07333333333333333,
+    "none": 0.06,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.8666666666666667,
+    "wrong": 0.07333333333333333,
+    "none": 0.06,
+    "false_alarm": 0.0
+   },
+   "sec": 200.9854576587677
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.2604166666666667,
+   "raw_success": 0.31,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.30666666666666664,
+   "success_music": 0.31333333333333335,
+   "auc": 0.77,
+   "fa1": {
+    "success": 0.31,
+    "wrong": 0.23,
+    "none": 0.45999999999999996,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.31,
+    "wrong": 0.23,
+    "none": 0.45999999999999996,
+    "false_alarm": 0.0
+   },
+   "sec": 195.32546520233154
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.47729166666666667,
+   "raw_success": 0.01,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.0,
+   "success_music": 0.02,
+   "auc": 0.5316666666666666,
+   "fa1": {
+    "success": 0.01,
+    "wrong": 0.05333333333333334,
+    "none": 0.9366666666666666,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.01,
+    "wrong": 0.05333333333333334,
+    "none": 0.9366666666666666,
+    "false_alarm": 0.0
+   },
+   "sec": 194.88670825958252
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.38375,
+   "raw_success": 0.14666666666666667,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.1,
+   "success_music": 0.19333333333333333,
+   "auc": 0.6316666666666667,
+   "fa1": {
+    "success": 0.14666666666666667,
+    "wrong": 0.11666666666666667,
+    "none": 0.7366666666666667,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.14666666666666667,
+    "wrong": 0.11666666666666667,
+    "none": 0.7366666666666667,
+    "false_alarm": 0.0
+   },
+   "sec": 195.56671237945557
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.433125,
+   "raw_success": 0.05333333333333334,
+   "raw_false_alarm": 0.0,
+   "success_speech": 0.04,
+   "success_music": 0.06666666666666667,
+   "auc": 0.5816666666666667,
+   "fa1": {
+    "success": 0.05333333333333333,
+    "wrong": 0.11,
+    "none": 0.8366666666666667,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.05333333333333333,
+    "wrong": 0.11,
+    "none": 0.8366666666666667,
+    "false_alarm": 0.0
+   },
+   "sec": 198.75020575523376
   }
  ],
  "audibility": [
@@ -2354,6 +2704,28 @@
    "si_snr_speech": 35.7545280456543,
    "si_snr_music": 34.17574691772461,
    "lsd_db": 4.748772144317627
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4",
+   "gain_db": 1.494140625,
+   "gain_at_bound": false,
+   "pesq_speech": 4.074631509780883,
+   "si_snr_db": 33.47091293334961,
+   "si_snr_speech": 34.260345458984375,
+   "si_snr_music": 32.681488037109375,
+   "lsd_db": 4.826683044433594
+  },
+  {
+   "method": "wavmark",
+   "target": "pesq4.3",
+   "gain_db": -2.744140625,
+   "gain_at_bound": false,
+   "pesq_speech": 4.344658792813619,
+   "si_snr_db": 37.70939636230469,
+   "si_snr_speech": 38.49872970581055,
+   "si_snr_music": 36.92005920410156,
+   "lsd_db": 3.655371904373169
   }
  ],
  "done": [
@@ -2363,7 +2735,10 @@
   "audioseal/native",
   "audioseal/pesq4",
   "audioseal/pesq4.3",
-  "wavmark/native"
+  "wavmark/native",
+  "wavmark/pesq4",
+  "wavmark/pesq4.3"
  ],
- "cal_nll_bits": 0.11068903137210945
+ "cal_nll_bits": 0.11068903137210945,
+ "complete": true
 }
