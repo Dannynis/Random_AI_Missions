@@ -71,7 +71,7 @@ import wmx  # noqa: E402
 RUN = os.environ.get("RUN_DIR", os.path.join(HERE, "_run"))
 CK, OUT = os.path.join(RUN, "ckpt"), os.path.join(RUN, "out")
 DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-torch.backends.cuda.matmul.allow_tf32 = True; torch.backends.cudnn.allow_tf32 = True
+torch.backends.cuda.matmul.allow_tf32 = True; torch.backends.cudnn.allow_tf32 = True; torch.backends.cudnn.benchmark = True
 T0 = time.time()
 
 SEG = 16000              # samples per segment (1 s)
@@ -213,7 +213,7 @@ def train(a):
         t_data += time.time() - td
         W = 2 * torch.randint(0, 2, (a.batch, NBITS), generator=g, device=DEV).float() - 1
         aac, adc = dwt(A)
-        ac = torch.autocast(DEV.type, dtype=torch.bfloat16, enabled=DEV.type == "cuda")
+        ac = torch.autocast(DEV.type, dtype=torch.bfloat16, enabled=a.bf16 and DEV.type == "cuda")
         with ac:
             r_ = enc(aac, W).float()
         aw = r_ * a.strength + aac
@@ -349,6 +349,7 @@ def main():
     ap.add_argument("--ld", type=float, default=0.01)
     ap.add_argument("--strength", type=float, default=1.0)
     ap.add_argument("--ckpt_every", type=int, default=1000)
+    ap.add_argument("--bf16", action="store_true", help="bf16 autocast (slower than fp32 for these 1-D convs on our GPUs)")
     a = ap.parse_args()
     train(a)
 
