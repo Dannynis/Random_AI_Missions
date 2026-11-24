@@ -28,6 +28,7 @@ import run_a1 as R
 import wmx
 
 GAP_S, LEAD_S = 0.5, 3.0
+DEFAULT_METHODS = ["ours", "audioseal", "wavmark"]
 
 
 def real_dir(tag):
@@ -56,13 +57,19 @@ def make(a):
     host, src, g0, phi0, t0, info = R.make_streams(a.stream_seed, a.n)
     chost, _, cg0, cphi, _, cinfo = R.make_streams(10_000 + a.seed, 48)
     items, gains = [("unmarked", "-", host.clone())], []
-    for m in load_methods(a.methods, a.seed, need_cal=False):
+    # targets per method: --items "ours:pesq4 audioseal:snr22 ..." or every method x (pesq targets + snr targets)
+    default_t = [f"pesq{t:g}" for t in a.pesq_targets] + [f"snr{t:g}" for t in a.snr_targets]
+    spec = {}
+    for s in (a.items or []):
+        mm, tt = s.split(":"); spec.setdefault(mm, []).append(tt)
+    names = list(spec) if spec else a.methods
+    for m in load_methods(names, a.seed, need_cal=False):
         r = m.residual(host, g0, info, phi0)
         rc = m.residual(chost, cg0, cinfo, cphi)
-        for t in a.pesq_targets:
-            gdb = R.calibrate_alpha(rc, chost, cg0, t, None, len(chost) // 2)
-            gains.append({"method": m.name, "target": f"pesq{t:g}", "gain_db": gdb})
-            items.append((m.name, f"pesq{t:g}", host + r * 10 ** (gdb / 20)))
+        for t in spec.get(m.name, default_t):
+            gdb = R.target_gain(t, rc, chost, cg0, None, len(chost) // 2)
+            gains.append({"method": m.name, "target": t, "gain_db": gdb})
+            items.append((m.name, t, host + r * 10 ** (gdb / 20)))
             R.say("gain", m.name, t, round(gdb, 2))
     L = host.shape[1]
     order = [(k, b) for k in range(len(items)) for b in range(a.n)]
@@ -139,7 +146,17 @@ def score(a):
     n = R.REC_S * wmx.SR
     B = man["n"]
 
-    def windows(method, target):
+    def post_fn(y, p):
+        """Optional processing of the recorded windows after the room (codec or telephone band), before decoding."""
+        if p is None:
+            return y
+        if p == "phone":
+            f = torch.fft.rfftfreq(y.shape[-1], 1 / wmx.SR)[None]
+            return wmx.mulaw(wmx.freq_gain(y, ((f >= 300) & (f <= 3400)).float().expand(len(y), -1)))
+        kind, br = p.split("_")
+        return wmx.codec(y, kind, br)[0].cpu()
+
+    def windows(method, target, p):
         y = np.zeros((B, n), np.float32); ok = np.zeros(B, bool)
         for it, s in zip(items, starts):
             if it["method"] == method and it["target"] == target and s >= 0:
@@ -147,37 +164,42 @@ def score(a):
                 if len(w) == n:
                     y[b] = w; ok[b] = True
         y = wmx.normalize(torch.from_numpy(y), 0.0)        # blind level normalisation of each window
-        return y, ok
+        return post_fn(y, p).clamp(-1, 1), ok
 
     truth = R.truth_for(g0, phi0, t0, np.zeros(B), np.ones(B))
-    yn, okn = windows("unmarked", "-")
-    for m in load_methods(a.methods, man["seed"], need_cal=True):
-        dn = m.decode(yn, truth)
-        for tgt in sorted({g["target"] for g in man["gains"] if g["method"] == m.name}):
-            yp, okp = windows(m.name, tgt)
-            t1 = time.time()
-            dp = m.decode(yp, truth)
-            for rule in dp:
-                ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
-                correct = (ip[:, :16] == info).all(1)
-                use = okp & okn
-                row = {"method": m.name, "target": tgt, "condition": "real", "rule": rule, "n": int(use.sum()),
-                       "ber": float((ip[use, :16] != info[use]).mean()),
-                       "raw_success": float((correct & op)[use].mean()), "raw_false_alarm": float(on[use].mean()),
-                       "success_speech": float((correct & op)[use & (src == 0)].mean()),
-                       "success_music": float((correct & op)[use & (src == 1)].mean()),
-                       "auc": R.auc(np.where(op, sp_, -1e9)[use], np.where(on, sn, -1e9)[use]),
-                       "fa1": R.two_fold(correct[use], op[use], sp_[use], on[use], sn[use], 0.01),
-                       "fa0": R.two_fold(correct[use], op[use], sp_[use], on[use], sn[use], 0.0),
-                       "per_rec": {"correct": correct.astype(int).tolist(), "out_pos": op.astype(int).tolist(),
-                                   "score_pos": np.round(np.nan_to_num(sp_, neginf=-1e9), 4).tolist(),
-                                   "out_neg": on.astype(int).tolist(),
-                                   "score_neg": np.round(np.nan_to_num(sn, neginf=-1e9), 4).tolist()},
-                       "sec": time.time() - t1}
-                res["rows"].append(row)
-                R.say(f"{m.name}/{tgt} {rule}: raw={row['raw_success']:.3f} fa1={row['fa1']['success']:.3f} "
-                      f"FA={row['raw_false_alarm']:.3f} ber={row['ber']:.3f} n={row['n']}")
-    R.dump(res, os.path.join(R.OUT, f"real_{a.tag}.json"))
+    names = list(dict.fromkeys(g["method"] for g in man["gains"]))
+    names = [m for m in names if m in a.methods] if a.methods != DEFAULT_METHODS else names
+    for m in load_methods(names, man["seed"], need_cal=True):
+        for p in ([] if a.skip_plain else [None]) + list(a.post):
+            cond = "real" if p is None else f"real+{p}"
+            yn, okn = windows("unmarked", "-", p)
+            dn = m.decode(yn, truth)
+            for tgt in sorted({g["target"] for g in man["gains"] if g["method"] == m.name}):
+                yp, okp = windows(m.name, tgt, p)
+                t1 = time.time()
+                dp = m.decode(yp, truth)
+                for rule in dp:
+                    ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
+                    correct = (ip[:, :16] == info).all(1)
+                    use = okp & okn
+                    row = {"method": m.name, "target": tgt, "condition": cond, "rule": rule, "n": int(use.sum()),
+                           "ber": float((ip[use, :16] != info[use]).mean()),
+                           "raw_success": float((correct & op)[use].mean()), "raw_false_alarm": float(on[use].mean()),
+                           "success_speech": float((correct & op)[use & (src == 0)].mean()),
+                           "success_music": float((correct & op)[use & (src == 1)].mean()),
+                           "auc": R.auc(np.where(op, sp_, -1e9)[use], np.where(on, sn, -1e9)[use]),
+                           "fa1": R.two_fold(correct[use], op[use], sp_[use], on[use], sn[use], 0.01),
+                           "fa0": R.two_fold(correct[use], op[use], sp_[use], on[use], sn[use], 0.0),
+                           "per_rec": {"correct": correct.astype(int).tolist(), "out_pos": op.astype(int).tolist(),
+                                       "score_pos": np.round(np.nan_to_num(sp_, neginf=-1e9), 4).tolist(),
+                                       "out_neg": on.astype(int).tolist(),
+                                       "score_neg": np.round(np.nan_to_num(sn, neginf=-1e9), 4).tolist()},
+                           "sec": time.time() - t1}
+                    res["rows"].append(row)
+                    R.say(f"{m.name}/{tgt} {cond} {rule}: raw={row['raw_success']:.3f} fa1={row['fa1']['success']:.3f} "
+                          f"FA={row['raw_false_alarm']:.3f} ber={row['ber']:.3f} n={row['n']}")
+            R.dump(res, os.path.join(R.OUT, f"real_{a.tag}{a.out_suffix}.json"))
+    R.dump(res, os.path.join(R.OUT, f"real_{a.tag}{a.out_suffix}.json"))
 
 
 def main():
@@ -187,8 +209,14 @@ def main():
     ap.add_argument("--n", type=int, default=6, help="host streams per (method, target) and unmarked")
     ap.add_argument("--seed", type=int, default=0, help="trained model seed")
     ap.add_argument("--stream_seed", type=int, default=30_000)
-    ap.add_argument("--methods", nargs="*", default=["ours", "audioseal", "wavmark"])
+    ap.add_argument("--methods", nargs="*", default=DEFAULT_METHODS)
+    ap.add_argument("--out_suffix", default="", help="suffix for the metrics file, e.g. _post")
     ap.add_argument("--pesq_targets", type=float, nargs="*", default=[4.0, 4.3])
+    ap.add_argument("--snr_targets", type=float, nargs="*", default=[])
+    ap.add_argument("--items", nargs="*", default=None, help='per-method targets, e.g. "ours:pesq4 wavmark:snr22"')
+    ap.add_argument("--post", nargs="*", default=[],
+                    help="also score the recording after a codec, e.g. mp3_64k opus_12k aac_32k phone")
+    ap.add_argument("--skip_plain", action="store_true", help="only the --post conditions")
     ap.add_argument("--recording", default="recording.wav")
     a = ap.parse_args()
     make(a) if a.cmd == "make" else score(a)

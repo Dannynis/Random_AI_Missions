@@ -29,7 +29,13 @@ if [ "$MODE" = stress ]; then             # evaluation only, unseen channels; mo
   exit 0
 fi
 if [ "$MODE" = real_make ] || [ "$MODE" = real_score ]; then   # real loudspeaker/microphone check (real_ota.py)
-  python real_ota.py "${MODE#real_}" --tag "${REAL_TAG:-pilot}" --n "${REAL_N:-6}" --seed "${REAL_SEED:-0}" --stream_seed "${REAL_STREAM_SEED:-30000}"
+  python real_ota.py "${MODE#real_}" --tag "${REAL_TAG:-pilot}" --n "${REAL_N:-6}" --seed "${REAL_SEED:-0}" --stream_seed "${REAL_STREAM_SEED:-30000}" ${REAL_ARGS:-}
+  exit 0
+fi
+if [ "$MODE" = energy ]; then             # energy-matched comparison: every method at the same host-to-watermark SNR
+  for s in $SEEDS; do
+    python run_a1.py eval --seed "$s" --tag _energy --no_native --pesq_targets --snr_targets ${SNR_TARGETS:-22 26}       --methods ${METHODS:-ours audioseal wavmark} --conditions ${CONDS:-clean ota ota_mp3 ota_noisy}
+  done
   exit 0
 fi
 if [ "$MODE" = ablate_channel ]; then      # ours only, trained on the original simple channel

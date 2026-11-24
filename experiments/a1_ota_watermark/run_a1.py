@@ -379,6 +379,23 @@ def calibrate_alpha(r, host, g0, target, pool, nsp):
     return (lo + hi) / 2
 
 
+def calibrate_snr(r, host, g0, target):
+    """Gain (dB) on residual r so that the mean host-to-watermark SNR (dB) over the first REC_S s of the marked span
+    of all calibration streams (speech and music) equals ``target`` (energy-matched comparison)."""
+    n = REC_S * wmx.SR
+    snr = [10 * np.log10(float((host[b, g0[b]:g0[b] + n] ** 2).sum()) / (float((r[b, g0[b]:g0[b] + n] ** 2).sum()) + 1e-12))
+           for b in range(len(host))]
+    return float(np.mean(snr) - target)
+
+
+def target_gain(tname, rc, chost, cg0, pool, nsp):
+    if tname.startswith("pesq"):
+        return calibrate_alpha(rc, chost, cg0, float(tname[4:]), pool, nsp)
+    if tname.startswith("snr"):
+        return calibrate_snr(rc, chost, cg0, float(tname[3:]))
+    raise ValueError(tname)
+
+
 def evaluate(a):
     global TINY
     TINY = a.tiny
@@ -415,13 +432,14 @@ def evaluate(a):
     for m in methods:
         r = m.residual(host, g0, info, phi0)
         rc = m.residual(chost, cg0, cinfo, cphi)
-        targets = [("native", 0.0)] + [(f"pesq{t:g}", None) for t in a.pesq_targets]
+        targets = ([("native", 0.0)] if not a.no_native else []) + [(f"pesq{t:g}", None) for t in a.pesq_targets] \
+            + [(f"snr{t:g}", None) for t in a.snr_targets]
         for tname, gdb in targets:
             key = f"{m.name}/{tname}"
             if key in res["done"]:
                 continue
             if gdb is None:
-                gdb = calibrate_alpha(rc, chost, cg0, float(tname[4:]), pool, nsp_cal)
+                gdb = target_gain(tname, rc, chost, cg0, pool, nsp_cal)
             xm = host + r * 10 ** (gdb / 20)
             ref = np.stack([host[b, g0[b]:g0[b] + n].numpy() for b in range(n_rec)])
             deg = np.stack([xm[b, g0[b]:g0[b] + n].numpy() for b in range(n_rec)])
@@ -516,6 +534,9 @@ def main():
     ap.add_argument("--methods", nargs="*", default=["ours", "audioseal", "wavmark"])
     ap.add_argument("--conditions", nargs="*", default=None)
     ap.add_argument("--pesq_targets", type=float, nargs="*", default=[4.0, 4.3])
+    ap.add_argument("--snr_targets", type=float, nargs="*", default=[],
+                    help="energy-matched targets: host-to-watermark SNR in dB over speech and music")
+    ap.add_argument("--no_native", action="store_true")
     ap.add_argument("--tiny", action="store_true")
     ap.add_argument("--train_channel", default="full", choices=["full", "legacy"])
     ap.add_argument("--tag", default="", help="suffix for the eval output file, e.g. _stress")
