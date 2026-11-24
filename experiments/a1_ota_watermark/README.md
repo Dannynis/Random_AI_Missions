@@ -18,7 +18,7 @@ re-recorded audio than the public AudioSeal and WavMark checkpoints **at the sam
 |---|---|---|
 | Hosts | LibriSpeech test-clean + ESC-50, 2 s crops | LibriSpeech train-clean-100 (15 h) + Free Music Archive (8.8 h) for training; LibriSpeech test-clean + held-out FMA shard for test |
 | Model | 16-channel 3-layer encoder, 32-channel decoder | 64-channel 6-block dilated residual encoder with payload injected at every block; 4-stage residual decoder (64-128 channels) |
-| Training | 3000 steps, batch 16, isolated 2 s clips | 40k steps, batch 32 three-chunk streams, decoder trained on windows with timing jitter at real chunk boundaries |
+| Training | 3000 steps, batch 16, isolated 2 s clips | 20k steps, batch 32 three-chunk streams, decoder trained on windows with timing jitter at real chunk boundaries |
 | Channel | exponential-noise RIRs, band-pass, AWGN, mu-law | image-source room impulse responses (3000 train rooms, 400 disjoint test rooms, 0.3-4 m, RT60 0.15-1.0 s), loudspeaker response + saturation, microphone response, real background sounds (ESC-50, disjoint folds), white / pink sensor noise, clock drift, plus the original channel |
 | Baselines | classical spread spectrum | AudioSeal (16-bit) and WavMark (16-bit payload + 16 pattern bits), public checkpoints |
 | Seeds | 2-3 | 5 model seeds, each on its own test streams; baselines run on the same streams (paired) |
@@ -68,8 +68,28 @@ Results on `clean` / codec-only channels are reported but are not part of the cr
 - The baselines were trained for 1 s localisation (AudioSeal) and segment-wise decoding (WavMark), not for
   8 s messages; both are used through their own public decoders with no retraining.
 
+## Protocol notes added during validation (2026-11-24)
+
+- **AudioSeal alignment.** The public 16-bit AudioSeal decoder recovers the message only when the recording is aligned
+  to a 320-sample grid (shifts of 10-310 samples give chance-level bits, while detection stays shift-tolerant).
+  Recordings here start at random points, so the AudioSeal receiver gets a grid search added for fairness: every
+  4-sample shift over one period scored by mean |message logit| on the whole recording, then a 1-sample refinement.
+  WavMark's own pattern search is already shift-robust and is used unchanged.
+- **Threshold folds.** Thresholds at <= 1 % false alarm are set on one half of the unmarked twins and applied to the
+  other; the halves are interleaved (even / odd recordings). The first seed-0 evaluation used first / second halves,
+  which put speech in one fold and music in the other and let AudioSeal's realised false-alarm rate reach 7-11 %.
+  That evaluation is superseded by an eval-only rerun with the fixed folds; per-recording scores are now saved so
+  operating points can be recomputed.
+- **Stress set (reported separately, not part of the criterion).** Channels never seen in training:
+  `ota_noisy` (background at 0-5 dB SNR), `speed_1pct` (1 % playback speed error; training saw <= 0.2 %),
+  `phone` (300-3400 Hz band + mu-law), `opus_12k`, `aac_32k`. Written to `eval_stress_seed*.json`.
+- **Training-channel ablation.** The same model trained on the original simple channel only
+  (`run.sh ablate_channel`, 3 seeds) measures what the realistic channel adds.
+
 ## Run
 
-`run.sh tiny` (validation, a few minutes) or `run.sh` (5 seeds; `SEEDS` / `STEPS` override). Everything resumes
+`run.sh tiny` (validation, a few minutes) or `run.sh` (5 seeds; `SEEDS` / `STEPS` override; the full run uses
+`STEPS=20000`, about 70 min per seed on one 80 GB GPU). Other modes: `evalonly`, `stress`, `ablate_channel`
+(trained models can be read from `A1_CKPT`). Everything resumes
 from `$RUN_DIR/ckpt` and skips finished evaluation blocks. Audio is prepared by `prep_data.py` into `$A1_DATA`
 (default under `$HF_HOME`).
