@@ -28,6 +28,10 @@ if [ "$MODE" = stress ]; then             # evaluation only, unseen channels; mo
   python run_a1.py summary
   exit 0
 fi
+if [ "$MODE" = real_make ] || [ "$MODE" = real_score ]; then   # real loudspeaker/microphone check (real_ota.py)
+  python real_ota.py "${MODE#real_}" --tag "${REAL_TAG:-pilot}" --n "${REAL_N:-6}" --seed "${REAL_SEED:-0}"
+  exit 0
+fi
 if [ "$MODE" = ablate_channel ]; then      # ours only, trained on the original simple channel
   for s in $SEEDS; do
     python run_a1.py train --seed "$s" --steps "$STEPS" --train_channel legacy
