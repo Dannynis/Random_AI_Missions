@@ -24,9 +24,10 @@ What the paper does not specify and had to be chosen here:
   the benchmark message are carried directly, no channel code or CRC.
 - segment length 1 s (16000 samples, 8000 approximate coefficients); the paper gives no segment length.
 - Haar wavelet for the DWT (the paper only says "differential DWT").
-- layer counts, widths and kernels: encoder = 4 conv blocks (Conv1d k=3, BatchNorm, LeakyReLU, 64 channels,
-  input skip at every layer), then the message (16 channels, each bit broadcast over time, as in HiDDeN)
-  concatenated with features and input, one more block, 1x1 conv to the residual. Decoder = 4 such blocks,
+- layer counts, widths and kernels: encoder = 5 conv blocks (Conv1d k=3, BatchNorm, LeakyReLU, 64 channels,
+  input skip at every layer; dilations 1, 2, 4, 8, 16 so the receptive field covers ~60 coefficients while the
+  feature length stays unchanged; plain k=3 stacks plateaued at training BER 0.33), then the message (16 channels, each bit broadcast over time, as in HiDDeN)
+  concatenated with features and input, one more block, 1x1 conv to the residual. Decoder = 5 such blocks (same dilations),
   3 stride-2 downsampling blocks, 1x1 conv to 16 channels, mean over time. Discriminator = 3 blocks,
   3 stride-2 downsampling blocks, 1x1 conv to 1 channel, mean over time.
 - the adversarial terms use the usual non-saturating binary cross-entropy forms of eq. 4 (same optimum).
@@ -102,15 +103,19 @@ def idwt(a, d):
 
 
 # ------------------------------------------------------------------ networks
-def block(cin, cout, stride=1):
-    return nn.Sequential(nn.Conv1d(cin, cout, 3, stride=stride, padding=1), nn.BatchNorm1d(cout), nn.LeakyReLU(0.2))
+def block(cin, cout, stride=1, dil=1):
+    return nn.Sequential(nn.Conv1d(cin, cout, 3, stride=stride, padding=dil, dilation=dil), nn.BatchNorm1d(cout),
+                         nn.LeakyReLU(0.2))
+
+
+DILS = (2, 4, 8, 16)
 
 
 class Encoder(nn.Module):
-    def __init__(self, ch=64, nb=4):
+    def __init__(self, ch=64):
         super().__init__()
         self.first = block(1, ch)
-        self.body = nn.ModuleList([block(ch + 1, ch) for _ in range(nb - 1)])
+        self.body = nn.ModuleList([block(ch + 1, ch, dil=d) for d in DILS])
         self.fuse = block(ch + 1 + NBITS, ch)
         self.out = nn.Conv1d(ch + 1, 1, 1)
 
@@ -126,10 +131,10 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, ch=64, nb=4, nd=3):
+    def __init__(self, ch=64, nd=3):
         super().__init__()
         self.first = block(1, ch)
-        self.body = nn.ModuleList([block(ch + 1, ch) for _ in range(nb - 1)])
+        self.body = nn.ModuleList([block(ch + 1, ch, dil=d) for d in DILS])
         self.down = nn.Sequential(*[block(ch, ch, 2) for _ in range(nd)])
         self.out = nn.Conv1d(ch, NBITS, 1)
 
