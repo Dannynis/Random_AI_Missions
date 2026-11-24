@@ -1,0 +1,2182 @@
+{
+ "seed": 0,
+ "rows": [
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 34.446958780288696
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "clean",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 34.4473192691803
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "clean",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 34.447638273239136
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 37.830888986587524
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "mp3_64k",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 37.8312463760376
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "mp3_64k",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.013333333333333334,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.013333333333333334
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 37.831578731536865
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 40.30860733985901
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "opus_32k",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 40.308969497680664
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "opus_32k",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.01,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 40.30928373336792
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 34.532034397125244
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "reverb",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 34.53237748146057
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "reverb",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.02,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "sec": 34.53269624710083
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "sec": 34.37615990638733
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota_legacy",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 34.37649869918823
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota_legacy",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.006666666666666667,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 34.37679433822632
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9999333333333333,
+   "fa1": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.9933333333333334,
+    "wrong": 0.0,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 34.626654624938965
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 34.62699842453003
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.01,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "sec": 34.627312660217285
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9961444444444445,
+   "fa1": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 38.44955015182495
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota_mp3",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9999777777777777,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 38.44991493225098
+  },
+  {
+   "method": "ours",
+   "target": "native",
+   "condition": "ota_mp3",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.016666666666666666,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9999222222222223,
+   "fa1": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.016666666666666666
+   },
+   "fa0": {
+    "success": 0.9933333333333334,
+    "wrong": 0.0,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 38.45023822784424
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 16.910351037979126
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "clean",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 16.91069531440735
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "clean",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 16.911000728607178
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 20.118616819381714
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "mp3_64k",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.118950843811035
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "mp3_64k",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.013333333333333334,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.013333333333333334
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.119274377822876
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 23.066648483276367
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "opus_32k",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 23.06698775291443
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "opus_32k",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.01,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 23.067310333251953
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 17.135058879852295
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "reverb",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 17.135411739349365
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "reverb",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.02,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "sec": 17.135748147964478
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9996,
+   "fa1": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.01
+   },
+   "sec": 17.218937397003174
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota_legacy",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 17.219279289245605
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota_legacy",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.006666666666666667,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 17.219589710235596
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9994111111111111,
+   "fa1": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.9833333333333334,
+    "wrong": 0.0,
+    "none": 0.016666666666666666,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 17.46861743927002
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 17.468950986862183
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.01,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.01
+   },
+   "sec": 17.46926760673523
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.008333333333333333,
+   "raw_success": 0.9833333333333333,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.9933333333333333,
+   "success_music": 0.9733333333333334,
+   "auc": 0.9944222222222222,
+   "fa1": {
+    "success": 0.9766666666666667,
+    "wrong": 0.0,
+    "none": 0.023333333333333334,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 0.9766666666666667,
+    "wrong": 0.0,
+    "none": 0.023333333333333334,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 20.738606214523315
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota_mp3",
+   "rule": "crc@1",
+   "ber": 0.006875,
+   "raw_success": 0.9833333333333333,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 0.9933333333333333,
+   "success_music": 0.9733333333333334,
+   "auc": 0.9916277777777778,
+   "fa1": {
+    "success": 0.9833333333333334,
+    "wrong": 0.0,
+    "none": 0.016666666666666666,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 0.98,
+    "wrong": 0.0,
+    "none": 0.02,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.738967418670654
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "condition": "ota_mp3",
+   "rule": "crc@4",
+   "ber": 0.005208333333333333,
+   "raw_success": 0.9866666666666667,
+   "raw_false_alarm": 0.016666666666666666,
+   "success_speech": 0.9933333333333333,
+   "success_music": 0.98,
+   "auc": 0.9931777777777778,
+   "fa1": {
+    "success": 0.9866666666666666,
+    "wrong": 0.0,
+    "none": 0.013333333333333334,
+    "false_alarm": 0.016666666666666666
+   },
+   "fa0": {
+    "success": 0.98,
+    "wrong": 0.0,
+    "none": 0.02,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.73929476737976
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9993888888888889,
+   "fa1": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 0.9966666666666666,
+    "wrong": 0.0,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 16.635428428649902
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "clean",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0
+   },
+   "sec": 16.63578176498413
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "clean",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 16.63610053062439
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9996,
+   "fa1": {
+    "success": 0.9933333333333334,
+    "wrong": 0.0,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.9933333333333334,
+    "wrong": 0.0,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 20.174718379974365
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "mp3_64k",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.175074100494385
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "mp3_64k",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.013333333333333334,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.013333333333333334
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.175395011901855
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 0.9979666666666667,
+   "fa1": {
+    "success": 0.9933333333333334,
+    "wrong": 0.0,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 22.670787811279297
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "opus_32k",
+   "rule": "crc@1",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 22.671139001846313
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "opus_32k",
+   "rule": "crc@4",
+   "ber": 0.0,
+   "raw_success": 1.0,
+   "raw_false_alarm": 0.01,
+   "success_speech": 1.0,
+   "success_music": 1.0,
+   "auc": 1.0,
+   "fa1": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 1.0,
+    "wrong": 0.0,
+    "none": 0.0,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 22.6714506149292
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.002916666666666667,
+   "raw_success": 0.99,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.9942,
+   "fa1": {
+    "success": 0.98,
+    "wrong": 0.0,
+    "none": 0.02,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 0.9766666666666667,
+    "wrong": 0.0,
+    "none": 0.023333333333333334,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 16.962897777557373
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "reverb",
+   "rule": "crc@1",
+   "ber": 0.005416666666666667,
+   "raw_success": 0.99,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.9949722222222223,
+   "fa1": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 16.963239192962646
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "reverb",
+   "rule": "crc@4",
+   "ber": 0.005416666666666667,
+   "raw_success": 0.99,
+   "raw_false_alarm": 0.02,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.9948777777777777,
+   "fa1": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.01
+   },
+   "sec": 16.963536977767944
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.005,
+   "raw_success": 0.99,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.9917333333333334,
+   "fa1": {
+    "success": 0.96,
+    "wrong": 0.0,
+    "none": 0.04,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.94,
+    "wrong": 0.0,
+    "none": 0.06,
+    "false_alarm": 0.01
+   },
+   "sec": 16.867795944213867
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota_legacy",
+   "rule": "crc@1",
+   "ber": 0.005416666666666667,
+   "raw_success": 0.99,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.995,
+   "fa1": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.0
+   },
+   "sec": 16.86815309524536
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota_legacy",
+   "rule": "crc@4",
+   "ber": 0.00375,
+   "raw_success": 0.9933333333333333,
+   "raw_false_alarm": 0.006666666666666667,
+   "success_speech": 1.0,
+   "success_music": 0.9866666666666667,
+   "auc": 0.9983,
+   "fa1": {
+    "success": 0.9933333333333334,
+    "wrong": 0.0033333333333333335,
+    "none": 0.0033333333333333335,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 0.99,
+    "wrong": 0.0033333333333333335,
+    "none": 0.006666666666666667,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 16.868460178375244
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.004583333333333333,
+   "raw_success": 0.9866666666666667,
+   "raw_false_alarm": 1.0,
+   "success_speech": 1.0,
+   "success_music": 0.9733333333333334,
+   "auc": 0.9928,
+   "fa1": {
+    "success": 0.9466666666666667,
+    "wrong": 0.0,
+    "none": 0.05333333333333334,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.91,
+    "wrong": 0.0,
+    "none": 0.09,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 17.18844771385193
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota",
+   "rule": "crc@1",
+   "ber": 0.006458333333333333,
+   "raw_success": 0.9866666666666667,
+   "raw_false_alarm": 0.0,
+   "success_speech": 1.0,
+   "success_music": 0.9733333333333334,
+   "auc": 0.9933333333333333,
+   "fa1": {
+    "success": 0.9866666666666667,
+    "wrong": 0.0,
+    "none": 0.013333333333333334,
+    "false_alarm": 0.0
+   },
+   "fa0": {
+    "success": 0.9866666666666667,
+    "wrong": 0.0,
+    "none": 0.013333333333333334,
+    "false_alarm": 0.0
+   },
+   "sec": 17.18878674507141
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota",
+   "rule": "crc@4",
+   "ber": 0.004791666666666666,
+   "raw_success": 0.99,
+   "raw_false_alarm": 0.01,
+   "success_speech": 1.0,
+   "success_music": 0.98,
+   "auc": 0.9949277777777777,
+   "fa1": {
+    "success": 0.99,
+    "wrong": 0.0,
+    "none": 0.01,
+    "false_alarm": 0.01
+   },
+   "fa0": {
+    "success": 0.9866666666666667,
+    "wrong": 0.0,
+    "none": 0.013333333333333334,
+    "false_alarm": 0.01
+   },
+   "sec": 17.189109802246094
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.014791666666666667,
+   "raw_success": 0.9633333333333334,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.9866666666666667,
+   "success_music": 0.94,
+   "auc": 0.9786222222222222,
+   "fa1": {
+    "success": 0.9033333333333333,
+    "wrong": 0.0,
+    "none": 0.09666666666666666,
+    "false_alarm": 0.006666666666666667
+   },
+   "fa0": {
+    "success": 0.89,
+    "wrong": 0.0,
+    "none": 0.11,
+    "false_alarm": 0.006666666666666667
+   },
+   "sec": 20.18997359275818
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota_mp3",
+   "rule": "crc@1",
+   "ber": 0.019583333333333335,
+   "raw_success": 0.96,
+   "raw_false_alarm": 0.0033333333333333335,
+   "success_speech": 0.98,
+   "success_music": 0.94,
+   "auc": 0.9798777777777777,
+   "fa1": {
+    "success": 0.96,
+    "wrong": 0.0,
+    "none": 0.04,
+    "false_alarm": 0.0033333333333333335
+   },
+   "fa0": {
+    "success": 0.9533333333333334,
+    "wrong": 0.0,
+    "none": 0.04666666666666666,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.19033980369568
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "condition": "ota_mp3",
+   "rule": "crc@4",
+   "ber": 0.014791666666666667,
+   "raw_success": 0.97,
+   "raw_false_alarm": 0.016666666666666666,
+   "success_speech": 0.9866666666666667,
+   "success_music": 0.9533333333333334,
+   "auc": 0.9845722222222222,
+   "fa1": {
+    "success": 0.9666666666666667,
+    "wrong": 0.0,
+    "none": 0.03333333333333333,
+    "false_alarm": 0.016666666666666666
+   },
+   "fa0": {
+    "success": 0.9466666666666668,
+    "wrong": 0.0,
+    "none": 0.05333333333333334,
+    "false_alarm": 0.0033333333333333335
+   },
+   "sec": 20.19063663482666
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.08666666666666667,
+   "raw_success": 0.5633333333333334,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.7133333333333334,
+   "success_music": 0.41333333333333333,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.5633333333333334,
+    "wrong": 0.43666666666666665,
+    "none": 0.0,
+    "false_alarm": 0.06666666666666667
+   },
+   "fa0": {
+    "success": 0.5633333333333334,
+    "wrong": 0.43666666666666665,
+    "none": 0.0,
+    "false_alarm": 0.06666666666666667
+   },
+   "sec": 12.945229291915894
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.09041666666666667,
+   "raw_success": 0.5433333333333333,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.74,
+   "success_music": 0.3466666666666667,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.5433333333333333,
+    "wrong": 0.45666666666666667,
+    "none": 0.0,
+    "false_alarm": 0.07666666666666666
+   },
+   "fa0": {
+    "success": 0.5433333333333333,
+    "wrong": 0.45666666666666667,
+    "none": 0.0,
+    "false_alarm": 0.05333333333333334
+   },
+   "sec": 15.568574666976929
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.085625,
+   "raw_success": 0.57,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.7533333333333333,
+   "success_music": 0.38666666666666666,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.57,
+    "wrong": 0.43,
+    "none": 0.0,
+    "false_alarm": 0.05333333333333334
+   },
+   "fa0": {
+    "success": 0.57,
+    "wrong": 0.43,
+    "none": 0.0,
+    "false_alarm": 0.043333333333333335
+   },
+   "sec": 18.223754167556763
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.354375,
+   "raw_success": 0.05,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.05333333333333334,
+   "success_music": 0.04666666666666667,
+   "auc": 0.9575666666666667,
+   "fa1": {
+    "success": 0.05,
+    "wrong": 0.7133333333333334,
+    "none": 0.2366666666666667,
+    "false_alarm": 0.06
+   },
+   "fa0": {
+    "success": 0.05,
+    "wrong": 0.67,
+    "none": 0.28,
+    "false_alarm": 0.03666666666666667
+   },
+   "sec": 12.596418142318726
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.474375,
+   "raw_success": 0.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.0,
+   "success_music": 0.0,
+   "auc": 0.8139444444444445,
+   "fa1": {
+    "success": 0.0,
+    "wrong": 0.43333333333333335,
+    "none": 0.5666666666666667,
+    "false_alarm": 0.08666666666666667
+   },
+   "fa0": {
+    "success": 0.0,
+    "wrong": 0.43333333333333335,
+    "none": 0.5666666666666667,
+    "false_alarm": 0.07666666666666666
+   },
+   "sec": 12.463513374328613
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.398125,
+   "raw_success": 0.02,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.006666666666666667,
+   "success_music": 0.03333333333333333,
+   "auc": 0.8992333333333333,
+   "fa1": {
+    "success": 0.02,
+    "wrong": 0.5733333333333334,
+    "none": 0.4066666666666667,
+    "false_alarm": 0.07333333333333333
+   },
+   "fa0": {
+    "success": 0.02,
+    "wrong": 0.4666666666666667,
+    "none": 0.5133333333333333,
+    "false_alarm": 0.02666666666666667
+   },
+   "sec": 12.671717166900635
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.40729166666666666,
+   "raw_success": 0.023333333333333334,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.02666666666666667,
+   "success_music": 0.02,
+   "auc": 0.8965888888888889,
+   "fa1": {
+    "success": 0.023333333333333334,
+    "wrong": 0.5533333333333333,
+    "none": 0.42333333333333334,
+    "false_alarm": 0.11333333333333333
+   },
+   "fa0": {
+    "success": 0.023333333333333334,
+    "wrong": 0.5166666666666667,
+    "none": 0.45999999999999996,
+    "false_alarm": 0.1
+   },
+   "sec": 16.029433250427246
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.06104166666666667,
+   "raw_success": 0.69,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.8133333333333334,
+   "success_music": 0.5666666666666667,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.69,
+    "wrong": 0.31,
+    "none": 0.0,
+    "false_alarm": 0.06666666666666667
+   },
+   "fa0": {
+    "success": 0.69,
+    "wrong": 0.31,
+    "none": 0.0,
+    "false_alarm": 0.06666666666666667
+   },
+   "sec": 6.276801347732544
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.07354166666666667,
+   "raw_success": 0.6633333333333333,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.82,
+   "success_music": 0.5066666666666667,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.6633333333333333,
+    "wrong": 0.33666666666666667,
+    "none": 0.0,
+    "false_alarm": 0.07666666666666666
+   },
+   "fa0": {
+    "success": 0.6633333333333333,
+    "wrong": 0.33666666666666667,
+    "none": 0.0,
+    "false_alarm": 0.05333333333333334
+   },
+   "sec": 9.487859725952148
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.06854166666666667,
+   "raw_success": 0.6733333333333333,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.8133333333333334,
+   "success_music": 0.5333333333333333,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.6733333333333333,
+    "wrong": 0.32666666666666666,
+    "none": 0.0,
+    "false_alarm": 0.05333333333333334
+   },
+   "fa0": {
+    "success": 0.6733333333333333,
+    "wrong": 0.32666666666666666,
+    "none": 0.0,
+    "false_alarm": 0.043333333333333335
+   },
+   "sec": 12.144437551498413
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.36125,
+   "raw_success": 0.03,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.04,
+   "success_music": 0.02,
+   "auc": 0.9946888888888888,
+   "fa1": {
+    "success": 0.03,
+    "wrong": 0.9233333333333333,
+    "none": 0.04666666666666667,
+    "false_alarm": 0.06
+   },
+   "fa0": {
+    "success": 0.03,
+    "wrong": 0.9133333333333333,
+    "none": 0.05666666666666667,
+    "false_alarm": 0.03666666666666667
+   },
+   "sec": 6.23914647102356
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.476875,
+   "raw_success": 0.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.0,
+   "success_music": 0.0,
+   "auc": 0.9648555555555556,
+   "fa1": {
+    "success": 0.0,
+    "wrong": 0.7833333333333333,
+    "none": 0.21666666666666667,
+    "false_alarm": 0.08666666666666667
+   },
+   "fa0": {
+    "success": 0.0,
+    "wrong": 0.78,
+    "none": 0.22,
+    "false_alarm": 0.07666666666666666
+   },
+   "sec": 6.219311237335205
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.3910416666666667,
+   "raw_success": 0.04,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.02666666666666667,
+   "success_music": 0.05333333333333334,
+   "auc": 0.9822,
+   "fa1": {
+    "success": 0.04,
+    "wrong": 0.7966666666666666,
+    "none": 0.16333333333333333,
+    "false_alarm": 0.07333333333333333
+   },
+   "fa0": {
+    "success": 0.04,
+    "wrong": 0.6633333333333333,
+    "none": 0.2966666666666667,
+    "false_alarm": 0.02666666666666667
+   },
+   "sec": 6.79045295715332
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.380625,
+   "raw_success": 0.03,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.03333333333333333,
+   "success_music": 0.02666666666666667,
+   "auc": 0.9736888888888889,
+   "fa1": {
+    "success": 0.03,
+    "wrong": 0.7733333333333334,
+    "none": 0.19666666666666668,
+    "false_alarm": 0.11333333333333333
+   },
+   "fa0": {
+    "success": 0.03,
+    "wrong": 0.6866666666666666,
+    "none": 0.2833333333333333,
+    "false_alarm": 0.1
+   },
+   "sec": 9.699360132217407
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "clean",
+   "rule": "top",
+   "ber": 0.07083333333333333,
+   "raw_success": 0.63,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.78,
+   "success_music": 0.48,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.63,
+    "wrong": 0.37,
+    "none": 0.0,
+    "false_alarm": 0.06666666666666667
+   },
+   "fa0": {
+    "success": 0.63,
+    "wrong": 0.37,
+    "none": 0.0,
+    "false_alarm": 0.06666666666666667
+   },
+   "sec": 6.272891521453857
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "mp3_64k",
+   "rule": "top",
+   "ber": 0.08020833333333334,
+   "raw_success": 0.6066666666666667,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.7733333333333333,
+   "success_music": 0.44,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.6066666666666667,
+    "wrong": 0.39333333333333337,
+    "none": 0.0,
+    "false_alarm": 0.07666666666666666
+   },
+   "fa0": {
+    "success": 0.6066666666666667,
+    "wrong": 0.39333333333333337,
+    "none": 0.0,
+    "false_alarm": 0.05333333333333334
+   },
+   "sec": 9.438192129135132
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "opus_32k",
+   "rule": "top",
+   "ber": 0.068125,
+   "raw_success": 0.65,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.8266666666666667,
+   "success_music": 0.47333333333333333,
+   "auc": 1.0,
+   "fa1": {
+    "success": 0.65,
+    "wrong": 0.35,
+    "none": 0.0,
+    "false_alarm": 0.05333333333333334
+   },
+   "fa0": {
+    "success": 0.65,
+    "wrong": 0.35,
+    "none": 0.0,
+    "false_alarm": 0.043333333333333335
+   },
+   "sec": 11.968799352645874
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "reverb",
+   "rule": "top",
+   "ber": 0.34270833333333334,
+   "raw_success": 0.043333333333333335,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.05333333333333334,
+   "success_music": 0.03333333333333333,
+   "auc": 0.9875777777777778,
+   "fa1": {
+    "success": 0.043333333333333335,
+    "wrong": 0.8566666666666667,
+    "none": 0.1,
+    "false_alarm": 0.06
+   },
+   "fa0": {
+    "success": 0.043333333333333335,
+    "wrong": 0.8466666666666667,
+    "none": 0.11000000000000001,
+    "false_alarm": 0.03666666666666667
+   },
+   "sec": 6.1855268478393555
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "ota_legacy",
+   "rule": "top",
+   "ber": 0.46791666666666665,
+   "raw_success": 0.0,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.0,
+   "success_music": 0.0,
+   "auc": 0.9167666666666666,
+   "fa1": {
+    "success": 0.0,
+    "wrong": 0.6533333333333333,
+    "none": 0.3466666666666666,
+    "false_alarm": 0.08666666666666667
+   },
+   "fa0": {
+    "success": 0.0,
+    "wrong": 0.64,
+    "none": 0.36,
+    "false_alarm": 0.07666666666666666
+   },
+   "sec": 6.199698209762573
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "ota",
+   "rule": "top",
+   "ber": 0.384375,
+   "raw_success": 0.03666666666666667,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.02,
+   "success_music": 0.05333333333333334,
+   "auc": 0.9485888888888889,
+   "fa1": {
+    "success": 0.03666666666666667,
+    "wrong": 0.7266666666666667,
+    "none": 0.23666666666666666,
+    "false_alarm": 0.07333333333333333
+   },
+   "fa0": {
+    "success": 0.03666666666666667,
+    "wrong": 0.5866666666666667,
+    "none": 0.3766666666666667,
+    "false_alarm": 0.02666666666666667
+   },
+   "sec": 6.567416667938232
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "condition": "ota_mp3",
+   "rule": "top",
+   "ber": 0.38895833333333335,
+   "raw_success": 0.02,
+   "raw_false_alarm": 1.0,
+   "success_speech": 0.03333333333333333,
+   "success_music": 0.006666666666666667,
+   "auc": 0.9511555555555555,
+   "fa1": {
+    "success": 0.02,
+    "wrong": 0.7033333333333334,
+    "none": 0.27666666666666667,
+    "false_alarm": 0.11333333333333333
+   },
+   "fa0": {
+    "success": 0.02,
+    "wrong": 0.63,
+    "none": 0.35,
+    "false_alarm": 0.1
+   },
+   "sec": 9.751424312591553
+  }
+ ],
+ "audibility": [
+  {
+   "method": "ours",
+   "target": "native",
+   "gain_db": 0.0,
+   "gain_at_bound": false,
+   "pesq_speech": 3.8276761404673256,
+   "si_snr_db": 20.02579689025879,
+   "si_snr_speech": 20.011096954345703,
+   "si_snr_music": 20.040494918823242,
+   "lsd_db": 0.9624858498573303
+  },
+  {
+   "method": "ours",
+   "target": "pesq4",
+   "gain_db": -2.060546875,
+   "gain_at_bound": false,
+   "pesq_speech": 4.049254933993022,
+   "si_snr_db": 22.114957809448242,
+   "si_snr_speech": 22.1011905670166,
+   "si_snr_music": 22.12872314453125,
+   "lsd_db": 0.8050879836082458
+  },
+  {
+   "method": "ours",
+   "target": "pesq4.3",
+   "gain_db": -5.751953125,
+   "gain_at_bound": false,
+   "pesq_speech": 4.327064677874247,
+   "si_snr_db": 25.843154907226562,
+   "si_snr_speech": 25.830608367919922,
+   "si_snr_music": 25.855701446533203,
+   "lsd_db": 0.5846231579780579
+  },
+  {
+   "method": "audioseal",
+   "target": "native",
+   "gain_db": 0.0,
+   "gain_at_bound": false,
+   "pesq_speech": 4.428112421035767,
+   "si_snr_db": 24.60137939453125,
+   "si_snr_speech": 26.47848129272461,
+   "si_snr_music": 22.72427749633789,
+   "lsd_db": 1.5575320720672607
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4",
+   "gain_db": 6.826171875,
+   "gain_at_bound": false,
+   "pesq_speech": 4.015096821784973,
+   "si_snr_db": 17.701553344726562,
+   "si_snr_speech": 19.6242733001709,
+   "si_snr_music": 15.778833389282227,
+   "lsd_db": 2.3151071071624756
+  },
+  {
+   "method": "audioseal",
+   "target": "pesq4.3",
+   "gain_db": 3.134765625,
+   "gain_at_bound": false,
+   "pesq_speech": 4.289588987032572,
+   "si_snr_db": 21.439964294433594,
+   "si_snr_speech": 23.333524703979492,
+   "si_snr_music": 19.546401977539062,
+   "lsd_db": 1.8741546869277954
+  }
+ ],
+ "done": [
+  "ours/native",
+  "ours/pesq4",
+  "ours/pesq4.3",
+  "audioseal/native",
+  "audioseal/pesq4",
+  "audioseal/pesq4.3"
+ ],
+ "cal_nll_bits": 0.11068903137210945
+}
