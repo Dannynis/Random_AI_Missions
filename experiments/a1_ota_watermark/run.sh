@@ -18,10 +18,12 @@ if [ "$MODE" = dear_tiny ]; then           # DeAR baseline smoke test: short tra
   done
   exit 0
 fi
-if [ "$MODE" = dear_train ]; then          # DeAR baseline (dear.py): train each seed, then the standard evaluation
+if [ "$MODE" = dear_train ]; then          # DeAR baseline (dear.py): train the seeds side by side on the GPU, then the standard evaluation
+  pids=""
   for s in ${SEEDS:-"0 1 2"}; do
-    python dear.py train --seed "$s" --steps "${STEPS:-100000}"
+    python dear.py train --seed "$s" --steps "${STEPS:-100000}" & pids="$pids $!"
   done
+  for p in $pids; do wait "$p"; done
   for s in ${SEEDS:-"0 1 2"}; do
     python run_a1.py eval --seed "$s" --methods dear --tag _dear
   done
