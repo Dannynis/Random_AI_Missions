@@ -129,7 +129,12 @@ def train(a):
 
 
 def load_ours(seed):
-    st = torch.load(os.path.join(CK, f"seed{seed}_final.pt"), map_location=DEV, weights_only=False)
+    # A1_CKPT (optional, ':'-separated) lets an evaluation-only run read models trained by earlier runs
+    dirs = [d for d in os.environ.get("A1_CKPT", "").split(":") if d] + [CK]
+    path = next((os.path.join(d, f"seed{seed}_final.pt") for d in dirs if os.path.exists(os.path.join(d, f"seed{seed}_final.pt"))), None)
+    if path is None:
+        raise FileNotFoundError(f"no trained model for seed {seed}")
+    st = torch.load(path, map_location=DEV, weights_only=False)
     ar = st["args"]
     enc, dec = wmx.Encoder(ch=ar["ch"], nblk=ar["nblk"]).to(DEV).eval(), wmx.Decoder().to(DEV).eval()
     enc.load_state_dict(st["enc"]); dec.load_state_dict(st["dec"])
@@ -375,7 +380,7 @@ def calibrate_alpha(r, host, g0, target, pool, nsp):
 def evaluate(a):
     global TINY
     TINY = a.tiny
-    outp = os.path.join(OUT, f"eval_seed{a.seed}.json")
+    outp = os.path.join(OUT, f"eval{a.tag}_seed{a.seed}.json")
     res = json.load(open(outp)) if os.path.exists(outp) else {"seed": a.seed, "rows": [], "audibility": [], "done": []}
     pool = None
     n_rec = 16 if TINY else a.n_rec
@@ -460,7 +465,7 @@ def evaluate(a):
 def summary(a):
     import glob
     rows, aud = [], []
-    for f in sorted(glob.glob(os.path.join(OUT, "eval_seed*.json"))):
+    for f in sorted(glob.glob(os.path.join(OUT, "eval*_seed*.json"))):
         d = json.load(open(f))
         for r in d["rows"]:
             rows.append({**r, "seed": d["seed"]})
@@ -507,6 +512,7 @@ def main():
     ap.add_argument("--pesq_targets", type=float, nargs="*", default=[4.0, 4.3])
     ap.add_argument("--tiny", action="store_true")
     ap.add_argument("--train_channel", default="full", choices=["full", "legacy"])
+    ap.add_argument("--tag", default="", help="suffix for the eval output file, e.g. _stress")
     a = ap.parse_args()
     if a.cmd == "train":
         train(a)

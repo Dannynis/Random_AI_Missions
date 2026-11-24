@@ -272,6 +272,7 @@ class Channel:
         return y, off
 
     TESTS = ("clean", "mp3_64k", "opus_32k", "reverb", "ota_legacy", "ota", "ota_mp3")
+    STRESS = ("ota_noisy", "speed_1pct", "phone", "opus_12k", "aac_32k")      # never seen in training
 
     def test(self, x, name: str, seed: int):
         """Fixed test recipe on long streams. Returns (y, offset_samples (B,), speed (B,))."""
@@ -281,8 +282,10 @@ class Channel:
         r = lambda: torch.rand(B, generator=g, device=dev)
         off = torch.randint(0, MAX_OFFSET + 1, (B,), generator=g, device=dev).float()
         speed = torch.ones(B, device=dev)
-        if name in ("ota", "ota_mp3"):
+        if name in ("ota", "ota_mp3", "ota_noisy"):
             speed = 1 + (200e-6 * r() - 100e-6)              # +-100 ppm clock mismatch
+        elif name == "speed_1pct":                           # unseen: 1 % playback speed error (training saw <= 0.2 %)
+            speed = 1 + 0.01 * torch.where(r() < 0.5, -1.0, 1.0)
         y = warp(x, speed, off)
         extra = 0
         if name == "reverb":
@@ -292,19 +295,28 @@ class Channel:
             y = freq_gain(y, band_response(150 + 150 * r(), 5000 + 2000 * r(), 3 * (2 * torch.rand(B, 3, generator=g, device=dev) - 1), n))
             y = add_noise(y, torch.randn((B, n), generator=g, device=dev), torch.full((B, 1), 20.0, device=dev))
             y = mulaw(y)
-        elif name in ("ota", "ota_mp3"):
+        elif name in ("ota", "ota_mp3", "ota_noisy"):
             y = freq_gain(y, band_response(100 + 250 * r(), 5000 + 3000 * r(), 5 * (2 * torch.rand(B, 4, generator=g, device=dev) - 1), n))
             y = soft_clip(y, 1.0 + 1.5 * r())
             y = fft_conv(y, self.rir[torch.randint(0, len(self.rir), (B,), generator=g, device=dev)])
             y = freq_gain(y, band_response(60 + 140 * r(), 6000 + 2000 * r(), 2 * (2 * torch.rand(B, 3, generator=g, device=dev) - 1), n))
-            y = add_noise(y, self._noise(B, n, g), 15 + 10 * r()[:, None])
+            snr = (0 + 5 * r()[:, None]) if name == "ota_noisy" else (15 + 10 * r()[:, None])
+            y = add_noise(y, self._noise(B, n, g), snr)
             y = add_noise(y, pink((B, n), g, dev), torch.full((B, 1), 35.0, device=dev))
+        elif name == "phone":                                # unseen: 300-3400 Hz telephone band, 8 kHz, mu-law
+            f = torch.fft.rfftfreq(n, 1 / SR, device=dev)[None]
+            y = freq_gain(y, ((f >= 300) & (f <= 3400)).float().expand(B, -1))
+            y = mulaw(y)
         y = y * 10 ** ((6 * r()[:, None] - 3) / 20)
         y = y.clamp(-1, 1)
         if name == "mp3_64k" or name == "ota_mp3":
             y, extra = codec(y, "mp3", "64k")
         elif name == "opus_32k":
             y, extra = codec(y, "opus", "32k")
+        elif name == "opus_12k":
+            y, extra = codec(y, "opus", "12k")
+        elif name == "aac_32k":
+            y, extra = codec(y, "aac", "32k")
         return y, off + extra, speed
 
 

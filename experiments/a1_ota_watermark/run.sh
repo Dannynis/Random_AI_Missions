@@ -16,6 +16,13 @@ if [ "$MODE" = speed ]; then
   exit 0
 fi
 SEEDS=${SEEDS:-"0 1 2 3 4"}; STEPS=${STEPS:-40000}
+if [ "$MODE" = stress ]; then             # evaluation only, unseen channels; models from A1_CKPT
+  for s in $SEEDS; do
+    python run_a1.py eval --seed "$s" --tag _stress --conditions ota_noisy speed_1pct phone opus_12k aac_32k
+  done
+  python run_a1.py summary
+  exit 0
+fi
 if [ "$MODE" = ablate_channel ]; then      # ours only, trained on the original simple channel
   for s in $SEEDS; do
     python run_a1.py train --seed "$s" --steps "$STEPS" --train_channel legacy
