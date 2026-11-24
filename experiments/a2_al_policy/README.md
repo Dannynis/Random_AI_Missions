@@ -114,6 +114,19 @@ Paired AUC differences against TypiClust (wins out of 10 seeds):
   rule after a few hundred labels (cf. the TCM heuristic), tested with a reward that weights high budgets.
 - Overall A2 status: on frozen DINOv2 features, no learned policy beats TypiClust; the MNIST result from the
   daily runs does not transfer. Negative result, 10 seeds, pre-stated criterion.
-- Follow-up queued (`run.sh extra dinov2-base`): TCM-style switch baselines, TypiClust until 100 or 300 labels
-  then Margin (`tcm100`, `tcm300`) or BADGE (`tcm100_badge`), to test whether the high-budget edge of the
-  learned policies is just "stop using TypiClust late".
+
+## Follow-up: TypiClust → uncertainty switch (TCM-style), 10 seeds
+
+Paired AUC difference vs TypiClust (wins / 10), DINOv2 ViT-B/14:
+
+| | CIFAR-10 lin | CIFAR-100 lin | held-out lin | CIFAR-10 LP | CIFAR-100 LP | held-out LP |
+|---|---|---|---|---|---|---|
+| TypiClust → Margin at 100 | +0.0000 (7) | −0.0133 (0) | +0.0009 (9) | −0.0056 (0) | −0.0147 (0) | −0.0020 (0) |
+| TypiClust → Margin at 300 | −0.0003 (0) | −0.0022 (0) | +0.0006 (10) | −0.0013 (0) | −0.0024 (0) | +0.0002 (7) |
+| TypiClust → BADGE at 100 | +0.0005 (8) | −0.0125 (0) | +0.0013 (10) | −0.0036 (0) | −0.0135 (0) | −0.0012 (0) |
+
+Switching late gives the same small high-budget gain the learned policies showed (CIFAR-10 linear at 1000
+labels: 0.983 vs 0.981) and is consistently positive on the 10-way tasks with the linear probe, but the AUC gain is
+≤ 0.0013, and it hurts on 100-class CIFAR-100 and with label propagation. Over this budget range, TypiClust on
+DINOv2 features leaves almost no room for a better query rule: the best achievable improvement found by any
+method here is about +0.001 AUC.
