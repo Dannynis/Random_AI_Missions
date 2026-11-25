@@ -134,6 +134,19 @@ Newest entry first.
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1 real loudspeaker / microphone, set 3: DeAR in the room** (same laptop and room, 100 host streams per arm,
+  2.8 h, 700 items, new host streams; alignment correlation median 0.37). DeAR decoded with the fixed band-filtered
+  decoder (seed 0); ours seed 0 for a repeat. Message success at <= 1 % false alarm, n = 100 per cell:
+
+  | method | PESQ 4.0 | PESQ 4.3 | SNR 22 dB | SNR 26 dB |
+  |---|---|---|---|---|
+  | ours (CRC, list of 4) | 0.98 | 0.81 | - | - |
+  | DeAR | 0.00 (bit error 0.43) | 0.00 (0.46) | 0.00 (0.30) | 0.00 (0.38) |
+
+  Ours repeats the full-set result on new host streams (1.00 / 0.94 there; PESQ 4.3 is the weaker point, bit error
+  0.09-0.12, CRC false alarm 0-1 % on 100 unmarked twins). DeAR reads nothing in the real room even when given the same
+  residual energy as ours (SNR 22 / 26 dB), consistent with the simulated table above. Results:
+  `results/a1_ota_watermark/1296502/real_set3.json`.
 - **A1 simulated channels at matched energy** (seeds 0-2, 300 recordings each; every method scaled to the same
   host-to-watermark SNR; message success at <= 1 % false alarm, mean of 3 seeds):
 
