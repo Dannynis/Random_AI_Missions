@@ -311,7 +311,11 @@ class DeARM:
         return v.reshape(len(offs), nseg, NBITS).mean(1)
 
     def decode(self, y, truth):
+        # the decoder only ever saw audio after the distortion layer's 1-4 kHz band filter, so the same fixed filter is
+        # applied before decoding (without it, clean-input bit error is 0.12 instead of 0.01 at native strength)
         B, L = y.shape
+        lo, hi = torch.tensor([1000.0]), torch.tensor([4000.0])
+        y = wmx.freq_gain(y.float().cpu(), wmx.band_response(lo, hi, torch.zeros(1, 1), L))
         nseg = max(1, (L - SEG + 1) // SEG)                     # whole segments available at every offset < SEG
         nfr = SEG // 2 // DS                                     # decoder frames per segment
         Q = SEG // (2 * DS)                                      # offsets per phase (o = 2*DS*q + s)
