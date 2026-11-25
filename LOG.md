@@ -115,6 +115,14 @@ Newest entry first.
   *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
   bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
   `results/a1_ota_watermark/1293800/real_full.json`.
+- **A1 DeAR baseline: first evaluation discarded, decoder input fixed.** The first DeAR evaluation (3 seeds, 250k
+  steps) gave near-zero message success everywhere, even clean at native strength. Checks on 32 clean streams: the
+  blind segment sync is not the problem (true-offset decoding gives the same bit error, 0.115 vs 0.123); BatchNorm
+  statistics are not either (re-estimating them changes nothing). The decoder was only ever trained on audio after the
+  distortion layer's 1-4 kHz band filter, and applying that fixed filter before decoding brings clean bit error at
+  native strength from 0.115 to 0.008 (message 0.97) and at PESQ 4.0 from 0.30 to 0.11 (message 0.31). The filter is
+  now part of DeAR's decoder and the evaluation is re-running. DeAR's native strength is speech PESQ 2.3; reaching
+  PESQ 4.0 takes -11.6 dB (ours: -2.1 dB).
 - **A1 simulated channels at matched energy** (seeds 0-2, 300 recordings each; every method scaled to the same
   host-to-watermark SNR; message success at <= 1 % false alarm, mean of 3 seeds):
 
