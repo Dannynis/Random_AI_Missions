@@ -121,8 +121,19 @@ Newest entry first.
   statistics are not either (re-estimating them changes nothing). The decoder was only ever trained on audio after the
   distortion layer's 1-4 kHz band filter, and applying that fixed filter before decoding brings clean bit error at
   native strength from 0.115 to 0.008 (message 0.97) and at PESQ 4.0 from 0.30 to 0.11 (message 0.31). The filter is
-  now part of DeAR's decoder and the evaluation is re-running. DeAR's native strength is speech PESQ 2.3; reaching
-  PESQ 4.0 takes -11.6 dB (ours: -2.1 dB).
+  now part of DeAR's decoder. DeAR's native strength is speech PESQ 2.3; reaching PESQ 4.0 takes -11.6 dB (ours:
+  -2.1 dB). Re-evaluation, 3 seeds, message success at <= 1 % false alarm:
+
+  | DeAR at | clean | reverb | ota | ota_mp3 |
+  |---|---|---|---|---|
+  | native (PESQ 2.3) | 0.830 +- 0.196 | 0.689 | 0.478 +- 0.094 | 0.432 |
+  | PESQ 4.0 | 0.054 | 0.001 | 0.000 | 0.000 |
+  | PESQ 4.3 | 0.000 | 0.000 | 0.000 | 0.000 |
+
+  The reimplementation does carry its message over the simulated air at its own (clearly audible) strength, but at the
+  audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
+  reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
+  hold false alarm). Results: `results/a1_ota_watermark/1295468`.
 - **A1 simulated channels at matched energy** (seeds 0-2, 300 recordings each; every method scaled to the same
   host-to-watermark SNR; message success at <= 1 % false alarm, mean of 3 seeds):
 
