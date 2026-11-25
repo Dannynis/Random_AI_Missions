@@ -1,0 +1,105 @@
+{
+ "success_at_fa1": {
+  "audioseal/native/ota_opus12": {
+   "mean": 0.006666666666666667,
+   "std": 0.004714045207910317,
+   "n_seeds": 3
+  },
+  "audioseal/pesq4/ota_opus12": {
+   "mean": 0.01888888888888889,
+   "std": 0.0015713484026367726,
+   "n_seeds": 3
+  },
+  "audioseal/pesq4.3/ota_opus12": {
+   "mean": 0.01,
+   "std": 0.007200822998230955,
+   "n_seeds": 3
+  },
+  "ours/native/ota_opus12": {
+   "mean": 0.93,
+   "std": 0.010886621079036372,
+   "n_seeds": 3
+  },
+  "ours/pesq4/ota_opus12": {
+   "mean": 0.7777777777777777,
+   "std": 0.02182986967154274,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/ota_opus12": {
+   "mean": 0.33777777777777773,
+   "std": 0.0412160822022031,
+   "n_seeds": 3
+  },
+  "wavmark/native/ota_opus12": {
+   "mean": 0.0022222222222222222,
+   "std": 0.003142696805273545,
+   "n_seeds": 3
+  },
+  "wavmark/pesq4/ota_opus12": {
+   "mean": 0.0033333333333333335,
+   "std": 0.002721655269759087,
+   "n_seeds": 3
+  },
+  "wavmark/pesq4.3/ota_opus12": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  }
+ },
+ "audibility": {
+  "ours/native": {
+   "pesq_speech": 3.7529458740022448,
+   "si_snr_db": 20.094162623087566,
+   "lsd_db": 0.9784512917200724,
+   "gain_db": 0.0
+  },
+  "ours/pesq4": {
+   "pesq_speech": 4.026615886158413,
+   "si_snr_db": 22.445153554280598,
+   "lsd_db": 0.7997498909632365,
+   "gain_db": -2.333984375
+  },
+  "ours/pesq4.3": {
+   "pesq_speech": 4.316582885318333,
+   "si_snr_db": 26.066382726033527,
+   "lsd_db": 0.5856818358103434,
+   "gain_db": -5.934244791666667
+  },
+  "audioseal/native": {
+   "pesq_speech": 4.42435136795044,
+   "si_snr_db": 25.050979614257812,
+   "lsd_db": 1.5693100690841675,
+   "gain_db": 0.0
+  },
+  "audioseal/pesq4": {
+   "pesq_speech": 4.007553564177619,
+   "si_snr_db": 18.24967384338379,
+   "lsd_db": 2.3189233938852944,
+   "gain_db": 6.735026041666667
+  },
+  "audioseal/pesq4.3": {
+   "pesq_speech": 4.295757205751207,
+   "si_snr_db": 22.16757074991862,
+   "lsd_db": 1.8578774531682332,
+   "gain_db": 2.861328125
+  },
+  "wavmark/native": {
+   "pesq_speech": 4.134793719715542,
+   "si_snr_db": 34.943885803222656,
+   "lsd_db": 4.949620087941487,
+   "gain_db": 0.0
+  },
+  "wavmark/pesq4": {
+   "pesq_speech": 4.031407428847419,
+   "si_snr_db": 33.35852305094401,
+   "lsd_db": 4.9892527262369795,
+   "gain_db": 1.5852864583333333
+  },
+  "wavmark/pesq4.3": {
+   "pesq_speech": 4.317566458384196,
+   "si_snr_db": 37.642556508382164,
+   "lsd_db": 3.824068307876587,
+   "gain_db": -2.6985677083333335
+  }
+ }
+}

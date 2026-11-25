@@ -1,0 +1,144 @@
+{
+ "success_at_fa1": {
+  "ours/native/clean": {
+   "mean": 1.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "ours/native/mp3_64k": {
+   "mean": 1.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "ours/native/opus_32k": {
+   "mean": 1.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "ours/native/ota": {
+   "mean": 0.9988888888888888,
+   "std": 0.0015713484026368086,
+   "n_seeds": 3
+  },
+  "ours/native/ota_legacy": {
+   "mean": 0.9988888888888888,
+   "std": 0.0015713484026368086,
+   "n_seeds": 3
+  },
+  "ours/native/ota_mp3": {
+   "mean": 0.9944444444444445,
+   "std": 0.004157397096415497,
+   "n_seeds": 3
+  },
+  "ours/native/ota_opus12": {
+   "mean": 0.9611111111111111,
+   "std": 0.016405358955814908,
+   "n_seeds": 3
+  },
+  "ours/native/reverb": {
+   "mean": 1.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "ours/pesq4/clean": {
+   "mean": 1.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "ours/pesq4/mp3_64k": {
+   "mean": 0.9955555555555554,
+   "std": 0.004157397096415488,
+   "n_seeds": 3
+  },
+  "ours/pesq4/opus_32k": {
+   "mean": 0.9966666666666666,
+   "std": 0.0027216552697591043,
+   "n_seeds": 3
+  },
+  "ours/pesq4/ota": {
+   "mean": 0.9333333333333332,
+   "std": 0.05894127648833263,
+   "n_seeds": 3
+  },
+  "ours/pesq4/ota_legacy": {
+   "mean": 0.9433333333333334,
+   "std": 0.04768725274194431,
+   "n_seeds": 3
+  },
+  "ours/pesq4/ota_mp3": {
+   "mean": 0.9199999999999999,
+   "std": 0.062360956446232324,
+   "n_seeds": 3
+  },
+  "ours/pesq4/ota_opus12": {
+   "mean": 0.6033333333333334,
+   "std": 0.24859605789312106,
+   "n_seeds": 3
+  },
+  "ours/pesq4/reverb": {
+   "mean": 0.971111111111111,
+   "std": 0.02615244954653294,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/clean": {
+   "mean": 0.9655555555555555,
+   "std": 0.04184037863058386,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/mp3_64k": {
+   "mean": 0.9411111111111111,
+   "std": 0.059275460748218364,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/opus_32k": {
+   "mean": 0.9444444444444443,
+   "std": 0.06494061864978873,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/ota": {
+   "mean": 0.7744444444444444,
+   "std": 0.16645171323692096,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/ota_legacy": {
+   "mean": 0.7000000000000001,
+   "std": 0.23253832818284834,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/ota_mp3": {
+   "mean": 0.7311111111111112,
+   "std": 0.19636197363888463,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/ota_opus12": {
+   "mean": 0.35333333333333333,
+   "std": 0.29822934252139033,
+   "n_seeds": 3
+  },
+  "ours/pesq4.3/reverb": {
+   "mean": 0.86,
+   "std": 0.13007120557032797,
+   "n_seeds": 3
+  }
+ },
+ "audibility": {
+  "ours/native": {
+   "pesq_speech": 3.365348871019151,
+   "si_snr_db": 20.06640116373698,
+   "lsd_db": 0.9850513736406962,
+   "gain_db": 0.0
+  },
+  "ours/pesq4": {
+   "pesq_speech": 4.022760476006401,
+   "si_snr_db": 26.10628318786621,
+   "lsd_db": 0.6752572258313497,
+   "gain_db": -6.025390625
+  },
+  "ours/pesq4.3": {
+   "pesq_speech": 4.312876455518935,
+   "si_snr_db": 29.957037607828777,
+   "lsd_db": 0.5007591346899668,
+   "gain_db": -9.853515625
+  }
+ }
+}

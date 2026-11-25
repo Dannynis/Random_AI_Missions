@@ -115,6 +115,33 @@ Newest entry first.
   *detects* its mark (AUC 0.999 / 0.974) but cannot read the message (bit error 0.31); WavMark finds nothing (AUC 0.50,
   bit error 0.50). One room, one device pair, one distance, ours seed 0 only. Results:
   `results/a1_ota_watermark/1293800/real_full.json`.
+- **A1 simulated channels at matched energy** (seeds 0-2, 300 recordings each; every method scaled to the same
+  host-to-watermark SNR; message success at <= 1 % false alarm, mean of 3 seeds):
+
+  | SNR | method | clean | ota | ota_mp3 | ota_noisy |
+  |---|---|---|---|---|---|
+  | 22 dB | ours | 1.000 | 1.000 | 0.999 | 0.961 |
+  | 22 dB | AudioSeal | 0.640 | 0.053 | 0.042 | 0.027 |
+  | 22 dB | WavMark | 0.810 | 0.309 | 0.221 | 0.189 |
+  | 26 dB | ours | 1.000 | 0.986 | 0.978 | 0.859 |
+  | 26 dB | AudioSeal | 0.600 | 0.018 | 0.021 | 0.009 |
+  | 26 dB | WavMark | 0.991 | 0.458 | 0.336 | 0.288 |
+
+  At equal watermark energy the gap stays large. WavMark is *worse* at the louder 22 dB than at 26 dB (even on
+  clean audio), so pushing it beyond its native strength does not help it; its best over-the-air number anywhere is
+  0.46.
+- **A1 Opus in the training channel: mixed, not adopted.** Ours retrained (3 seeds, 20k steps, same settings) with a
+  straight-through Opus 8-24 kbit/s stage on half the batches, against the main-run models (seeds 0-2), simulated
+  test channels, PESQ 4.0:
+
+  | model | ota | ota_mp3 | ota_opus12 |
+  |---|---|---|---|
+  | main run | 0.998 | 0.993 | 0.778 +- 0.022 |
+  | with Opus stage | 0.933 +- 0.059 | 0.920 | 0.603 +- 0.249 |
+
+  Seed-dependent: seed 1 with the Opus stage reaches 1.000 on `ota` and 0.933 on `ota_opus12`, seeds 0 and 2 are
+  worse than the main run on both. Training ends at bit error 0.08 against 0.03, so the harder channel probably
+  needs more steps. AudioSeal and WavMark on `ota_opus12`: 0.019 / 0.003. Results: `results/a1_ota_watermark/1294596`.
 - **A1 real full set, 6 dB quieter playback** (same 1000 items, laptop and room as the full set, playlist scaled by
   -6 dB; alignment correlation median 0.37). Message success at <= 1 % false alarm, n = 100:
 
@@ -130,11 +157,6 @@ Newest entry first.
   channels, message success at <= 1 % false alarm): `ota` 0.982 +- 0.010 / 0.853 +- 0.067 at PESQ 4.0 / 4.3 (full
   channel: 0.998 / 0.981), `ota_mp3` 0.970 / 0.817 (full: 0.993 / 0.976), held-out reverb 0.996 / 0.943. The
   realistic loudspeaker / room / microphone training channel matters mostly at the quieter strength.
-- **A1 Opus in the training channel** (queued): real-room + Opus 12k was the one condition that broke ours, so an
-  optional straight-through Opus stage (8-24 kbit/s, p = 0.5) was added to training, with a new `ota_opus12` test
-  condition for all methods. The first attempt's 4000-step go/no-go check was uninformative (ours is still at chance
-  at 4000 steps with or without the codec stage) and its training step hit a seed-list bug (fixed); 3 x 20k-step
-  training now runs directly, compared against the main-run models on the same conditions.
 - **A1 real set 2: baselines at matched energy** (same laptop and room, 2.8 h, 100 streams per arm; ours seed 1 at
   PESQ 4.0 / 4.3; AudioSeal and WavMark scaled to host-to-watermark SNR 22 and 26 dB, i.e. the energy ours carries at
   PESQ 4.0 / about 4.3; WavMark is +12.7 dB louder than at matched PESQ). Message success at <= 1 % false alarm:
