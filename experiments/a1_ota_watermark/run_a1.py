@@ -167,13 +167,41 @@ def si_snr(ref, deg):
 
 
 # ======================================================================= methods
+def info_for(info, k):
+    """Message bits for a k-bit payload: the 16 standard info bits, extended by bits drawn from a generator seeded
+    by them (so every method and every run sees the same longer messages for the same streams)."""
+    if k <= info.shape[1]:
+        return info[:, :k]
+    import zlib
+    ext = np.random.default_rng(zlib.crc32(np.packbits(info).tobytes())).integers(0, 2, (len(info), k - info.shape[1]))
+    return np.concatenate([info, ext], 1)
+
+
+def make_method(m, seed):
+    """Method object from its name: ours, ours_k<bits> (same model, longer message), audioseal, wavmark, dear."""
+    if m == "ours" or m.startswith("ours_k"):
+        return Ours(seed, int(m[6:]) if m != "ours" else 16)
+    if m == "audioseal":
+        return AudioSealM()
+    if m == "wavmark":
+        return WavMarkM()
+    if m == "dear":
+        from dear import DeARM
+        return DeARM(seed)
+    raise ValueError(m)
+
+
 class Ours:
     name = "ours"
 
-    def __init__(self, seed):
+    def __init__(self, seed, k_info=16):
         self.enc, self.dec, self.ar = load_ours(seed)
         self.seed = seed
-        self.lay = wcr.CRCLayout(r=8, seed=seed)
+        self.k_info = k_info
+        if k_info != 16:
+            self.name = f"ours_k{k_info}"
+        # k_info info bits + CRC-8, rate-1/2 convolutional code in the same 128 slots of the 8 s cycle
+        self.lay = wcr.CRCLayout(k_info=k_info, r=8, seed=seed)
         self.cal = None
 
     def calibrate(self, corp, chan):
@@ -195,7 +223,7 @@ class Ours:
         """host (B, L) cpu; marks S full chunks from g0. Returns residual (B, L) at native WHR."""
         B, L = host.shape
         S = (L - wmx.N) // wmx.N
-        cyc = self.lay.chunk_bits(self.lay.frame(info))                          # (B, 4, K)
+        cyc = self.lay.chunk_bits(self.lay.frame(info_for(info, self.k_info)))   # (B, 4, K)
         sb = cyc[np.arange(B)[:, None], (np.arange(S)[None] + phi0[:, None]) % 4]
         r = torch.zeros_like(host)
         with torch.no_grad():
@@ -224,6 +252,33 @@ class Ours:
             info, out, nm = wcr.decide(c, self.lay, rule, lst)
             res[rule] = (info, out, nm)
         return res
+
+    def slot_stats(self, y, truth, info):
+        """Physical-layer information rate at the true timing, over the full chunks of each window: slot bit error,
+        and the soft-information rate (bits/s) with the training-channel LLR calibration and with a calibration refit on
+        this condition (two folds over recordings); the binary-symmetric-channel rate 1 - H(slot error) for reference."""
+        with torch.no_grad():
+            feats = torch.cat([self.dec.frames(y[i:i + 16].to(DEV)).float().cpu() for i in range(0, len(y), 16)])
+        B, T, _ = feats.shape
+        f0 = np.round(np.asarray(truth.f0)).astype(int)
+        J = int(T // wmx.FPC) + 1
+        z, frac = ws.window_logits(self._Head(self.dec), feats, f0[:, None] + np.arange(J)[None] * wmx.FPC)
+        bits = self.lay.chunk_bits(self.lay.frame(info_for(info, self.k_info)))
+        bits = bits[np.arange(B)[:, None], (np.asarray(truth.phase)[:, None] + np.arange(J)[None]) % 4]
+        full = frac >= 0.999
+        zf, bf = z[full], bits[full]
+        rec = np.repeat(np.arange(B)[:, None], J, 1)[full]
+        sps = wmx.K * wmx.SR / wmx.N                                    # slots per second (16)
+        cap_cal = wc.capacity_bits(wc.evidence(self.cal(zf), bf)) * sps
+        ev = np.zeros_like(zf)
+        for fold in (0, 1):                                             # refit on half the recordings, score the other
+            tr, te = rec % 2 != fold, rec % 2 == fold
+            ev[te] = wc.evidence(wc.fit_llr(zf[tr], bf[tr])(zf[te]), bf[te])
+        p = float(((self.cal(zf) > 0) != bf).mean())
+        h = 0.0 if p in (0.0, 1.0) else -(p * np.log2(p) + (1 - p) * np.log2(1 - p))
+        return {"slot_ber": p, "n_chunks": int(full.sum()), "cap_cal_bps": cap_cal,
+                "cap_refit_bps": wc.capacity_bits(ev) * sps, "cap_bsc_bps": (1 - h) * sps,
+                "payload_bps": self.k_info / (4 * wmx.N / wmx.SR)}
 
 
 class AudioSealM:
@@ -392,6 +447,8 @@ def calibrate_snr(r, host, g0, target):
 
 
 def target_gain(tname, rc, chost, cg0, pool, nsp):
+    if tname == "native":
+        return 0.0
     if tname.startswith("pesq"):
         return calibrate_alpha(rc, chost, cg0, float(tname[4:]), pool, nsp)
     if tname.startswith("snr"):
@@ -417,16 +474,10 @@ def evaluate(a):
     methods = []
     for m in a.methods:
         try:
-            if m == "ours":
-                o = Ours(a.seed); nll = o.calibrate(corp, wmx.Channel(DEV, "train")); res["cal_nll_bits"] = nll
-                methods.append(o)
-            elif m == "audioseal":
-                methods.append(AudioSealM())
-            elif m == "wavmark":
-                methods.append(WavMarkM())
-            elif m == "dear":
-                from dear import DeARM
-                methods.append(DeARM(a.seed))
+            o = make_method(m, a.seed)
+            if isinstance(o, Ours):
+                nll = o.calibrate(corp, wmx.Channel(DEV, "train")); res.setdefault("cal_nll_bits", nll)
+            methods.append(o)
         except Exception as e:
             say("method", m, "failed to load:", repr(e)); res.setdefault("errors", []).append(f"{m}: {e!r}")
     n = REC_S * wmx.SR
@@ -472,11 +523,16 @@ def evaluate(a):
                 if (m.name, c) not in neg_cache:            # unmarked twins do not depend on the target
                     neg_cache[(m.name, c)] = m.decode(unmarked[c], truth)
                 dn = neg_cache[(m.name, c)]
+                k = getattr(m, "k_info", 16); im = info_for(info, k)
+                if hasattr(m, "slot_stats"):
+                    ss = m.slot_stats(ym, truth, info)
+                    res.setdefault("slots", []).append({"method": m.name, "target": tname, "condition": c, **ss})
+                    say(f"{key} {c} slots:", {x: round(v, 4) for x, v in ss.items()})
                 for rule in dp:
                     ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
-                    correct = (ip[:, :16] == info).all(1)
-                    row = {"method": m.name, "target": tname, "condition": c, "rule": rule,
-                           "ber": float((ip[:, :16] != info).mean()),
+                    correct = (ip[:, :k] == im).all(1)
+                    row = {"method": m.name, "target": tname, "condition": c, "rule": rule, "k_info": k,
+                           "ber": float((ip[:, :k] != im).mean()),
                            "raw_success": float((correct & op).mean()), "raw_false_alarm": float(on.mean()),
                            "success_speech": float((correct & op)[src == 0].mean()),
                            "success_music": float((correct & op)[src == 1].mean()),
@@ -543,7 +599,7 @@ def main():
     ap.add_argument("--lsd_weight", type=float, default=1.0)
     ap.add_argument("--ckpt_every", type=int, default=500)
     ap.add_argument("--n_rec", type=int, default=300)
-    ap.add_argument("--methods", nargs="*", default=["ours", "audioseal", "wavmark"])
+    ap.add_argument("--methods", nargs="*", default=["ours", "audioseal", "wavmark", "dear"])
     ap.add_argument("--conditions", nargs="*", default=None)
     ap.add_argument("--pesq_targets", type=float, nargs="*", default=[4.0, 4.3])
     ap.add_argument("--snr_targets", type=float, nargs="*", default=[],

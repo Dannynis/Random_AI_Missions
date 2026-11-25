@@ -28,7 +28,7 @@ import run_a1 as R
 import wmx
 
 GAP_S, LEAD_S = 0.5, 3.0
-DEFAULT_METHODS = ["ours", "audioseal", "wavmark"]
+DEFAULT_METHODS = ["ours", "audioseal", "wavmark", "dear"]
 
 
 def real_dir(tag):
@@ -40,18 +40,10 @@ def real_dir(tag):
 def load_methods(names, seed, need_cal):
     out = []
     for m in names:
-        if m == "ours":
-            o = R.Ours(seed)
-            if need_cal:
-                o.calibrate((wmx.Corpus("speech_train"), wmx.Corpus("music_train")), wmx.Channel(R.DEV, "train"))
-            out.append(o)
-        elif m == "audioseal":
-            out.append(R.AudioSealM())
-        elif m == "wavmark":
-            out.append(R.WavMarkM())
-        elif m == "dear":
-            from dear import DeARM
-            out.append(DeARM(seed))
+        o = R.make_method(m, seed)
+        if need_cal and isinstance(o, R.Ours):
+            o.calibrate((wmx.Corpus("speech_train"), wmx.Corpus("music_train")), wmx.Channel(R.DEV, "train"))
+        out.append(o)
     return out
 
 
@@ -181,12 +173,18 @@ def score(a):
                 yp, okp = windows(m.name, tgt, p)
                 t1 = time.time()
                 dp = m.decode(yp, truth)
+                k = getattr(m, "k_info", 16); im = R.info_for(info, k)
+                if hasattr(m, "slot_stats"):
+                    ss = m.slot_stats(yp[torch.from_numpy(okp)], R.ws.Truth(f0=np.asarray(truth.f0)[okp], phase=np.asarray(truth.phase)[okp]),
+                                      info[okp])
+                    res.setdefault("slots", []).append({"method": m.name, "target": tgt, "condition": cond, **ss})
+                    R.say(f"{m.name}/{tgt} {cond} slots:", {x: round(v, 4) for x, v in ss.items()})
                 for rule in dp:
                     ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
-                    correct = (ip[:, :16] == info).all(1)
+                    correct = (ip[:, :k] == im).all(1)
                     use = okp & okn
                     row = {"method": m.name, "target": tgt, "condition": cond, "rule": rule, "n": int(use.sum()),
-                           "ber": float((ip[use, :16] != info[use]).mean()),
+                           "k_info": k, "ber": float((ip[use, :k] != im[use]).mean()),
                            "raw_success": float((correct & op)[use].mean()), "raw_false_alarm": float(on[use].mean()),
                            "success_speech": float((correct & op)[use & (src == 0)].mean()),
                            "success_music": float((correct & op)[use & (src == 1)].mean()),

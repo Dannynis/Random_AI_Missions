@@ -85,6 +85,25 @@ if [ "$MODE" = opus_train ]; then          # ours trained with the Opus stage (m
   fi
   exit 0
 fi
+STEALTH_METHODS="ours ours_k32 ours_k48 dear"
+STEALTH_CONDS="clean reverb ota ota_mp3 ota_noisy"
+if [ "$MODE" = stealth_tiny ]; then       # smoke test of the stealth / payload evaluation
+  python run_a1.py eval --seed 0 --tiny --tag _stealth_tiny --no_native --methods $STEALTH_METHODS     --conditions clean ota --pesq_targets 4.3 4.6
+  exit 0
+fi
+if [ "$MODE" = stealth ]; then            # stealth sweep (PESQ up to 4.6) x payload (16 / 32 / 48 bits per 8 s), models from $A1_CKPT
+  for s in ${SEEDS:-0 1 2}; do
+    python run_a1.py eval --seed "$s" --tag _stealth --no_native --methods ${METHODS:-$STEALTH_METHODS}       --conditions ${CONDS:-$STEALTH_CONDS} --pesq_targets ${PESQ_TARGETS:-4.0 4.3 4.5 4.6}
+  done
+  exit 0
+fi
+if [ "$MODE" = train_variant ]; then      # ours retrained with other settings ($TRAIN_ARGS), then the stealth sweep on it
+  for s in ${SEEDS:-0}; do
+    python run_a1.py train --seed "$s" --steps "${STEPS:-20000}" ${TRAIN_ARGS:-}
+    python run_a1.py eval --seed "$s" --tag _stealth --no_native --methods ours ours_k32 ours_k48       --conditions ${CONDS:-$STEALTH_CONDS} --pesq_targets ${PESQ_TARGETS:-4.0 4.3 4.5 4.6}
+  done
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0
