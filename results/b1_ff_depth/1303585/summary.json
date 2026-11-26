@@ -1,0 +1,269 @@
+{
+ "cells": {
+  "bp_cifar10_d2_s0": {
+   "block_acc": [
+    0.228,
+    0.248
+   ],
+   "head_acc": 0.249,
+   "n": 1000,
+   "rule": "bp",
+   "dataset": "cifar10",
+   "depth": 2,
+   "seed": 0,
+   "sec": 3.1
+  },
+  "local_ce_cifar10_d2_s0": {
+   "block_acc": [
+    0.249,
+    0.252
+   ],
+   "head_acc": 0.252,
+   "n": 1000,
+   "rule": "local_ce",
+   "dataset": "cifar10",
+   "depth": 2,
+   "seed": 0,
+   "sec": 3.5
+  },
+  "ff_cifar10_d2_s0": {
+   "block_acc": [
+    0.121,
+    0.096
+   ],
+   "head_acc": 0.121,
+   "n": 1000,
+   "rule": "ff",
+   "dataset": "cifar10",
+   "depth": 2,
+   "seed": 0,
+   "sec": 4.8
+  },
+  "bp_cifar10_d2_s1": {
+   "block_acc": [
+    0.23,
+    0.245
+   ],
+   "head_acc": 0.264,
+   "n": 1000,
+   "rule": "bp",
+   "dataset": "cifar10",
+   "depth": 2,
+   "seed": 1,
+   "sec": 1.5
+  },
+  "local_ce_cifar10_d2_s1": {
+   "block_acc": [
+    0.244,
+    0.242
+   ],
+   "head_acc": 0.244,
+   "n": 1000,
+   "rule": "local_ce",
+   "dataset": "cifar10",
+   "depth": 2,
+   "seed": 1,
+   "sec": 2.5
+  },
+  "ff_cifar10_d2_s1": {
+   "block_acc": [
+    0.123,
+    0.063
+   ],
+   "head_acc": 0.123,
+   "n": 1000,
+   "rule": "ff",
+   "dataset": "cifar10",
+   "depth": 2,
+   "seed": 1,
+   "sec": 2.9
+  },
+  "bp_cifar10_d4_s0": {
+   "block_acc": [
+    0.252,
+    0.256,
+    0.293,
+    0.296
+   ],
+   "head_acc": 0.306,
+   "n": 1000,
+   "rule": "bp",
+   "dataset": "cifar10",
+   "depth": 4,
+   "seed": 0,
+   "sec": 1.5
+  },
+  "bp_cifar10_d4_s1": {
+   "block_acc": [
+    0.232,
+    0.252,
+    0.288,
+    0.295
+   ],
+   "head_acc": 0.3,
+   "n": 1000,
+   "rule": "bp",
+   "dataset": "cifar10",
+   "depth": 4,
+   "seed": 1,
+   "sec": 1.7
+  },
+  "local_ce_cifar10_d4_s0": {
+   "block_acc": [
+    0.244,
+    0.253,
+    0.267,
+    0.264
+   ],
+   "head_acc": 0.267,
+   "n": 1000,
+   "rule": "local_ce",
+   "dataset": "cifar10",
+   "depth": 4,
+   "seed": 0,
+   "sec": 4.4
+  },
+  "ff_cifar10_d4_s0": {
+   "block_acc": [
+    0.143,
+    0.149,
+    0.167,
+    0.163
+   ],
+   "head_acc": 0.167,
+   "n": 1000,
+   "rule": "ff",
+   "dataset": "cifar10",
+   "depth": 4,
+   "seed": 0,
+   "sec": 5.0
+  },
+  "local_ce_cifar10_d4_s1": {
+   "block_acc": [
+    0.255,
+    0.246,
+    0.26,
+    0.275
+   ],
+   "head_acc": 0.275,
+   "n": 1000,
+   "rule": "local_ce",
+   "dataset": "cifar10",
+   "depth": 4,
+   "seed": 1,
+   "sec": 4.6
+  },
+  "ff_cifar10_d4_s1": {
+   "block_acc": [
+    0.098,
+    0.116,
+    0.152,
+    0.207
+   ],
+   "head_acc": 0.207,
+   "n": 1000,
+   "rule": "ff",
+   "dataset": "cifar10",
+   "depth": 4,
+   "seed": 1,
+   "sec": 4.7
+  }
+ },
+ "agg": {
+  "bp|cifar10|d2": {
+   "head_acc_mean": 0.2565,
+   "head_acc_std": 0.007500000000000007,
+   "first_block_mean": 0.229,
+   "best_block_mean": 0.2465,
+   "depth_gain_mean": 0.017499999999999988,
+   "n_seeds": 2,
+   "block_acc_mean": [
+    0.229,
+    0.2465
+   ]
+  },
+  "local_ce|cifar10|d2": {
+   "head_acc_mean": 0.248,
+   "head_acc_std": 0.0040000000000000036,
+   "first_block_mean": 0.2465,
+   "best_block_mean": 0.248,
+   "depth_gain_mean": 0.0015000000000000013,
+   "n_seeds": 2,
+   "block_acc_mean": [
+    0.2465,
+    0.247
+   ]
+  },
+  "ff|cifar10|d2": {
+   "head_acc_mean": 0.122,
+   "head_acc_std": 0.0010000000000000009,
+   "first_block_mean": 0.122,
+   "best_block_mean": 0.122,
+   "depth_gain_mean": 0.0,
+   "n_seeds": 2,
+   "block_acc_mean": [
+    0.122,
+    0.0795
+   ]
+  },
+  "bp|cifar10|d4": {
+   "head_acc_mean": 0.303,
+   "head_acc_std": 0.0030000000000000027,
+   "first_block_mean": 0.242,
+   "best_block_mean": 0.2955,
+   "depth_gain_mean": 0.05349999999999998,
+   "n_seeds": 2,
+   "block_acc_mean": [
+    0.242,
+    0.254,
+    0.2905,
+    0.2955
+   ]
+  },
+  "local_ce|cifar10|d4": {
+   "head_acc_mean": 0.271,
+   "head_acc_std": 0.0040000000000000036,
+   "first_block_mean": 0.2495,
+   "best_block_mean": 0.271,
+   "depth_gain_mean": 0.02150000000000002,
+   "n_seeds": 2,
+   "block_acc_mean": [
+    0.2495,
+    0.2495,
+    0.2635,
+    0.2695
+   ]
+  },
+  "ff|cifar10|d4": {
+   "head_acc_mean": 0.187,
+   "head_acc_std": 0.01999999999999999,
+   "first_block_mean": 0.1205,
+   "best_block_mean": 0.187,
+   "depth_gain_mean": 0.0665,
+   "n_seeds": 2,
+   "block_acc_mean": [
+    0.1205,
+    0.1325,
+    0.1595,
+    0.185
+   ]
+  }
+ },
+ "config": {
+  "epochs": 3,
+  "depths": [
+   2,
+   4
+  ],
+  "seeds": [
+   0,
+   1
+  ],
+  "rules": [
+   "bp",
+   "local_ce",
+   "ff"
+  ],
+  "tiny": true
+ }
+}

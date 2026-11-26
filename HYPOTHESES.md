@@ -39,10 +39,14 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 
 ## Tier B: scale checks that settle open questions
 
-### B1. Forward-Forward: is the loss the problem, not locality?  (`todo`)
-- **Origin:** PR #46 (MNIST: Hinton recipe 7.26 % error, pairwise loss 1.98 %, local cross-entropy 1.49 %, backprop 1.85 %).
-- **Strong test:** CIFAR-10/100 and ImageNet-100 with conv and ViT blocks; local losses versus backprop at equal
-  epochs, 3 seeds; depth sweep.
+### B1. Forward-Forward: is the loss the problem, not locality?  (`running`: `experiments/b1_ff_depth`, CIFAR depth sweep launched 2026-11-26)
+- **Origin:** PR #46 (MNIST: Hinton recipe 7.26 % error, pairwise loss 1.98 %, local cross-entropy 1.49 %, backprop
+  1.85 %) and PR #60 (label-free pairwise FF 2.11 %, threshold 4.03 %). Both found locality is free and the threshold
+  loss is the cost, but on MNIST **depth adds nothing** for a local learner.
+- **Strong test:** CIFAR-10/100 with conv blocks; bp vs greedy local-CE vs goodness/pairwise-FF at equal arch and
+  epochs, depth sweep {4,8,12}, 3 seeds. Two pre-stated questions: H1 parity (best local within 3 pp of bp on
+  CIFAR-10), H2 composition (deepest-block probe beats first by ≥5 pp — does locality compose with depth on a hard
+  task, unlike MNIST?). Prior work: Belilovsky et al. greedy layerwise (ICML 2019), Nøkland & Eidnes local errors.
 
 ### B2. Differentiable logic-gate networks at depth  (`todo`)
 - **Origin:** PR #56. Straight-through forward took depth-12 training from 10 % to 86.7 %.

@@ -2,6 +2,67 @@
 
 Newest entry first.
 
+## 2026-11-26: B7 settled (PASS, replicated at large backbone), B1 launched at scale
+
+Start state: **no lab jobs running or queued** — the 11-24/11-25 A1 real-room sweep and the stress/energy/DeAR/B7
+jobs had all finished (the A1 interim handoff below was kept current through ~09:13 today). Full budget free. Owner's
+`awesome` job left alone. The big A1 exploration is effectively complete and needs the owner's hardware
+for more real rooms, so this session moved the lab's compute onto the open B-tier questions.
+
+### Verdicts settled this session
+- **B7 step 1: PASS, report written** (`reports/2026-11-26-b7-hard-al`). Full run 1294221 (10 seeds × 7 rules × 3 hard
+  tasks × 2 readouts) scored against the pre-stated bar (a rule beats TypiClust by ≥0.01 AUC on ≥8/10 seeds on any
+  (task, readout)). Cleared: on long-tailed CIFAR-100 **Coreset beats TypiClust +0.063 AUC (lp, 10/10)** / +0.028
+  (linear); on 40% symmetric noise **Margin/BADGE beat it +0.045/+0.034 (linear, 8/10)**. At ViT-B/14, asymmetric
+  noise had no headroom. So typicality is a poor prior exactly where coverage (long-tail) or uncertainty (noise) is the
+  right geometry. HYPOTHESES B7 → running (policy build justified).
+- **B7 replicated and widened at dinov2-large (ViT-L/14)** (job 1303503, small tier, report section added). Same 210
+  runs on ViT-L/14 features: Coreset long-tail +0.067 lp (10/10), Margin symmetric +0.060 (8/10), and **Margin now
+  also clears the bar on asymmetric noise +0.059 linear (8/10)** — the one regime that looked rule-less at the smaller
+  backbone. The verdict is not a backbone artifact; "coverage wins the tail, uncertainty wins noise" holds at scale.
+  Prior-work check logged: the policy's real bar is DIRECT (arXiv 2312.09196) and the ICML-2026 foundation-prior AL
+  method, not just the seven generic rules.
+
+### Launched this session
+- **B1 (new): layer-local vs backprop depth sweep on CIFAR** (`experiments/b1_ff_depth`). Lifts the MNIST
+  Forward-Forward decomposition (Random-Ideas #46 supervised, #60 self-supervised — both found locality is free, the
+  threshold loss is the cost, but depth adds nothing for a local learner on MNIST) to CIFAR, where features must
+  compose across depth. Three rules at matched conv arch/epochs: `bp` (end-to-end), `local_ce` (greedy layer-local
+  cross-entropy), `ff` (greedy layer-local goodness, pairwise SymBa, BN disabled). Depth {4,8,12} × CIFAR-10/100 ×
+  3 seeds = 54 cells, resumable with epoch-level checkpoints, 3 workers share one GPU. Pre-stated H1 (best local within
+  3 pp of bp on CIFAR-10) and H2 (deepest-block probe beats first by ≥5 pp — does locality compose with depth on a hard
+  task?). Smoke-tested all rules + preempt/resume locally; tiny validated on cluster (1303585, 12 cells, DONE). Full
+  run **submitted on a single strong GPU, 24 h, resumable** (1303586, pending at log time).
+- **B7-large** (1303503, small tier) — the backbone-robustness re-run above. Done.
+
+### Reviewed, not pursued
+- Random-Ideas `2026-11-26-horn-channel-calib`: CPU DSP audio-matching (segmented GCC-PHAT), not GPU-bound — outside
+  the strong-GPU mission. `2026-11-25-ff-selfsup-pairwise` IS pursued — it is the direct motivation for B1.
+
+### Infra notes
+- CIFAR downloads from the public torchvision mirror are slow (~100 kB/s) and the first tiny job stalled with 3 workers
+  contending on one partial file. Fixed B1's `run.sh` to **prefetch both datasets once (serially) before spawning
+  workers**; pre-staged CIFAR-10/100 into the shared data cache (one-time ~50 min). Added `dinov2-large` to the A2
+  extractor (one line) for the B7 replication. Guarded the SIGUSR1 handler so the code imports on Windows too.
+
+### Handoff for the next session
+- **Running/queued:** strong = 1 (**B1 full 1303586**, pending→running on a strong GPU, 24 h, resumable; collect with
+  `python experiments/b1_ff_depth/b1_depth.py collect` after sync). small = 0. Budget free: 1 strong + 3 small.
+- **Check next:**
+  1. **B1** (1303586): `bash infra/sync_results.sh`, read `results/b1_ff_depth/1303586/out/summary.json`. Apply H1
+     (per (dataset,depth): best of local_ce/ff `head_acc_mean` vs bp within 3 pp on CIFAR-10) and H2 (`depth_gain_mean`
+     ≥0.05 for the best local rule) — compare the local depth curve to bp's. Write `reports/<date>-b1-ff-depth`. If the
+     run is slow, it chains within 24 h via per-cell ckpt; resubmit the same command to resume if preempted.
+  2. **Fill the idle budget** with the two ready builds: **B3 (MoE vs dense at GPT-2 scale)** on a strong GPU — the
+     next flagship, genuinely LLM-scale; and the **B7 noise/imbalance-aware policy** on the small tier — now justified
+     and backbone-robust, must be benchmarked against DIRECT and the foundation-prior AL method (not just the generic
+     rules), per-regime best fixed rule (Coreset/Margin) as the imitation ceiling.
+- **Known problems:** torchvision CIFAR mirror is slow — keep datasets in the shared cache (now staged), never let many
+  workers download concurrently. B1's `ff` arm may underperform on CIFAR (goodness on conv is hard); a weak `ff` is a
+  reportable negative and does not affect the `local_ce`-vs-`bp` headline or the depth-composition curve.
+- **Confidentiality:** grep clean on all pushed files this session (only incidental matches are dataset names like
+  `train-clean-100` / `ImageNet-100` hitting the node regex, not host names).
+
 ## 2026-11-24 (session 2): reports written, H2 settled, B7 launched
 
 ### Verdicts settled this session
