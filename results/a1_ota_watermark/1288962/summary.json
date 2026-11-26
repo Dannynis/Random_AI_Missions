@@ -3,127 +3,127 @@
   "ours/native/clean": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/native/mp3_64k": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/native/opus_32k": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/native/ota": {
-   "mean": 1.0,
-   "std": 0.0,
-   "n_seeds": 2
+   "mean": 0.9977777777777778,
+   "std": 0.0031426968052735123,
+   "n_seeds": 3
   },
   "ours/native/ota_legacy": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/native/ota_mp3": {
-   "mean": 0.9983333333333333,
-   "std": 0.0016666666666667052,
-   "n_seeds": 2
+   "mean": 0.9966666666666667,
+   "std": 0.002721655269759059,
+   "n_seeds": 3
   },
   "ours/native/reverb": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/pesq4/clean": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/pesq4/mp3_64k": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/pesq4/opus_32k": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/pesq4/ota": {
-   "mean": 0.985,
-   "std": 0.011666666666666603,
-   "n_seeds": 2
+   "mean": 0.9822222222222221,
+   "std": 0.01030402055055075,
+   "n_seeds": 3
   },
   "ours/pesq4/ota_legacy": {
-   "mean": 0.9983333333333333,
-   "std": 0.0016666666666667052,
-   "n_seeds": 2
+   "mean": 0.9988888888888888,
+   "std": 0.0015713484026368086,
+   "n_seeds": 3
   },
   "ours/pesq4/ota_mp3": {
-   "mean": 0.97,
-   "std": 0.013333333333333364,
-   "n_seeds": 2
+   "mean": 0.9700000000000001,
+   "std": 0.010886621079036372,
+   "n_seeds": 3
   },
   "ours/pesq4/reverb": {
-   "mean": 0.995,
-   "std": 0.0016666666666665941,
-   "n_seeds": 2
+   "mean": 0.9955555555555554,
+   "std": 0.001571348402636704,
+   "n_seeds": 3
   },
   "ours/pesq4.3/clean": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/pesq4.3/mp3_64k": {
    "mean": 1.0,
    "std": 0.0,
-   "n_seeds": 2
+   "n_seeds": 3
   },
   "ours/pesq4.3/opus_32k": {
-   "mean": 0.9983333333333333,
-   "std": 0.0016666666666667052,
-   "n_seeds": 2
+   "mean": 0.9988888888888888,
+   "std": 0.0015713484026368086,
+   "n_seeds": 3
   },
   "ours/pesq4.3/ota": {
-   "mean": 0.8583333333333333,
-   "std": 0.08166666666666667,
-   "n_seeds": 2
+   "mean": 0.8533333333333334,
+   "std": 0.06705442786495383,
+   "n_seeds": 3
   },
   "ours/pesq4.3/ota_legacy": {
-   "mean": 0.9633333333333334,
-   "std": 0.026666666666666672,
-   "n_seeds": 2
+   "mean": 0.958888888888889,
+   "std": 0.022662308949301276,
+   "n_seeds": 3
   },
   "ours/pesq4.3/ota_mp3": {
-   "mean": 0.8233333333333334,
-   "std": 0.08666666666666667,
-   "n_seeds": 2
+   "mean": 0.8166666666666668,
+   "std": 0.07138834846315116,
+   "n_seeds": 3
   },
   "ours/pesq4.3/reverb": {
-   "mean": 0.9383333333333334,
-   "std": 0.04166666666666663,
-   "n_seeds": 2
+   "mean": 0.9433333333333334,
+   "std": 0.034747768380248616,
+   "n_seeds": 3
   }
  },
  "audibility": {
   "ours/native": {
-   "pesq_speech": 3.4339167873064675,
-   "si_snr_db": 20.014090538024902,
-   "lsd_db": 0.9759328663349152,
+   "pesq_speech": 3.4355086565017703,
+   "si_snr_db": 20.00617281595866,
+   "lsd_db": 0.9818266828854879,
    "gain_db": 0.0
   },
   "ours/pesq4": {
-   "pesq_speech": 3.9997239836057026,
-   "si_snr_db": 24.474088668823242,
-   "lsd_db": 0.6632198691368103,
-   "gain_db": -4.453125
+   "pesq_speech": 4.013083242310418,
+   "si_snr_db": 24.49042002360026,
+   "lsd_db": 0.6648834546407064,
+   "gain_db": -4.475911458333333
   },
   "ours/pesq4.3": {
-   "pesq_speech": 4.289682019551595,
-   "si_snr_db": 28.10309600830078,
-   "lsd_db": 0.4847801476716995,
-   "gain_db": -8.076171875
+   "pesq_speech": 4.302883476681179,
+   "si_snr_db": 28.142122904459637,
+   "lsd_db": 0.4847759207089742,
+   "gain_db": -8.121744791666666
   }
  }
 }

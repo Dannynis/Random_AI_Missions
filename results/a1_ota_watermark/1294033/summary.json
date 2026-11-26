@@ -1,0 +1,129 @@
+{
+ "success_at_fa1": {
+  "dear/native/clean": {
+   "mean": 0.01888888888888889,
+   "std": 0.026712922844825127,
+   "n_seeds": 3
+  },
+  "dear/native/mp3_64k": {
+   "mean": 0.007777777777777778,
+   "std": 0.010999438818457406,
+   "n_seeds": 3
+  },
+  "dear/native/opus_32k": {
+   "mean": 0.008888888888888889,
+   "std": 0.01257078722109418,
+   "n_seeds": 3
+  },
+  "dear/native/ota": {
+   "mean": 0.012222222222222223,
+   "std": 0.010999438818457406,
+   "n_seeds": 3
+  },
+  "dear/native/ota_legacy": {
+   "mean": 0.1411111111111111,
+   "std": 0.11242555836125301,
+   "n_seeds": 3
+  },
+  "dear/native/ota_mp3": {
+   "mean": 0.09999999999999999,
+   "std": 0.1414213562373095,
+   "n_seeds": 3
+  },
+  "dear/native/reverb": {
+   "mean": 0.0011111111111111111,
+   "std": 0.0015713484026367724,
+   "n_seeds": 3
+  },
+  "dear/pesq4/clean": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4/mp3_64k": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4/opus_32k": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4/ota": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4/ota_legacy": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4/ota_mp3": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4/reverb": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/clean": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/mp3_64k": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/opus_32k": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/ota": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/ota_legacy": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/ota_mp3": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  },
+  "dear/pesq4.3/reverb": {
+   "mean": 0.0,
+   "std": 0.0,
+   "n_seeds": 3
+  }
+ },
+ "audibility": {
+  "dear/native": {
+   "pesq_speech": 2.3148561278978987,
+   "si_snr_db": 17.642691294352215,
+   "lsd_db": 9.019710222880045,
+   "gain_db": 0.0
+  },
+  "dear/pesq4": {
+   "pesq_speech": 3.984373739560445,
+   "si_snr_db": 28.493126551310223,
+   "lsd_db": 4.504937092463176,
+   "gain_db": -10.810546875
+  },
+  "dear/pesq4.3": {
+   "pesq_speech": 4.285213561058044,
+   "si_snr_db": 32.23614056905111,
+   "lsd_db": 3.4910691579182944,
+   "gain_db": -14.547526041666666
+  }
+ }
+}

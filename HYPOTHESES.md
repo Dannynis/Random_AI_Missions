@@ -72,11 +72,17 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 ### B6. Adversarial audio evaluation: simulated versus real channel transfer  (`todo`, manual)
 - **Origin:** PR #13. Not to be run automatically; listed for the owner to drive.
 
-### B7. Learned query policies where typicality is a poor prior  (`todo`, from A2)
+### B7. Learned query policies where typicality is a poor prior  (`running`: step 1 PASS, `reports/2026-11-26-b7-hard-al`; policy build justified)
 - **Origin:** A2 (2026-11-24): on clean CIFAR with DINOv2 features TypiClust leaves about 0.001 AUC of headroom and no
   learned policy beats it. Typicality should fail on noisy labels (CIFAR-10N) and long-tailed pools.
 - **Strong test:** the A2 pipeline on CIFAR-10N (worst label set) and a long-tailed CIFAR-100 pool, 10 seeds; policy
   meta-trained on synthetic label noise only.
+- **Step 1 result (2026-11-26, precondition test):** PASS. On long-tailed CIFAR-100, Coreset beats TypiClust by +0.063
+  AUC (lp, 10/10 seeds) / +0.028 (linear); on 40% symmetric noise, Margin/BADGE beat it by +0.045/+0.034 (linear,
+  8/10). Under 40% *asymmetric* noise no rule clears the 0.01 bar — TypiClust holds there. So typicality is a poor
+  prior exactly where coverage (long-tail) or uncertainty (symmetric noise) is the right geometry. The policy build is
+  justified but its real bar is DIRECT (arXiv 2312.09196) and the ICML-2026 foundation-prior AL method, not just the
+  generic rules.
 
 ## Tier C: cheap sweeps
 - Seeds and ablations for any Tier A/B experiment.
