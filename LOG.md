@@ -134,6 +134,32 @@ Newest entry first.
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1, more payload with a punctured code; retraining for stealth; room set C.**
+  - Punctured convolutional code (`make_layout`): the same model and 128 slots per 8 s, the rate-1/2 code punctured to
+    rate 2/3 for 64 info bits (8 bit/s, `ours_k64`) and to 3/4 for 80 bits (10 bit/s, `ours_k80`); CRC-8, list of 4.
+    Simulated, 2 seeds x 300, message success at <= 1 % false alarm, PESQ 4.0 / 4.3 / 4.4: over the air 8 bit/s
+    0.955 / 0.633 / 0.347, 10 bit/s 0.858 / 0.428 / 0.177; clean 8 bit/s 1.000 / 0.977 / 0.868. With the 2-6 bit/s
+    rows above: at PESQ 4.0 the simulated air carries 8 bit/s at 0.95 (measured information rate there 13.6 bit/s).
+    Results: `results/a1_ota_watermark/1301069`, `1301070`.
+  - Retraining for stealth (seed 0, sweep as above, compared with the original seed 0): (a) trained from scratch at a
+    6 dB lower watermark level: did not learn (bit error 0.50 after 20k steps), discarded; (b) the original model
+    fine-tuned 8k steps at that level: same success at equal PESQ (over the air 0.977 vs 0.983 at 4.3, 0.787 vs 0.783
+    at 4.5), with 5 dB less watermark energy at equal PESQ (SI-SNR 31.1 vs 25.8 dB at 4.3); (c) trained with a 3x
+    weight and half the target on the log-spectral-distance loss: LSD 0.37 vs 0.58 dB at PESQ 4.3, success slightly
+    lower (over the air 0.957 vs 0.983 at 4.3). So retraining moves the mark to less energy or a flatter spectral
+    footprint at the same PESQ, but does not buy robustness at a given PESQ; the scaled-down original model stays the
+    best trade-off. Results: `results/a1_ota_watermark/1300907` (b), `1300294` (c).
+  - Room set B replayed (same playlist, same placement): phone mic 0.98 / 0.90 / 0.88 / 0.70 at PESQ 4.0 / 4.3 / 4.4 /
+    4.5 (first play 0.98 / 0.90 / 0.88 / 0.73), laptop mic 0.93 / 0.80 / 0.63 / 0.18 (0.93 / 0.80 / 0.65 / 0.28); 4 bit/s
+    at 4.0 0.95 / 0.85 (phone / laptop), 6 bit/s at 4.0 0.93 / 0.80; DeAR 0.15 / 0.08 at native, 0 at PESQ 4.0 and 4.3.
+    Results: `results/a1_ota_watermark/1301067`, `1301068`.
+  - Room set C (same setup, new streams, 40 per cell; phone / laptop mic): 8 bit/s at PESQ 4.0 0.83 / 0.23, at 4.3
+    0.20 / 0.00; 10 bit/s at 4.0 0.48 / 0.08; 2 bit/s at 4.4 0.80 / 0.33; 4 bit/s at 4.4 0.33 / 0.03; 6 bit/s at 4.3
+    0.58 / 0.08. The recording level on the phone was 4 dB lower than in set B (-56 vs -52 dB RMS) and the 2 bit/s PESQ
+    4.4 cell, also in set B, fell from 0.88 to 0.80, so this run's channel was somewhat worse. Measured information rate
+    on the phone mic at PESQ 4.0: 10.5 bit/s. Best real-room operating points so far on the phone mic: 2 bit/s at
+    PESQ 4.4 (0.80-0.88), 6 bit/s at PESQ 4.0 (0.93), 8 bit/s at PESQ 4.0 (0.83). Results:
+    `results/a1_ota_watermark/1301117` (phone), `1301118` (laptop).
 - **A1 stress set, 5 seeds** (channels never used in training; message success at <= 1 % false alarm, ours / best
   baseline, PESQ 4.0 | 4.3): AAC 32k 1.00 / 0.99 (WavMark) | 1.00 / 0.92; Opus 12k 0.98 / 0.61 (AudioSeal) | 0.68 / 0.56;
   telephone band 1.00 / 0.64 | 0.96 / 0.59; noisy room 0.94 / 0.21 | 0.83 / 0.07; 1 % speed change 1.00 / 0.00 |
