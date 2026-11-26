@@ -81,6 +81,10 @@ def train(a):
         enc.load_state_dict(st["enc"]); dec.load_state_dict(st["dec"]); opt.load_state_dict(st["opt"])
         sched.load_state_dict(st["sched"]); step, hist = st["step"], st["hist"]
         say("resumed seed", a.seed, "at step", step)
+    elif a.init:                                  # fine-tune: start from a trained model (fresh optimiser and schedule)
+        st = torch.load(os.path.join(a.init, f"seed{a.seed}_final.pt"), map_location=DEV, weights_only=False)
+        enc.load_state_dict(st["enc"]); dec.load_state_dict(st["dec"])
+        say("initialised seed", a.seed, "from", os.path.basename(os.path.dirname(a.init.rstrip("/"))) or a.init)
     say("params enc", sum(p.numel() for p in enc.parameters()), "dec", sum(p.numel() for p in dec.parameters()))
     corp = (wmx.Corpus("speech_train"), wmx.Corpus("music_train"))
     chan = wmx.Channel(DEV, "train")
@@ -598,6 +602,7 @@ def main():
     ap.add_argument("--lsd_target", type=float, default=1.0)
     ap.add_argument("--lsd_weight", type=float, default=1.0)
     ap.add_argument("--ckpt_every", type=int, default=500)
+    ap.add_argument("--init", default="", help="directory with seed<N>_final.pt to fine-tune from")
     ap.add_argument("--n_rec", type=int, default=300)
     ap.add_argument("--methods", nargs="*", default=["ours", "audioseal", "wavmark", "dear"])
     ap.add_argument("--conditions", nargs="*", default=None)
