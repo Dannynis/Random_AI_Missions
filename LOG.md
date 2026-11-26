@@ -134,6 +134,22 @@ Newest entry first.
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1, listening longer for more stealth** (`A1_REC_S`: the receiver window is 16 s or 32 s instead of 8 s, so the
+  same 16-bit message, repeated every 8 s, is combined over 2 or 4 cycles: 1 or 0.5 bit/s instead of 2; same model, PESQ
+  measured over the whole window). Simulated, seed 0, message success at <= 1 % false alarm, over the air:
+
+  | window | PESQ 4.3 | 4.5 | 4.6 |
+  |---|---|---|---|
+  | 8 s (2 bit/s) | 0.983 | 0.783 | 0.170 |
+  | 16 s (1 bit/s) | 0.997 | 0.913 | 0.293 |
+  | 32 s (0.5 bit/s, 150 recordings) | 1.000 | 0.973 | 0.520 |
+
+  Over the air + MP3, 32 s: 1.000 / 0.987 / 0.533; clean, 32 s: 1.000 / 1.000 / 0.907. The 32 s job ran out of GPU
+  memory in its 4 bit/s part, after the rows above. Real room, 16 s window (jack speakers, 40 per cell, phone / laptop
+  mic): PESQ 4.4 0.93 / 0.78 (8 s window, sets B and C: 0.80-0.88 / 0.33-0.65), PESQ 4.5 0.78 / 0.40 (8 s:
+  0.70-0.73 / 0.18-0.28), PESQ 4.6 0.13 / 0.00; 2 bit/s over 16 s (32-bit message) at PESQ 4.3 0.90 / 0.58. So the
+  stealth limit moves with listening time, about +0.1 PESQ per doubling of the window in the simulator. Results:
+  `results/a1_ota_watermark/1301155` (16 s), `1301156` (32 s), `1301382`, `1301383` (room, 16 s).
 - **A1, more payload with a punctured code; retraining for stealth; room set C.**
   - Punctured convolutional code (`make_layout`): the same model and 128 slots per 8 s, the rate-1/2 code punctured to
     rate 2/3 for 64 info bits (8 bit/s, `ours_k64`) and to 3/4 for 80 bits (10 bit/s, `ours_k80`); CRC-8, list of 4.
