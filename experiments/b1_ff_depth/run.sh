@@ -8,6 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 export LAB_DATA=${LAB_DATA:-$HF_HOME/lab_data}
 [ "${1:-}" = "tiny" ] && export B1_TINY=1
+python b1_depth.py prefetch          # single download before workers share the cache
 N=${B1_WORKERS:-3}
 pids=()
 for w in $(seq 0 $((N - 1))); do python b1_depth.py worker "$w" "$N" & pids+=($!); done

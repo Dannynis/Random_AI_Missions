@@ -59,7 +59,8 @@ def main():
     import timm
     res = int(os.environ.get("FEAT_RES", 224))
     arch = {"dinov2-small": "vit_small_patch14_dinov2.lvd142m",
-            "dinov2-base": "vit_base_patch14_dinov2.lvd142m"}[mname]
+            "dinov2-base": "vit_base_patch14_dinov2.lvd142m",
+            "dinov2-large": "vit_large_patch14_dinov2.lvd142m"}[mname]
     model = timm.create_model(arch, pretrained=True, img_size=res, num_classes=0).cuda().eval()
     blob = {"model": mname, "dataset": ds, "res": res}
     for split, train in (("train", True), ("test", False)):

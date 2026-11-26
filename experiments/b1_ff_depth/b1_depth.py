@@ -322,9 +322,20 @@ def collect():
     json.dump(out, open(os.path.join(OUT, "summary.json"), "w"), indent=1)
     print("collected", len(cells), "cells ->", os.path.join(OUT, "summary.json"))
 
+def prefetch():
+    """Download datasets once, serially, before workers start — avoids the
+    concurrent-download race when several workers share the cache."""
+    root = os.path.join(DATA, "cifar"); os.makedirs(root, exist_ok=True)
+    dsets = [tv.datasets.CIFAR10] if TINY else [tv.datasets.CIFAR10, tv.datasets.CIFAR100]
+    for C in dsets:
+        C(root, train=True, download=True); C(root, train=False, download=True)
+        print("prefetched", C.__name__, flush=True)
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "worker"
     if cmd == "worker":
         worker(int(sys.argv[2]), int(sys.argv[3]))
     elif cmd == "collect":
         collect()
+    elif cmd == "prefetch":
+        prefetch()
