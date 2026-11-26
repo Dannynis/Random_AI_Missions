@@ -195,6 +195,31 @@ def make_method(m, seed):
     raise ValueError(m)
 
 
+# puncturing patterns of the rate-1/2 K=7 code over its interleaved output pairs: rate 1/2, 2/3, 3/4, 5/6
+PUNCTURE = ((1, 1), (1, 1, 1, 0), (1, 1, 1, 0, 0, 1), (1, 1, 1, 0, 0, 1, 1, 0, 0, 1))
+
+
+def make_layout(k_info, seed, r=8):
+    """CRC layout for k_info info bits: the lowest-rate puncturing of the convolutional code whose kept bits fit the
+    128 slots of a cycle (kept bits are then repeated cyclically, as without puncturing). k_info <= 50 is the unpunctured
+    code of the original layout."""
+    lay = wcr.CRCLayout(k_info=min(k_info, 16), r=r, seed=seed)
+    if k_info == 16:
+        return lay
+    k_msg = k_info + r
+    for pat in PUNCTURE:
+        n_code = 2 * (k_msg + 6)
+        kept = np.where(np.resize(np.array(pat, bool), n_code))[0]
+        if len(kept) <= lay.n_data:
+            break
+    else:
+        raise ValueError(f"{k_info} info bits do not fit {lay.n_data} slots")
+    code = wc.ConvCode(k_msg, n_code)
+    code.n, code.idx = lay.n_data, kept[np.arange(lay.n_data) % len(kept)]
+    lay.k_info, lay.k_msg, lay.code = k_info, k_msg, code
+    return lay
+
+
 class Ours:
     name = "ours"
 
@@ -204,8 +229,8 @@ class Ours:
         self.k_info = k_info
         if k_info != 16:
             self.name = f"ours_k{k_info}"
-        # k_info info bits + CRC-8, rate-1/2 convolutional code in the same 128 slots of the 8 s cycle
-        self.lay = wcr.CRCLayout(k_info=k_info, r=8, seed=seed)
+        # k_info info bits + CRC-8, convolutional code in the same 128 slots of the 8 s cycle (punctured when needed)
+        self.lay = make_layout(k_info, seed)
         self.cal = None
 
     def calibrate(self, corp, chan):
