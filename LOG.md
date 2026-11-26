@@ -150,6 +150,9 @@ Newest entry first.
   0.70-0.73 / 0.18-0.28), PESQ 4.6 0.13 / 0.00; 2 bit/s over 16 s (32-bit message) at PESQ 4.3 0.90 / 0.58. So the
   stealth limit moves with listening time, about +0.1 PESQ per doubling of the window in the simulator. Results:
   `results/a1_ota_watermark/1301155` (16 s), `1301156` (32 s), `1301382`, `1301383` (room, 16 s).
+  Real room, 32 s window (same setup, 40 per cell, phone / laptop mic): PESQ 4.5 0.95 / 0.63, PESQ 4.6 0.28 / 0.00.
+  A loud event near the phone around minute 65 of 77 (one minute 35 dB above the rest) is inside this recording.
+  Results: `results/a1_ota_watermark/1301452`, `1301453`.
 - **A1, more payload with a punctured code; retraining for stealth; room set C.**
   - Punctured convolutional code (`make_layout`): the same model and 128 slots per 8 s, the rate-1/2 code punctured to
     rate 2/3 for 64 info bits (8 bit/s, `ours_k64`) and to 3/4 for 80 bits (10 bit/s, `ours_k80`); CRC-8, list of 4.
