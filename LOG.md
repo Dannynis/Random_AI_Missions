@@ -134,6 +134,49 @@ Newest entry first.
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1 stress set, 5 seeds** (channels never used in training; message success at <= 1 % false alarm, ours / best
+  baseline, PESQ 4.0 | 4.3): AAC 32k 1.00 / 0.99 (WavMark) | 1.00 / 0.92; Opus 12k 0.98 / 0.61 (AudioSeal) | 0.68 / 0.56;
+  telephone band 1.00 / 0.64 | 0.96 / 0.59; noisy room 0.94 / 0.21 | 0.83 / 0.07; 1 % speed change 1.00 / 0.00 |
+  1.00 / 0.00. Results: `results/a1_ota_watermark/1293870`.
+- **A1 stealth x payload sweep, simulated** (3 seeds x 300 recordings; same trained models, the mark only scaled down;
+  `ours_k32` / `ours_k48` carry 32 / 48 info bits instead of 16 in the same 8 s cycle and 128 slots, i.e. 4 / 6
+  instead of 2 bit/s, CRC-8, list of 4). Message success at <= 1 % false alarm, over the air (`ota`):
+
+  | | PESQ 4.0 | 4.3 | 4.4 | 4.5 | 4.6 |
+  |---|---|---|---|---|---|
+  | ours, 2 bit/s | 1.000 | 0.987 | 0.967 | 0.840 | 0.222 |
+  | ours, 4 bit/s | 0.998 | 0.936 | 0.807 | 0.439 | 0.028 |
+  | ours, 6 bit/s | 0.992 | 0.866 | 0.672 | 0.286 | 0.006 |
+  | DeAR | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+  | SI-SNR of the mark (ours) | 22.5 dB | 26.1 | 27.8 | 30.2 | 35.1 |
+
+  Clean, 2 bit/s: 1.000 up to PESQ 4.4, 0.987 at 4.5, 0.46 at 4.6. Over the air + MP3, 2 bit/s: 0.999 / 0.980 /
+  0.946 / 0.760 / 0.148. DeAR needs -10.8 dB (PESQ 4.0) to -25.9 dB (4.6) of gain, ours -2.3 to -15.0 dB.
+  Physical-layer information rate (soft-decision rate of the 16 slots/s at the true timing, LLRs refit per condition,
+  two folds), over the air: 13.7 bit/s at PESQ 4.0, 10.6 at 4.3, 8.5 at 4.4, 5.7 at 4.5, 1.9 at 4.6 (slot bit error
+  0.04 / 0.10 / 0.14 / 0.21 / 0.33). The rate-1/2 convolutional code with CRC uses 2-6 bit/s of that, so the
+  remaining limit on payload is the code, not the channel: at PESQ 4.0 a stronger code could carry several times more.
+  Results: `results/a1_ota_watermark/1300133`, `1300134`, `1300181`.
+- **A1 real room, second setup: external speakers on the audio jack**, same laptop and room, two microphones (the
+  laptop's own array, and a phone's microphone captured over USB, placed elsewhere in the room). 40 host streams per
+  cell; message success at <= 1 % false alarm (two-fold thresholds), ours with CRC and a list of 4:
+
+  | playlist / mic | ours 2 bit/s, PESQ 4.0 | 4.3 | 4.4 | 4.5 | 4 bit/s, 4.0 | 4.3 | 6 bit/s, 4.0 | DeAR native / 4.0 / 4.3 | AudioSeal / WavMark |
+  |---|---|---|---|---|---|---|---|---|---|
+  | set A, laptop mic, run 1 | 0.78 | 0.43 | - | - | - | - | - | - | 0.00 / 0.00 |
+  | set A, laptop mic, run 2 | 0.95 | 0.60 | - | - | - | - | - | - | 0.00 / 0.00 |
+  | set A, phone mic, run 2 | 0.98 | 0.93 | - | - | - | - | - | - | 0.00 / 0.00 |
+  | set B, laptop mic | 0.93 | 0.80 | 0.65 | 0.28 | 0.83 | 0.48 | 0.73 | 0.10 / 0.00 / 0.00 | - |
+  | set B, phone mic | 0.98 | 0.90 | 0.88 | 0.73 | 0.95 | 0.85 | 0.93 | 0.18 / 0.00 / 0.00 | - |
+
+  The external speakers through the laptop mic are the hardest real channel so far (alignment correlation 0.20-0.29
+  against 0.37-0.41 with the built-in speakers); the repeat of set A on the same mic moved 0.78 -> 0.95 at PESQ 4.0, so
+  that mic position is also sensitive to room noise (a loud event was logged during run 1). On the phone mic ours
+  carries 2 bit/s at PESQ 4.4 (0.88) and 6 bit/s at PESQ 4.0 (0.93); measured information rate on that mic 11.0 bit/s
+  at PESQ 4.0 and 6.6 at 4.4. DeAR reads 10-18 % of messages at its own audible strength (PESQ 2.3) and nothing at
+  PESQ 4.0 or 4.3. AudioSeal and WavMark read nothing (bit error 0.39-0.51). Caveat: the CRC-only false alarm on the
+  phone mic was 2-5 % (1-2 of 40 unmarked); the reported numbers hold false alarm at 1 % with a score threshold.
+  Results: `results/a1_ota_watermark/1299968`, `1300639`, `1300644` (set A), `1300891`, `1300892` (set B).
 - **A1 real loudspeaker / microphone, set 3: DeAR in the room** (same laptop and room, 100 host streams per arm,
   2.8 h, 700 items, new host streams; alignment correlation median 0.37). DeAR decoded with the fixed band-filtered
   decoder (seed 0); ours seed 0 for a repeat. Message success at <= 1 % false alarm, n = 100 per cell:
