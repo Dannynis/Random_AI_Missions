@@ -55,6 +55,25 @@ Read-through of the mechanism:
   than scatter; no rule reliably beats TypiClust (Margin +0.007 at 7/10, below the bar). This is the hard regime and
   the honest limit of the result: a policy has no obvious fixed rule to imitate here.
 
+## Backbone robustness (dinov2-large, ViT-L/14)
+
+Re-running the full 210-run benchmark on ViT-L/14 features (job on a single small GPU) confirms the verdict is not an
+artifact of the ViT-B/14 backbone — and the headroom is, if anything, wider:
+
+| Task | Readout | Best rule | Gain vs TypiClust | Seeds won |
+|---|---|---|---|---|
+| c100_longtail | lp | Coreset | +0.067 | 10/10 |
+| c100_longtail | linear | Coreset | +0.033 | 10/10 |
+| c10_sym40 | linear | Margin | +0.060 | 8/10 |
+| c10_asym40 | linear | **Margin** | **+0.059** | 8/10 |
+| c10_asym40 | lp | **Margin** | **+0.042** | 8/10 |
+
+The long-tail (Coreset) and symmetric-noise (Margin) wins hold and grow slightly. The one change: at the larger
+backbone **Margin now also clears the bar on asymmetric noise** (+0.059 linear, 8/10), which was the sole regime with
+no headroom at ViT-B/14 (Margin +0.007, 7/10 there). So on stronger features the clean-data-best density rule is beaten
+by an uncertainty rule in *all three* hard regimes. This removes the one caveat from the base-backbone verdict and
+makes the premise for the policy build more robust, not less.
+
 ## Prior work (literature check, logged with the verdict)
 
 Active learning under class imbalance and under label noise are each well studied; the pair together is the active
@@ -74,8 +93,9 @@ build is justified; its bar is now these specialized baselines.
 
 ## Decision
 
-- B7 → **policy build justified** (pass), scoped to the two regimes with real headroom (long-tail, symmetric noise).
-  Asymmetric noise is recorded as the regime where no fixed rule — and so plausibly no imitation policy — has an edge.
+- B7 → **policy build justified** (pass). Headroom is real on long-tail (Coreset) and symmetric noise (Margin/BADGE) at
+  both backbones; at ViT-L/14 it extends to asymmetric noise (Margin) too, so the regime that looked rule-less at
+  ViT-B/14 is not a hard exception — the picture is "coverage wins the tail, uncertainty wins noise," consistently.
 - The policy must be benchmarked against DIRECT and the foundation-model-prior method, at matched budget and features,
   with the per-regime best fixed rule (Coreset / Margin) as the imitation ceiling and TypiClust as the clean-data
   anchor. 3+ seeds, pre-stated AUC-headroom criterion.
