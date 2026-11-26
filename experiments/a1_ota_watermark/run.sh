@@ -93,7 +93,7 @@ if [ "$MODE" = stealth_tiny ]; then       # smoke test of the stealth / payload 
 fi
 if [ "$MODE" = stealth ]; then            # stealth sweep (PESQ up to 4.6) x payload (16 / 32 / 48 bits per 8 s), models from $A1_CKPT
   for s in ${SEEDS:-0 1 2}; do
-    python run_a1.py eval --seed "$s" --tag _stealth --no_native --methods ${METHODS:-$STEALTH_METHODS}       --conditions ${CONDS:-$STEALTH_CONDS} --pesq_targets ${PESQ_TARGETS:-4.0 4.3 4.5 4.6}
+    python run_a1.py eval --seed "$s" --tag "${TAG:-_stealth}" --no_native --methods ${METHODS:-$STEALTH_METHODS}       --conditions ${CONDS:-$STEALTH_CONDS} --pesq_targets ${PESQ_TARGETS:-4.0 4.3 4.5 4.6} --n_rec "${N_REC:-300}"
   done
   exit 0
 fi

@@ -85,7 +85,7 @@ def make(a):
     wf.write(os.path.join(d, "playlist.wav"), wmx.SR, (pl * 32767).astype(np.int16))
     np.savez(os.path.join(d, "streams.npz"), src=src, g0=g0, phi0=phi0, t0=t0, info=info, L=L)
     json.dump({"tag": a.tag, "seed": a.seed, "stream_seed": a.stream_seed, "n": a.n, "scale": scale,
-               "items": man, "gains": gains, "duration_s": len(pl) / wmx.SR},
+               "items": man, "gains": gains, "duration_s": len(pl) / wmx.SR, "rec_s": R.REC_S},
               open(os.path.join(d, "manifest.json"), "w"), indent=1)
     R.say(f"playlist {len(pl) / wmx.SR / 60:.1f} min, {len(man)} items -> {d}")
 
@@ -132,6 +132,7 @@ def score(a):
     if rec.ndim > 1:
         rec = rec.mean(1)
     items = man["items"]
+    assert man.get("rec_s", 8) == R.REC_S, ("set A1_REC_S to the playlist's listening window", man.get("rec_s", 8))
     starts, q, _ = align(rec, pl, items, L)
     res = {"tag": a.tag, "seed": man["seed"], "n_streams": man["n"], "gains": man["gains"],
            "align_corr_median": float(np.median(q)), "align_corr_min": float(q.min()),

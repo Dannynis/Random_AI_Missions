@@ -307,7 +307,7 @@ class Ours:
         h = 0.0 if p in (0.0, 1.0) else -(p * np.log2(p) + (1 - p) * np.log2(1 - p))
         return {"slot_ber": p, "n_chunks": int(full.sum()), "cap_cal_bps": cap_cal,
                 "cap_refit_bps": wc.capacity_bits(ev) * sps, "cap_bsc_bps": (1 - h) * sps,
-                "payload_bps": self.k_info / (4 * wmx.N / wmx.SR)}
+                "payload_bps": self.k_info / (4 * wmx.N / wmx.SR), "rec_s": REC_S}
 
 
 class AudioSealM:
@@ -400,8 +400,8 @@ class WavMarkM:
 
 # ======================================================================= benchmark
 TINY = False
-S_CHUNKS = 6
-REC_S = 8
+REC_S = int(os.environ.get("A1_REC_S", "8"))     # listening window (s); longer windows combine repeats of the 8 s cycle
+S_CHUNKS = REC_S // 2 + 2
 
 
 def make_streams(seed, n_rec):
