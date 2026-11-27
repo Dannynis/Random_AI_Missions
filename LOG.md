@@ -195,6 +195,21 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1, is the long-window gain fair to the baselines? Rate at equal bit rate; punctured code on 3 seeds.**
+  - Baselines with a 32 s window, simulated (seed 0, 60 recordings, PESQ 4.0, message success at <= 1 % false alarm):
+    WavMark clean 1.000, over the air 0.650 (8 s window: 0.31); AudioSeal 0.567 / 0.000; DeAR 0.067 / 0.000. So
+    WavMark also gains from listening longer; ours at 32 s holds 0.991 over the air at PESQ 4.5, a stricter
+    audibility than the baselines' 4.0. Real room, 32 s window, external speakers (now 6 dB quieter than in the
+    earlier sets), phone / laptop mic, 40 per cell: AudioSeal, WavMark and DeAR at PESQ 4.0 all 0.00 (bit error
+    0.40-0.51); ours 0.5 bit/s at PESQ 4.5 0.78 / 0.55, 1 bit/s (32-bit message over 32 s) at 4.5 0.63 / 0.35. Ours is
+    lower than in the earlier 32 s plays (0.95-1.00 / 0.63-1.00) at the quieter playback level. Results:
+    `results/a1_ota_watermark/1304722` (simulated), `1304945` (phone), `1304944` (laptop).
+  - Equal bit rate, longer codeword: a 32-bit message over 16 s (2 bit/s) reads 0.977 over the air at PESQ 4.3 and
+    0.703 at 4.5, against 0.983 / 0.783 for the 16-bit message over 8 s; a 64-bit message over 16 s (4 bit/s) 0.887 at
+    4.3, against 0.923 for 32 bits over 8 s (seed 0). With this code a longer listening window helps only as
+    repetition of a short message, not through longer codewords. Results: `results/a1_ota_watermark/1304437`.
+  - Punctured code, 3 seeds, over the air, PESQ 4.0 / 4.3 / 4.4: 8 bit/s 0.947 / 0.620 / 0.337, 10 bit/s 0.854 /
+    0.433 / 0.179. Results: `results/a1_ota_watermark/1301069`, `1301070`, `1304436`.
 - **A1, overnight: longer windows on 3 seeds; a third real setup (the laptop's built-in speakers) with both mics.**
   - Listening window, simulated, 3 seeds (300 recordings for 8 s / 16 s, 150 for 32 s), message success at <= 1 %
     false alarm, PESQ 4.3 / 4.5 / 4.6:
