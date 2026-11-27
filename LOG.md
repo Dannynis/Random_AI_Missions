@@ -195,6 +195,36 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1, overnight: longer windows on 3 seeds; a third real setup (the laptop's built-in speakers) with both mics.**
+  - Listening window, simulated, 3 seeds (300 recordings for 8 s / 16 s, 150 for 32 s), message success at <= 1 %
+    false alarm, PESQ 4.3 / 4.5 / 4.6:
+
+    | window (rate) | over the air | over the air + MP3 | clean |
+    |---|---|---|---|
+    | 8 s (2 bit/s) | 0.987 / 0.840 / 0.222 | 0.980 / 0.760 / 0.148 | 1.000 / 0.987 / 0.462 |
+    | 16 s (1 bit/s) | 0.998 / 0.939 / 0.424 | 0.996 / 0.896 / 0.291 | 1.000 / 0.996 / 0.806 |
+    | 32 s (0.5 bit/s) | 1.000 / 0.991 / 0.673 | 1.000 / 0.969 / 0.480 | 1.000 / 1.000 / 0.951 |
+
+    Results: `results/a1_ota_watermark/1301155`, `1303628`, `1303629` (16 s), `1301156`, `1301454`, `1303627` (32 s).
+  - Real room, external speakers, played 6 dB quieter than before from minute 69 of the 32 s replay on (owner's
+    request), 40 per cell, phone / laptop mic: 32 s window, PESQ 4.5 1.00 / 1.00, PESQ 4.6 0.50 / 0.28 (first play:
+    0.95 / 0.63 and 0.28 / 0.00); 16 s window, PESQ 4.4 0.97 / 0.95, 4.5 0.82 / 0.70, 4.6 0.15 / 0.00, and 2 bit/s
+    over 16 s at PESQ 4.3 0.95 / 0.93 (first play: 0.93 / 0.78, 0.78 / 0.40, 0.13 / 0.00, 0.90 / 0.58). The phone was
+    re-attached before this replay and recorded 10-12 dB louder than before (closer to the speakers). Results:
+    `results/a1_ota_watermark/1304452`, `1304459` (32 s), `1304479`, `1304496` (16 s).
+  - Real room, the laptop's built-in speakers at 6 dB below their earlier level, same phone and laptop mic, the same
+    playlists as before (phone / laptop mic, 40 per cell):
+    - set A: ours 0.97 / 0.97 at PESQ 4.0, 0.93 / 0.65 at 4.3; AudioSeal and WavMark 0.00-0.03.
+    - set B: ours 1.00 / 0.95, 0.93 / 0.78, 0.85 / 0.48, 0.45 / 0.15 at PESQ 4.0 / 4.3 / 4.4 / 4.5; 4 bit/s 0.95 / 0.80 at
+      4.0; 6 bit/s 0.93 / 0.65 at 4.0; DeAR 0.08 / 0.00 at native, 0 at 4.0 and 4.3.
+    - set C: 8 bit/s at 4.0 0.62 / 0.20, 10 bit/s at 4.0 0.45 / 0.03, 2 bit/s at 4.4 0.60 / 0.25 (this playlist was also
+      the weakest on the external speakers).
+    - 32 s window: PESQ 4.5 0.97 / 0.77, PESQ 4.6 0.28 / 0.07.
+    Results: `results/a1_ota_watermark/1304450`, `1304495` (set A), `1304478`, `1304487` (set B), `1304460`, `1304486`
+    (set C), `1304451`, `1304505` (32 s).
+  - Summary of the real room over three speaker setups and two microphones: at PESQ 4.0 ours carries 2 bit/s at
+    0.93-1.00 and 6 bit/s at 0.65-0.93; with a 32 s window it carries 0.5 bit/s at PESQ 4.5 at 0.77-1.00. AudioSeal,
+    WavMark and DeAR read nothing at PESQ >= 4.0 in any setup.
 - **A1, listening longer for more stealth** (`A1_REC_S`: the receiver window is 16 s or 32 s instead of 8 s, so the
   same 16-bit message, repeated every 8 s, is combined over 2 or 4 cycles: 1 or 0.5 bit/s instead of 2; same model, PESQ
   measured over the whole window). Simulated, seed 0, message success at <= 1 % false alarm, over the air:
