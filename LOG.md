@@ -2,6 +2,73 @@
 
 Newest entry first.
 
+## 2026-11-27: B1 settled (H1 FAIL, H2 PASS with a plateau), B1b and B8 launched
+
+Start state: the A1 review work running in a parallel session holds **both strong slots** (one job running, one
+pending). Those jobs were left alone. Small tier was empty. B1's full depth sweep had finished overnight (~3 h on one
+strong GPU).
+
+### Verdicts settled this session
+- **B1 depth sweep: H1 FAIL, H2 PASS with a plateau; report written** (`reports/2026-11-27-b1-ff-depth`). 54 cells:
+  3 rules × depth {4, 8, 12} × CIFAR-10/100 × 3 seeds; seed std ≤ 0.007.
+  - Greedy layer-local CE trails backprop by **12.5 / 16.4 / 16.7 pp** on CIFAR-10 at depth 4/8/12 (CIFAR-100:
+    14.5-23.3 pp), even though each local block gets 40 epochs of its own.
+  - Local CE does compose with depth (+33 pp from block 1 to its best, 3/3 seeds), unlike MNIST. But it **plateaus at
+    about block 7**, while backprop keeps gaining to block 10-12; the curves cross at block 7 (CIFAR-10) and 9
+    (CIFAR-100).
+  - FF goodness (pairwise) is far worse at conv depth: 0.43-0.46 on CIFAR-10. It peaks at block 6 and then degrades.
+  - So the MNIST conclusion "locality is free, the loss is the cost" does not carry over: on CIFAR both are costs.
+  - Prior work: the plateau matches InfoPro's "information collapse" (arXiv 2101.10832); Belilovsky et al. close
+    most of the gap with stronger auxiliary heads.
+- **Prior-work checks deprioritise B2 and B3** (HYPOTHESES updated).
+  - B2: DLGN depth is already solved by residual init (NeurIPS 2024), a reparametrisation (arXiv 2510.03250), and
+    straight-through training (arXiv 2607.09399).
+  - B3: MoE vs dense with oracle domain routing, plus learned vs domain routing, is DEMix (NAACL 2022, appendix A.5).
+  - Neither was built.
+
+### Launched this session
+- **B1b** (`experiments/b1_ff_depth`, README section "Follow-up B1b"): is the plateau locality, or the local
+  objective?
+  - `local_aux`: Belilovsky-style conv + 2×2-pool auxiliary head.
+  - `local_rec`: InfoPro-style 1×1 linear reconstruction of the input, weight 1.
+  - Depth {8, 12} × CIFAR-10/100 × 3 seeds. `bp` and `local_ce` are reused from the main sweep.
+  - Pre-stated: P1, the best variant is within 3 pp of bp at d8 on CIFAR-10. P2, `local_rec` block 12 beats block 6
+    by ≥2 pp.
+  - Smoke-tested (including preempt/resume) and tiny-validated. Two full jobs on the small tier, split by dataset,
+    36 h limit, resumable per cell.
+- **B8 (new)**: exemplar selection for a nearest-neighbour memory classifier on frozen DINOv2 features
+  (`experiments/b8_exemplar_select`). Origin: today's Random-Ideas PR #62 (k-center writes +0.062 over random on
+  EMNIST with a small CNN).
+  - Class-incremental CIFAR-100 (10 stages) and CIFAR-10 (5 stages), ViT-S/B/L, 10 seeds, budgets 1-40 per class.
+  - Arms: random, herding, k-center, k-means prototypes, all, and NCM (class mean).
+  - Pre-stated: H1, k-center beats random by ≥0.02 at 20/class on ≥8/10 seeds (CIFAR-100, ViT-B). H2, the best
+    exemplar arm beats NCM by ≥0.01 on ≥8/10 seeds; otherwise selection is moot with foundation features.
+  - Tiny validated. Full run on the small tier, expected 1-2 h.
+
+### Reviewed, not pursued
+- Random-Ideas `2026-11-27-memory-exemplar-select` is pursued as B8. Nothing else new since 11-26.
+
+### Handoff for the next session
+- **Running/queued:**
+  - Strong = 2, both A1 from the parallel A1 session; not this loop's jobs, leave them to it.
+  - Small = 3: B1b CIFAR-10, B1b CIFAR-100, and B8 full (see `QUEUE.md` for ids).
+- **Check next:**
+  1. **B8**: sync, then read `results/b8_exemplar_select/<id>/summary.json` → `tests` per `cifar100|dinov2-base`
+     (H1 and H2), with the S/L backbones as the encoder-strength trend. Write `reports/<date>-b8-exemplar-select`.
+     The tiny preview (100/class subset, ViT-S, 2 seeds) had NCM beating every exemplar arm by 2-4 pp. If that holds,
+     H2 fails: a class mean is the better memory with foundation features, and that is the headline negative.
+  2. **B1b**: when both jobs finish, compare `local_aux` / `local_rec` to the main sweep's bp (0.932 at d8 CIFAR-10)
+     and local_ce (0.767), and check P2 on `block_acc` at d12. Add a B1b section to the B1 report.
+  3. **Strong slots**: when the A1 jobs end, the best-justified strong builds are (a) B7's noise/imbalance-aware
+     policy, which must beat DIRECT and the foundation-prior AL method, and (b) a B1 sequel at LLM scale (greedy
+     local learning for LM pretraining, arXiv 2610.04867; read it first). B3 and B2 were deprioritised by prior work.
+- **Known problems:**
+  - The lab is at the small-tier cap (3) until B8 ends, so the A1 session's short small jobs may have to wait about
+    1-2 h.
+  - B1b `local_aux`'s readout has one extra conv layer relative to bp's linear head. This is noted in the README as
+    not able to explain parity alone (bp gains 0.1 pp from d8 to d12).
+- **Confidentiality:** grep clean on all pushed files.
+
 ## 2026-11-26: B7 settled (PASS, replicated at large backbone), B1 launched at scale
 
 Start state: **no lab jobs running or queued** — the 11-24/11-25 A1 real-room sweep and the stress/energy/DeAR/B7
