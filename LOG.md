@@ -214,6 +214,10 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
     The spread across model seeds in the room is larger than in the simulator (3 seeds within 0.01 there), so real-room
     numbers need several seeds. Results: `results/a1_ota_watermark/1306102`, `1306104` (seed 1), `1306094`, `1306099`
     (seed 2).
+  - AWARE in the real room (external speakers, both mics, 40 per cell, new streams): 0.025 at PESQ 4.0 and 0.00 at 4.3
+    on both mics; ours in the same playlist 0.88 / 0.90 at 4.0 and 0.55 / 0.80 at 4.3 (laptop / phone, `crc@1`, no
+    false alarm). Its simulated-room advantage over AudioSeal and WavMark does not carry over to the real room.
+    Results: `results/a1_ota_watermark/1306214` (laptop), `1306216` (phone).
   - AudioSeal fine-tuned on our channel, second attempt (lr 1e-4, 20k steps): again no learning (training bit error
     0.39) and 0 decoding after fine-tuning. Cause found: our channel shifts the audio by up to 1600 samples and the
     public 16-bit decoder only reads its message on a 320-sample grid, so the message loss saw unaligned audio from
