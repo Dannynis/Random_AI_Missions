@@ -82,7 +82,7 @@ def adapt_ours(m, a, sname):
     """Receiver-side room adaptation for ours: refit the per-slot LLR calibration (``cal``), or also fine-tune the
     decoder head (``head``), on the marked windows of another playlist recorded in the same room with the same microphone
     (``--adapt TAG[:recording]``), using its known messages and timing. The target playlist is never used."""
-    tag, _, recname = a.adapt.partition(":")
+    tag, recname = (a.adapt.split(":", 1) + [""])[:2]
     d = real_dir(tag)
     man = json.load(open(os.path.join(d, "manifest.json")))
     st = np.load(os.path.join(d, "streams.npz"))
