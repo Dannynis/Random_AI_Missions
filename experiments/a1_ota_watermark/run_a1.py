@@ -388,6 +388,23 @@ class AudioSealM:
         sc, ms = torch.cat(sc).numpy(), torch.cat(ms).numpy()
         out = np.ones(len(sc), bool)
         res = {"top": (ms, out, sc)}
+        if getattr(self, "genie_info", None) is not None:        # upper bound: the grid shift (4-sample steps) whose
+            gms, gsc = [], []                                     # message best matches the true one, per recording
+            with torch.no_grad():
+                for i in range(0, len(y), 8):
+                    yb = y[i:i + 8].to(DEV); b = len(yb)
+                    tru = torch.from_numpy(np.asarray(self.genie_info[i:i + 8])).to(DEV)
+                    best_err = torch.full((b,), 99, device=DEV); best_m = torch.zeros(b, 16, dtype=torch.long, device=DEV)
+                    best_s = torch.zeros(b, device=DEV)
+                    for s0 in range(0, self.PERIOD, 4):
+                        raw = self._raw(yb[:, s0:s0 + n])
+                        msg = (raw[:, 2:].mean(-1) > 0).long()
+                        err = (msg != tru).sum(1)
+                        upd = err < best_err
+                        best_err = torch.where(upd, err, best_err); best_m[upd] = msg[upd]
+                        best_s = torch.where(upd, torch.softmax(raw[:, :2], 1)[:, 1].mean(-1), best_s)
+                    gms.append(best_m.cpu()); gsc.append(best_s.cpu())
+            res["genie"] = (torch.cat(gms).numpy(), out.copy(), torch.cat(gsc).numpy())
         if getattr(self, "oracle_shift", None) is not None:      # upper bound: decode on the known embedding grid
             osc, oms = [], []
             sh = np.asarray(self.oracle_shift).astype(int) % self.PERIOD
@@ -449,11 +466,13 @@ class WavMarkM:
 
 class WavMarkSoftM(WavMarkM):
     """WavMark with soft combining (added for fairness): the public decoder keeps a 1 s segment only if all 16 pattern
-    bits decode exactly and then votes hard bits. Here, for every phase of the 1 s segment grid (50 ms steps, as the
-    public search), the bit probabilities of all segments in the window are averaged; the phase with the highest pattern
-    log-likelihood is kept, the payload is the averaged probability > 0.5, the score is that log-likelihood."""
+    bits decode exactly and then votes hard bits. WavMark embeds 1 s segments every 1.1 s (1 s mark + 0.1 s gap) and
+    skips segments that fail its SNR check. Here, for every phase of that 1.1 s grid (50 ms steps, as the public
+    search), the bit probabilities of the segments in the window are averaged, weighting each segment by the
+    likelihood of its 16 pattern bits (so skipped segments count little); the phase with the highest mean pattern
+    log-likelihood is kept, the payload is the weighted probability > 0.5, the score is that log-likelihood."""
     name = "wavmark_soft"
-    STEP, SEG = 800, 16000
+    STEP, SEG, PERIOD = 800, 16000, 17600
 
     def decode(self, y, truth):
         pat = torch.tensor(self.wm.wm_add_util.fix_pattern[0:16], dtype=torch.float32)
@@ -463,13 +482,16 @@ class WavMarkSoftM(WavMarkM):
             for i in range(B):
                 x = y[i].float()
                 best = (-np.inf, None)
-                for ph in range(0, self.SEG, self.STEP):
-                    starts = list(range(ph, len(x) - self.SEG + 1, self.SEG))
+                for ph in range(0, self.PERIOD, self.STEP):
+                    starts = list(range(ph, len(x) - self.SEG + 1, self.PERIOD))
                     if not starts:
                         continue
                     seg = torch.stack([x[s0:s0 + self.SEG] for s0 in starts]).to(DEV)
-                    pr = self.model.decode(seg).float().cpu().clamp(1e-4, 1 - 1e-4).mean(0)       # (32,)
-                    ll = float((pat * pr[:16].log() + (1 - pat) * (1 - pr[:16]).log()).sum())
+                    p = self.model.decode(seg).float().cpu().clamp(1e-4, 1 - 1e-4)                 # (S, 32)
+                    lls = (pat * p[:, :16].log() + (1 - pat) * (1 - p[:, :16]).log()).sum(1)       # (S,)
+                    wgt = torch.softmax(lls, 0)
+                    pr = (wgt[:, None] * p).sum(0)
+                    ll = float(lls.mean())
                     if ll > best[0]:
                         best = (ll, pr)
                 sc[i] = best[0]
@@ -637,6 +659,7 @@ def evaluate(a):
                     self_unm = unmarked[c_base][:, :ds * wmx.SR]
                     if isinstance(m, AudioSealM):              # host sample 0 sits at (offset - t0) in the window
                         m.oracle_shift = (np.round(off.cpu().numpy()).astype(int) - t0) % AudioSealM.PERIOD
+                        m.genie_info = info if os.environ.get("A1_GENIE") else None
                     dp = m.decode(ym, truth)
                     if (m.name, c) not in neg_cache:            # unmarked twins do not depend on the target
                         neg_cache[(m.name, c)] = m.decode(self_unm, truth)
