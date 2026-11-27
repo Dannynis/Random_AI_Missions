@@ -54,9 +54,15 @@ def main():
         w = gen.get_watermark(host[:, None], wmx.SR, message=bits)[:, 0]
         strength = min(1.0, step / (0.3 * a.steps))
         g_state = g.get_state()
-        y, _ = chan.train(host + w, g, strength=strength)
+        y, off = chan.train(host + w, g, strength=strength)
         g.set_state(g_state)                                   # the unmarked twin goes through the same channel draw
         y0, _ = chan.train(host, g, strength=strength)
+        # the public 16-bit decoder reads the message only on its 320-sample embedding grid, and the channel shifts the
+        # audio by up to MAX_OFFSET samples: decode a crop that starts on the grid (what the sync search finds at test)
+        s0 = (torch.round(off).long() % 320)
+        Lc = L - wmx.MAX_OFFSET - 320
+        idx = s0[:, None] + torch.arange(Lc, device=dev)[None]
+        y, y0 = y.gather(1, idx), y0.gather(1, idx)
         raw = det.detector(torch.cat([y, y0])[:, None])        # (2B, 2 + 16, T)
         msg_logit = raw[:a.batch, 2:].mean(-1)
         lm = F.binary_cross_entropy_with_logits(msg_logit, bits.float())
