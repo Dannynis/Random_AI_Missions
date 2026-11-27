@@ -57,6 +57,21 @@ strong GPU).
      (H1 and H2), with the S/L backbones as the encoder-strength trend. Write `reports/<date>-b8-exemplar-select`.
      The tiny preview (100/class subset, ViT-S, 2 seeds) had NCM beating every exemplar arm by 2-4 pp. If that holds,
      H2 fails: a class mean is the better memory with foundation features, and that is the headline negative.
+     **Interim from the full run (ViT-S/14, CIFAR-100, 6/10 seeds; not a verdict):**
+
+     | arm, 20 per class | final accuracy |
+     |---|---|
+     | random | 0.727 |
+     | herding | 0.758 |
+     | k-center | 0.773 (+0.046 over random, 6/6 seeds) |
+     | k-means centroids | 0.834 |
+     | NCM (one mean per class) | 0.802 |
+     | all training images | 0.841 |
+
+     H1 is on track and H2 is failing at ViT-S. Storing centroids instead of real points nearly reaches the
+     full-memory bound. The run takes about 1.5 min per seed, about 1.5-2 h for all 60 runs.
+     Protocol note for the report: with a frozen encoder and no memory rewrites, *final* accuracy does not depend on
+     class order (only average incremental accuracy does), so the seed spread is selection randomness alone.
   2. **B1b**: when both jobs finish, compare `local_aux` / `local_rec` to the main sweep's bp (0.932 at d8 CIFAR-10)
      and local_ce (0.767), and check P2 on `block_acc` at d12. Add a B1b section to the B1 report.
   3. **Strong slots**: when the A1 jobs end, the best-justified strong builds are (a) B7's noise/imbalance-aware
