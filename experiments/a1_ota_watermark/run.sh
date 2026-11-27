@@ -114,6 +114,13 @@ if [ "$MODE" = fair ]; then               # baseline bounds and the held-out mea
   done
   exit 0
 fi
+if [ "$MODE" = audioseal_ft ]; then       # AudioSeal fine-tuned on our training channel, then the fair evaluation on it
+  for s in ${SEEDS:-0}; do
+    python ft_audioseal.py --seed "$s" --steps "${STEPS:-8000}" ${FT_ARGS:-}
+    python run_a1.py eval --seed "$s" --tag _audioseal_ft --no_native --methods audioseal_ft       --conditions ${CONDS:-clean ota ota_mp3 ota_mit ota_mit_mp3} --pesq_targets ${PESQ_TARGETS:-4.0 4.3}
+  done
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0

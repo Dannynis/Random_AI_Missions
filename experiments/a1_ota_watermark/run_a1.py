@@ -183,7 +183,8 @@ def info_for(info, k):
 
 # one pre-registered decision rule per method for every table (simulated and real): ours and its payload variants use
 # the CRC with a list of 4; baselines their own decoder ("top"); "oracle" (AudioSeal on its known grid) is an upper bound
-PRIMARY_RULE = {"ours": "crc@4", "audioseal": "top", "wavmark": "top", "wavmark_soft": "top", "dear": "top"}
+PRIMARY_RULE = {"ours": "crc@4", "audioseal": "top", "audioseal_ft": "top", "wavmark": "top", "wavmark_soft": "top",
+                "dear": "top"}
 
 
 def make_method(m, seed):
@@ -192,6 +193,8 @@ def make_method(m, seed):
         return Ours(seed, int(m[6:]) if m != "ours" else 16)
     if m == "audioseal":
         return AudioSealM()
+    if m == "audioseal_ft":
+        return AudioSealFTM(seed)
     if m == "wavmark":
         return WavMarkM()
     if m == "wavmark_soft":
@@ -386,6 +389,22 @@ class AudioSealM:
                     oms.append((raw[:, 2:].mean(-1) > 0).long().cpu())
             res["oracle"] = (torch.cat(oms).numpy(), out.copy(), torch.cat(osc).numpy())
         return res
+
+
+class AudioSealFTM(AudioSealM):
+    """AudioSeal after fine-tuning on our training channel (ft_audioseal.py); same decoder and sync search."""
+    name = "audioseal_ft"
+
+    def __init__(self, seed):
+        super().__init__()
+        dirs = [d for d in os.environ.get("A1_CKPT", "").split(":") if d] + [CK]
+        path = next((os.path.join(d, f"audioseal_ft_seed{seed}.pt") for d in dirs
+                     if os.path.exists(os.path.join(d, f"audioseal_ft_seed{seed}.pt"))), None)
+        if path is None:
+            raise FileNotFoundError(f"no fine-tuned AudioSeal for seed {seed}")
+        st = torch.load(path, map_location=DEV, weights_only=False)
+        self.gen.load_state_dict(st["gen"]); self.det.load_state_dict(st["det"])
+        self.gen.eval(); self.det.eval()
 
 
 class WavMarkM:
