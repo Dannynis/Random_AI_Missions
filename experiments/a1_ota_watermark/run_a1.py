@@ -181,6 +181,11 @@ def info_for(info, k):
     return np.concatenate([info, ext], 1)
 
 
+# one pre-registered decision rule per method for every table (simulated and real): ours and its payload variants use
+# the CRC with a list of 4; baselines their own decoder ("top"); "oracle" (AudioSeal on its known grid) is an upper bound
+PRIMARY_RULE = {"ours": "crc@4", "audioseal": "top", "wavmark": "top", "wavmark_soft": "top", "dear": "top"}
+
+
 def make_method(m, seed):
     """Method object from its name: ours, ours_k<bits> (same model, longer message), audioseal, wavmark, dear."""
     if m == "ours" or m.startswith("ours_k"):
@@ -189,6 +194,8 @@ def make_method(m, seed):
         return AudioSealM()
     if m == "wavmark":
         return WavMarkM()
+    if m == "wavmark_soft":
+        return WavMarkSoftM()
     if m == "dear":
         from dear import DeARM
         return DeARM(seed)
@@ -366,7 +373,19 @@ class AudioSealM:
                 sc.append(det.cpu()); ms.append((raw[:, 2:].mean(-1) > 0).long().cpu())
         sc, ms = torch.cat(sc).numpy(), torch.cat(ms).numpy()
         out = np.ones(len(sc), bool)
-        return {"top": (ms, out, sc)}
+        res = {"top": (ms, out, sc)}
+        if getattr(self, "oracle_shift", None) is not None:      # upper bound: decode on the known embedding grid
+            osc, oms = [], []
+            sh = np.asarray(self.oracle_shift).astype(int) % self.PERIOD
+            with torch.no_grad():
+                for i in range(0, len(y), 8):
+                    yb = y[i:i + 8].to(DEV)
+                    crop = torch.stack([yb[k, sh[i + k]:sh[i + k] + n] for k in range(len(yb))])
+                    raw = self._raw(crop)
+                    osc.append(torch.softmax(raw[:, :2], 1)[:, 1].mean(-1).cpu())
+                    oms.append((raw[:, 2:].mean(-1) > 0).long().cpu())
+            res["oracle"] = (torch.cat(oms).numpy(), out.copy(), torch.cat(osc).numpy())
+        return res
 
 
 class WavMarkM:
@@ -396,6 +415,36 @@ class WavMarkM:
             if p is not None:
                 ms[i] = p; out[i] = True
         return {"top": (ms, out, sc)}
+
+
+class WavMarkSoftM(WavMarkM):
+    """WavMark with soft combining (added for fairness): the public decoder keeps a 1 s segment only if all 16 pattern
+    bits decode exactly and then votes hard bits. Here, for every phase of the 1 s segment grid (50 ms steps, as the
+    public search), the bit probabilities of all segments in the window are averaged; the phase with the highest pattern
+    log-likelihood is kept, the payload is the averaged probability > 0.5, the score is that log-likelihood."""
+    name = "wavmark_soft"
+    STEP, SEG = 800, 16000
+
+    def decode(self, y, truth):
+        pat = torch.tensor(self.wm.wm_add_util.fix_pattern[0:16], dtype=torch.float32)
+        B = len(y)
+        ms = np.zeros((B, 16), np.int64); sc = np.zeros(B)
+        with torch.no_grad():
+            for i in range(B):
+                x = y[i].float()
+                best = (-np.inf, None)
+                for ph in range(0, self.SEG, self.STEP):
+                    starts = list(range(ph, len(x) - self.SEG + 1, self.SEG))
+                    if not starts:
+                        continue
+                    seg = torch.stack([x[s0:s0 + self.SEG] for s0 in starts]).to(DEV)
+                    pr = self.model.decode(seg).float().cpu().clamp(1e-4, 1 - 1e-4).mean(0)       # (32,)
+                    ll = float((pat * pr[:16].log() + (1 - pat) * (1 - pr[:16]).log()).sum())
+                    if ll > best[0]:
+                        best = (ll, pr)
+                sc[i] = best[0]
+                ms[i] = (best[1][16:] > 0.5).long().numpy()
+        return {"top": (ms, np.ones(B, bool), sc)}
 
 
 # ======================================================================= benchmark
@@ -485,7 +534,7 @@ def target_gain(tname, rc, chost, cg0, pool, nsp):
     raise ValueError(tname)
 
 
-FIXED_COND_INDEX = {"ota_opus12": 50}
+FIXED_COND_INDEX = {"ota_opus12": 50, "ota_mit": 51, "ota_mit_mp3": 52}
 
 
 def evaluate(a):
@@ -548,6 +597,8 @@ def evaluate(a):
                 y, off, sp = chan.test(xm.to(DEV), c, cseed[c])
                 ym = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
                 truth = truth_for(g0, phi0, t0, off.cpu().numpy().astype(np.float64), sp.cpu().numpy().astype(np.float64))
+                if isinstance(m, AudioSealM):              # host sample 0 sits at (offset - t0) in the window
+                    m.oracle_shift = (np.round(off.cpu().numpy()).astype(int) - t0) % AudioSealM.PERIOD
                 dp = m.decode(ym, truth)
                 if (m.name, c) not in neg_cache:            # unmarked twins do not depend on the target
                     neg_cache[(m.name, c)] = m.decode(unmarked[c], truth)
@@ -596,7 +647,7 @@ def summary(a):
         return
     tab = {}
     for r in rows:
-        best = r["rule"] in ("crc@1",) if r["method"] == "ours" else r["rule"] == "top"
+        best = r["rule"] == PRIMARY_RULE.get(r["method"].split("_k")[0] if r["method"].startswith("ours") else r["method"], "top")
         if not best:
             continue
         k = (r["method"], r["target"], r["condition"])

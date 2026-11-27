@@ -104,6 +104,16 @@ if [ "$MODE" = train_variant ]; then      # ours retrained with other settings (
   done
   exit 0
 fi
+if [ "$MODE" = fair_tiny ]; then          # smoke test: baseline bounds (AudioSeal oracle grid, WavMark soft) + measured rooms
+  python run_a1.py eval --seed 0 --tiny --tag _fair_tiny --no_native --methods ours audioseal wavmark wavmark_soft     --conditions clean ota_mit --pesq_targets 4.0
+  exit 0
+fi
+if [ "$MODE" = fair ]; then               # baseline bounds and the held-out measured-room channel, models from $A1_CKPT
+  for s in ${SEEDS:-0 1 2}; do
+    python run_a1.py eval --seed "$s" --tag "${TAG:-_fair}" --no_native --methods ${METHODS:-ours audioseal wavmark_soft dear}       --conditions ${CONDS:-clean ota ota_mit ota_mit_mp3} --pesq_targets ${PESQ_TARGETS:-4.0 4.3} --n_rec "${N_REC:-300}"
+  done
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0

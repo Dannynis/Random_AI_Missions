@@ -169,6 +169,8 @@ def score(a):
         for p in ([] if a.skip_plain else [None]) + list(a.post):
             cond = "real" if p is None else f"real+{p}"
             yn, okn = windows("unmarked", "-", p)
+            if isinstance(m, R.AudioSealM):             # oracle rule: host sample 0 sits at -t0 in each window
+                m.oracle_shift = (-t0.astype(int)) % m.PERIOD
             dn = m.decode(yn, truth)
             for tgt in sorted({g["target"] for g in man["gains"] if g["method"] == m.name}):
                 yp, okp = windows(m.name, tgt, p)

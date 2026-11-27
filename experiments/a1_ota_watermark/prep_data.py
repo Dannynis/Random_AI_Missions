@@ -123,6 +123,32 @@ def rir_banks():
         print(name, out.shape, flush=True)
 
 
+def mit_rir_bank():
+    """Measured room impulse responses (MIT IR Survey, Traer & McDermott 2016, CC-BY 4.0; 270 real spaces at 1.5 m),
+    if the archive has been unpacked to <data>/mit_ir/Audio: resampled to 16 kHz, direct path near sample 16, 0.5 s,
+    unit energy (as the simulated banks). Used only for the held-out test condition ``ota_mit``."""
+    d = out_dir()
+    src = os.path.join(d, "mit_ir", "Audio")
+    dst = os.path.join(d, "rir_mit.npy")
+    if os.path.exists(dst) or not os.path.isdir(src):
+        return
+    import glob
+    import scipy.signal as ss
+    import soundfile as sf
+    out = []
+    for f in sorted(glob.glob(os.path.join(src, "*.wav"))):
+        x, sr = sf.read(f, dtype="float32")
+        x = x if x.ndim == 1 else x[:, 0]
+        g = math.gcd(SR, sr)
+        h = ss.resample_poly(x, SR // g, sr // g).astype(np.float32)
+        k = int(np.argmax(np.abs(h)))
+        h = h[max(0, k - 16):][:8000]
+        v = np.zeros(8000, np.float32); v[:len(h)] = h / (np.linalg.norm(h) + 1e-9)
+        out.append(v)
+    np.save(dst, np.stack(out))
+    print("rir_mit", len(out), flush=True)
+
+
 def main():
     tiny = "--tiny" in sys.argv
     h = 0.3 if tiny else 1.0
@@ -135,6 +161,7 @@ def main():
                           (ESC, "data/train-00001-of-00002-27425e5c1846b494.parquet")], "fold", 3,
           keep=lambda r: r.get("fold", 1) != 5)
     rir_banks()
+    mit_rir_bank()
     build("speech_train", [(LS, f"all/train.clean.100/{i:04d}.parquet") for i in range(3)], "speaker_id", 15 * h)
     build("music_train", [(FMA, f"data/train-{i:05d}-of-00015.parquet") for i in range(2)], None, 12 * h)
 

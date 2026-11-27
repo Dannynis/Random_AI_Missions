@@ -271,6 +271,8 @@ class Channel:
         self.rir = torch.from_numpy(np.load(os.path.join(d, f"rir_{split}.npy"))).to(device)
         self.rir_legacy = legacy_rirs(400 if split == "train" else 100, seed=1 if split == "train" else 777).to(device)
         self.noise = Corpus(f"noise_{split}")
+        f = os.path.join(d, "rir_mit.npy")            # measured rooms, test only (held-out condition ota_mit)
+        self.rir_mit = torch.from_numpy(np.load(f)).to(device) if split == "test" and os.path.exists(f) else None
 
     def _noise(self, B, n, g):
         rng = np.random.default_rng(int(torch.randint(0, 2 ** 31, (1,), generator=g, device=g.device)))
@@ -358,6 +360,7 @@ class Channel:
 
     TESTS = ("clean", "mp3_64k", "opus_32k", "reverb", "ota_legacy", "ota", "ota_mp3")
     STRESS = ("ota_noisy", "speed_1pct", "phone", "opus_12k", "aac_32k")      # never seen in training
+    HELDOUT = ("ota_mit", "ota_mit_mp3")      # the ota chain with measured rooms (MIT IR Survey) instead of simulated ones
     EXTRA = ("ota_opus12",)                  # play-and-record chain, then Opus 12 kbit/s (recording sent over a call)
 
     def test(self, x, name: str, seed: int):
@@ -368,7 +371,7 @@ class Channel:
         r = lambda: torch.rand(B, generator=g, device=dev)
         off = torch.randint(0, MAX_OFFSET + 1, (B,), generator=g, device=dev).float()
         speed = torch.ones(B, device=dev)
-        if name in ("ota", "ota_mp3", "ota_noisy", "ota_opus12"):
+        if name in ("ota", "ota_mp3", "ota_noisy", "ota_opus12", "ota_mit", "ota_mit_mp3"):
             speed = 1 + (200e-6 * r() - 100e-6)              # +-100 ppm clock mismatch
         elif name == "speed_1pct":                           # unseen: 1 % playback speed error (training saw <= 0.2 %)
             speed = 1 + 0.01 * torch.where(r() < 0.5, -1.0, 1.0)
@@ -381,10 +384,11 @@ class Channel:
             y = freq_gain(y, band_response(150 + 150 * r(), 5000 + 2000 * r(), 3 * (2 * torch.rand(B, 3, generator=g, device=dev) - 1), n))
             y = add_noise(y, torch.randn((B, n), generator=g, device=dev), torch.full((B, 1), 20.0, device=dev))
             y = mulaw(y)
-        elif name in ("ota", "ota_mp3", "ota_noisy", "ota_opus12"):
+        elif name in ("ota", "ota_mp3", "ota_noisy", "ota_opus12", "ota_mit", "ota_mit_mp3"):
             y = freq_gain(y, band_response(100 + 250 * r(), 5000 + 3000 * r(), 5 * (2 * torch.rand(B, 4, generator=g, device=dev) - 1), n))
             y = soft_clip(y, 1.0 + 1.5 * r())
-            y = fft_conv(y, self.rir[torch.randint(0, len(self.rir), (B,), generator=g, device=dev)])
+            bank = self.rir_mit if name.startswith("ota_mit") else self.rir   # measured rooms: never seen in training
+            y = fft_conv(y, bank[torch.randint(0, len(bank), (B,), generator=g, device=dev)])
             y = freq_gain(y, band_response(60 + 140 * r(), 6000 + 2000 * r(), 2 * (2 * torch.rand(B, 3, generator=g, device=dev) - 1), n))
             snr = (0 + 5 * r()[:, None]) if name == "ota_noisy" else (15 + 10 * r()[:, None])
             y = add_noise(y, self._noise(B, n, g), snr)
@@ -395,7 +399,7 @@ class Channel:
             y = mulaw(y)
         y = y * 10 ** ((6 * r()[:, None] - 3) / 20)
         y = y.clamp(-1, 1)
-        if name == "mp3_64k" or name == "ota_mp3":
+        if name in ("mp3_64k", "ota_mp3", "ota_mit_mp3"):
             y, extra = codec(y, "mp3", "64k")
         elif name == "opus_32k":
             y, extra = codec(y, "opus", "32k")
