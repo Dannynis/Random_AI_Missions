@@ -61,12 +61,23 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 - **Origin:** PR #56. Straight-through forward took depth-12 training from 10 % to 86.7 %.
 - **Strong test:** CIFAR-10 at the published network sizes, depth 6 to 48, versus the published residual-init
   and Gumbel variants. Check prior work first (a 2025 paper may cover this).
+- **Prior-work check (2026-11-27): crowded.** Residual initialisation already trains DLGNs past 6 layers (Petersen et
+  al., "Convolutional DLGNs", NeurIPS 2024, arXiv 2411.04732, 86.3% CIFAR-10); a reparametrisation fixes depth with 4×
+  less memory and 8.5× fewer steps ("Light DLGNs", arXiv 2510.03250); straight-through training of gates and
+  connections at depth is in arXiv 2607.09399. The daily run's ST trick is covered. Keep only as a cheap replication
+  check unless a new angle appears; deprioritised below B5.
 
 ### B3. Mixture-of-experts routing versus dense at real scale  (`todo`)
 - **Origin:** PRs #3, #20, #40, #52. Learned routers recover 24-82 % of oracle gain; self-supervised features in a
   dense model beat every router.
 - **Strong test:** small transformer language model (GPT-2 small scale) with MoE layers on a multi-domain corpus,
   dense at equal compute, oracle domain routing as the ceiling.
+- **Prior-work check (2026-11-27): largely covered by DEMix** (Gururangan et al., NAACL 2022, arXiv 2108.05036):
+  domain-expert FFN layers versus dense at 125M-1.3B with oracle domain routing, and a learned-vs-domain routing
+  comparison in its appendix A.5. A B3 run at GPT-2 scale would mostly replicate it. The daily-run angle that is still
+  open is narrower: *does a dense model's own self-supervised features route better than a trained router* (the
+  "features beat every router" finding) — worth a build only if that survives a read of DEMix A.5 and later
+  routing-analysis papers. Deprioritised until then.
 
 ### B4. Neural cellular automata: persistence schedule  (`done`: `reports/2026-11-24-b4-nca-schedule`)
 - **Origin:** PRs #28, #44, #58. Reversed re-seed schedule (2 to 8) was best on 1 seed.
