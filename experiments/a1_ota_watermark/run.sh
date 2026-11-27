@@ -121,6 +121,10 @@ if [ "$MODE" = audioseal_ft ]; then       # AudioSeal fine-tuned on our training
   done
   exit 0
 fi
+if [ "$MODE" = audibility ]; then         # SQUIM MOS, PEAQ-style NMR, STOI at the PESQ-matched gains; listening-test kit
+  python audibility.py --seed "${SEED:-0}" --n "${N_AUD:-40}" --methods ${METHODS:-ours audioseal wavmark dear}     --targets ${PESQ_TARGETS:-4.0 4.3 4.5} --kit "$RUN_DIR/out/abx_kit"
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0

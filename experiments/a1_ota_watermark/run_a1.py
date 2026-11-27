@@ -159,6 +159,17 @@ def _pesq_one(args):
 
 
 def pesq_batch(ref, deg, pool=None):
+    """Wideband PESQ per row; rows longer than 8 s are scored as the mean over their 8 s sub-windows, so PESQ means
+    the same thing for every listening window (identical to the plain call for 8 s rows)."""
+    seg = 8 * wmx.SR
+    if ref.shape[-1] > seg:
+        k = ref.shape[-1] // seg
+        r2 = ref[:, :k * seg].reshape(-1, seg); d2 = deg[:, :k * seg].reshape(-1, seg)
+        return np.nanmean(_pesq_rows(r2, d2).reshape(len(ref), k), 1)
+    return _pesq_rows(ref, deg)
+
+
+def _pesq_rows(ref, deg):
     # sequential on purpose: process pools need shared memory that batch jobs may not have
     return np.array([_pesq_one(a) for a in zip(ref.astype(np.float64), deg.astype(np.float64))])
 
@@ -470,6 +481,9 @@ class WavMarkSoftM(WavMarkM):
 TINY = False
 REC_S = int(os.environ.get("A1_REC_S", "8"))     # listening window (s); longer windows combine repeats of the 8 s cycle
 S_CHUNKS = REC_S // 2 + 2
+# decoding windows (s) evaluated on the same streams (paired); the first REC_S s of each window. Rows for a window
+# shorter than REC_S get the condition name "<cond>@<s>s"
+DEC_S = [int(x) for x in os.environ.get("A1_DEC_S", str(REC_S)).split()]
 
 
 def make_streams(seed, n_rec):
@@ -614,39 +628,44 @@ def evaluate(a):
             for c in conds:
                 t1 = time.time()
                 y, off, sp = chan.test(xm.to(DEV), c, cseed[c])
-                ym = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
+                yfull = torch.stack([y[b, t0[b]:t0[b] + n] for b in range(n_rec)]).cpu()
                 truth = truth_for(g0, phi0, t0, off.cpu().numpy().astype(np.float64), sp.cpu().numpy().astype(np.float64))
-                if isinstance(m, AudioSealM):              # host sample 0 sits at (offset - t0) in the window
-                    m.oracle_shift = (np.round(off.cpu().numpy()).astype(int) - t0) % AudioSealM.PERIOD
-                dp = m.decode(ym, truth)
-                if (m.name, c) not in neg_cache:            # unmarked twins do not depend on the target
-                    neg_cache[(m.name, c)] = m.decode(unmarked[c], truth)
-                dn = neg_cache[(m.name, c)]
-                k = getattr(m, "k_info", 16); im = info_for(info, k)
-                if hasattr(m, "slot_stats"):
-                    ss = m.slot_stats(ym, truth, info)
-                    res.setdefault("slots", []).append({"method": m.name, "target": tname, "condition": c, **ss})
-                    say(f"{key} {c} slots:", {x: round(v, 4) for x, v in ss.items()})
-                for rule in dp:
-                    ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
-                    correct = (ip[:, :k] == im).all(1)
-                    row = {"method": m.name, "target": tname, "condition": c, "rule": rule, "k_info": k,
-                           "ber": float((ip[:, :k] != im).mean()),
-                           "raw_success": float((correct & op).mean()), "raw_false_alarm": float(on.mean()),
-                           "success_speech": float((correct & op)[src == 0].mean()),
-                           "success_music": float((correct & op)[src == 1].mean()),
-                           "auc": auc(np.where(op, sp_, -1e9), np.where(on, sn, -1e9)),
-                           "fa1": two_fold(correct, op, sp_, on, sn, 0.01),
-                           "fa0": two_fold(correct, op, sp_, on, sn, 0.0),
-                           "per_rec": {"correct": correct.astype(int).tolist(), "out_pos": op.astype(int).tolist(),
-                                       "score_pos": np.round(np.nan_to_num(sp_, neginf=-1e9), 4).tolist(),
-                                       "out_neg": on.astype(int).tolist(),
-                                       "score_neg": np.round(np.nan_to_num(sn, neginf=-1e9), 4).tolist()},
-                           "sec": time.time() - t1}
-                    res["rows"].append(row)
-                say(f"{key} {c}: " + ", ".join(f"{x['rule']} raw={x['raw_success']:.3f} fa1={x['fa1']['success']:.3f} "
-                                               f"FA={x['raw_false_alarm']:.3f} ber={x['ber']:.3f}"
-                                               for x in res["rows"][-len(dp):]))
+                c_base = c
+                for ds in DEC_S:
+                    c = c_base if ds == REC_S else f"{c_base}@{ds}s"
+                    ym = yfull[:, :ds * wmx.SR]
+                    self_unm = unmarked[c_base][:, :ds * wmx.SR]
+                    if isinstance(m, AudioSealM):              # host sample 0 sits at (offset - t0) in the window
+                        m.oracle_shift = (np.round(off.cpu().numpy()).astype(int) - t0) % AudioSealM.PERIOD
+                    dp = m.decode(ym, truth)
+                    if (m.name, c) not in neg_cache:            # unmarked twins do not depend on the target
+                        neg_cache[(m.name, c)] = m.decode(self_unm, truth)
+                    dn = neg_cache[(m.name, c)]
+                    k = getattr(m, "k_info", 16); im = info_for(info, k)
+                    if hasattr(m, "slot_stats"):
+                        ss = m.slot_stats(ym, truth, info)
+                        res.setdefault("slots", []).append({"method": m.name, "target": tname, "condition": c, **ss})
+                        say(f"{key} {c} slots:", {x: round(v, 4) for x, v in ss.items()})
+                    for rule in dp:
+                        ip, op, sp_ = dp[rule]; _, on, sn = dn[rule]
+                        correct = (ip[:, :k] == im).all(1)
+                        row = {"method": m.name, "target": tname, "condition": c, "rule": rule, "k_info": k,
+                               "ber": float((ip[:, :k] != im).mean()),
+                               "raw_success": float((correct & op).mean()), "raw_false_alarm": float(on.mean()),
+                               "success_speech": float((correct & op)[src == 0].mean()),
+                               "success_music": float((correct & op)[src == 1].mean()),
+                               "auc": auc(np.where(op, sp_, -1e9), np.where(on, sn, -1e9)),
+                               "fa1": two_fold(correct, op, sp_, on, sn, 0.01),
+                               "fa0": two_fold(correct, op, sp_, on, sn, 0.0),
+                               "per_rec": {"correct": correct.astype(int).tolist(), "out_pos": op.astype(int).tolist(),
+                                           "score_pos": np.round(np.nan_to_num(sp_, neginf=-1e9), 4).tolist(),
+                                           "out_neg": on.astype(int).tolist(),
+                                           "score_neg": np.round(np.nan_to_num(sn, neginf=-1e9), 4).tolist()},
+                               "sec": time.time() - t1}
+                        res["rows"].append(row)
+                    say(f"{key} {c}: " + ", ".join(f"{x['rule']} raw={x['raw_success']:.3f} fa1={x['fa1']['success']:.3f} "
+                                                   f"FA={x['raw_false_alarm']:.3f} ber={x['ber']:.3f}"
+                                                   for x in res["rows"][-len(dp):]))
             res["done"].append(key)
             dump(res, outp)
     res["complete"] = True
