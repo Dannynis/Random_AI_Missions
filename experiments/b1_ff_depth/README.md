@@ -56,3 +56,27 @@ composition curve are the new content.
 `$RUN_DIR/out/summary.json`: per-cell head/block accuracies, and per-(rule, dataset, depth) aggregates incl.
 `head_acc_mean`, `first_block_mean`, `best_block_mean`, `depth_gain_mean`. `run.sh tiny` is a fast CPU/GPU pipeline
 check (2 depths, 2 seeds, CIFAR-10, 3 epochs, 2k train images).
+
+## Follow-up B1b (2026-11-27): is the plateau locality, or the local objective?
+The full sweep (report `reports/2026-11-27-b1-ff-depth`) found H1 FAIL (greedy local CE trails backprop by 12-17 pp
+on CIFAR-10) and H2 formally PASS but with a plateau: local CE composes up to ~block 7 and then adds nothing
+(CIFAR-10 d12 block probes 0.763 → 0.766 over blocks 6-12), while backprop keeps gaining to block 10. This is the
+"information collapse" of greedy modules described by InfoPro (Wang et al., ICLR 2021, arXiv 2101.10832): a module
+trained only on its own CE discards input information later modules need. Belilovsky et al. (ICML 2019) close most of
+the gap with stronger auxiliary heads. B1b separates the two explanations at our controlled arch/epochs:
+- **`local_aux`** — greedy local CE with a Belilovsky-style auxiliary head (one hidden 3×3 conv + BN + ReLU, 2×2
+  average pool, linear) instead of linear-on-GAP. Tests: was the cost the weak local readout?
+- **`local_rec`** — greedy local CE (linear-on-GAP head, as `local_ce`) **plus** an InfoPro-style reconstruction term:
+  a 1×1 linear decoder from the block's features, bilinearly upsampled, MSE to the input image, weight 1. Tests: does
+  forcing each block to keep input information lift the plateau?
+
+Depths {8, 12} × CIFAR-10/100 × 3 seeds (same seeds/epochs as the main sweep; `bp` and `local_ce` numbers are reused
+from it). Run: `B1_RULES=local_aux,local_rec B1_DEPTHS=8,12 [B1_DATASETS=cifar10] run.sh`.
+
+**Pass / fail (stated before the run):**
+- **P1 (objective, not locality):** the best of `local_aux` / `local_rec` at depth 8 on CIFAR-10 is within **3 pp** of
+  `bp` d8 (0.932) on ≥2/3 seeds. **Fail:** gap >3 pp → a sizeable cost of locality remains even with the known fixes.
+- **P2 (plateau lifts):** for `local_rec` at depth 12 on CIFAR-10, the block-12 probe beats the block-6 probe by
+  **≥2 pp** on ≥2/3 seeds (`local_ce`: +0.3 pp). **Fail:** <2 pp → reconstruction does not restore composition at depth.
+Note: `local_aux`'s readout has one extra conv layer relative to `bp`'s linear head; `bp` gains only 0.1 pp from
+d8 to d12, so one extra layer cannot by itself explain parity.

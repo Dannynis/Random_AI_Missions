@@ -49,6 +49,11 @@ BATCH = 128
 DEPTHS = [2, 4] if TINY else [4, 8, 12]
 SEEDS = [0, 1] if TINY else [0, 1, 2]
 RULES = ["bp", "local_ce", "ff"]
+# follow-up (B1b) overrides: comma lists, e.g. B1_RULES=local_aux,local_rec B1_DEPTHS=8,12
+if os.environ.get("B1_RULES"): RULES = os.environ["B1_RULES"].split(",")
+if os.environ.get("B1_DEPTHS"): DEPTHS = [int(v) for v in os.environ["B1_DEPTHS"].split(",")]
+DATASETS_ENV = os.environ.get("B1_DATASETS")
+REC_W = float(os.environ.get("B1_REC", "1.0"))  # weight of the reconstruction term (local_rec)
 # channel width per block index (downsample where width increases)
 WIDTHS = [64, 64, 128, 128, 256, 256, 256, 256, 512, 512, 512, 512]
 
@@ -149,6 +154,30 @@ def overlay(x, y, ncls):
 def rms_norm(z):  # per-sample RMS normalization of a feature map
     return z / (z.pow(2).mean(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-6)
 
+class AuxHead(nn.Module):
+    """Belilovsky-style auxiliary classifier: one hidden conv + 2x2 pooling + linear."""
+    def __init__(self, w, ncls):
+        super().__init__()
+        self.net = nn.Sequential(nn.Conv2d(w, w, 3, padding=1, bias=False), nn.BatchNorm2d(w),
+                                 nn.ReLU(inplace=True), nn.AdaptiveAvgPool2d(2), nn.Flatten(),
+                                 nn.Linear(4 * w, ncls))
+    def forward(self, fm): return self.net(fm)
+
+class RecHead(nn.Module):
+    """Linear-on-GAP classifier (as local_ce) plus a 1x1 linear decoder to the input image."""
+    def __init__(self, w, ncls):
+        super().__init__()
+        self.cls = nn.Linear(w, ncls); self.dec = nn.Conv2d(w, 3, 1)
+    def forward(self, fm): return self.cls(gap(fm))
+
+def make_head(rule, w, ncls):
+    if rule == "local_aux": return AuxHead(w, ncls)
+    if rule == "local_rec": return RecHead(w, ncls)
+    return nn.Linear(w, ncls)
+
+def head_logits(rule, head, fm):
+    return head(fm) if rule in ("local_aux", "local_rec") else head(gap(fm))
+
 def run_local(rule, depth, ncls, trl, tel, state):
     """Greedy block-wise training.
       local_ce: each block trained with a detached input and its own linear CE
@@ -159,7 +188,7 @@ def run_local(rule, depth, ncls, trl, tel, state):
                 fit on the frozen blocks for readout (matches eval)."""
     c_extra = ncls if rule == "ff" else 0
     blocks, _ = make_blocks(depth, 3 + c_extra, use_bn=(rule != "ff"))
-    heads = nn.ModuleList([nn.Linear(width(i), ncls) for i in range(depth)])
+    heads = nn.ModuleList([make_head(rule, width(i), ncls) for i in range(depth)])
     blocks, heads = blocks.to(DEV), heads.to(DEV)
     cur_block = 0; start_ep = 0; phase = "blocks"
     if state is not None:
@@ -177,7 +206,7 @@ def run_local(rule, depth, ncls, trl, tel, state):
             for j in range(bi):
                 for p in blocks[j].parameters(): p.requires_grad_(False)
             tgt = list(blocks[bi].parameters())
-            if rule == "local_ce": tgt += list(heads[bi].parameters())
+            if rule != "ff": tgt += list(heads[bi].parameters())
             opt = torch.optim.SGD(tgt, lr=0.1, momentum=0.9, weight_decay=5e-4, nesterov=True)
             sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, EPOCHS)
             s0 = start_ep if bi == cur_block else 0
@@ -201,7 +230,12 @@ def run_local(rule, depth, ncls, trl, tel, state):
                         gn = blocks[bi](hneg).pow(2).mean(dim=(1, 2, 3))
                         loss = F.softplus(-4.0 * (gp - gn)).mean()
                     else:
-                        loss = F.cross_entropy(heads[bi](gap(blocks[bi](h))), y)
+                        fm = blocks[bi](h)
+                        loss = F.cross_entropy(head_logits(rule, heads[bi], fm), y)
+                        if rule == "local_rec":  # InfoPro-style: keep input information
+                            rec = F.interpolate(heads[bi].dec(fm), size=x.shape[-2:], mode="bilinear",
+                                                align_corners=False)
+                            loss = loss + REC_W * F.mse_loss(rec, x)
                     opt.zero_grad(); loss.backward(); opt.step()
                 sched.step()
                 if _PREEMPT["hit"]:
@@ -262,7 +296,7 @@ def eval_local(blocks, heads, tel, depth, rule, ncls):
             hh = x
             for i in range(depth):
                 hh = blocks[i](hh)
-                correct[i] += (heads[i](gap(hh)).argmax(1) == y).sum().item()
+                correct[i] += (head_logits(rule, heads[i], hh).argmax(1) == y).sum().item()
         n += y.numel()
     ba = (correct / n).tolist()
     return {"block_acc": ba, "head_acc": max(ba), "n": n}
@@ -273,6 +307,7 @@ def cell_name(rule, dataset, depth, seed):
 
 def worker(widx, nworkers):
     datasets = ["cifar10"] if TINY else ["cifar10", "cifar100"]
+    if DATASETS_ENV: datasets = DATASETS_ENV.split(",")
     cells = [(r, ds, d, s) for ds in datasets for d in DEPTHS for s in SEEDS for r in RULES]
     for k, (rule, ds, depth, seed) in enumerate(cells):
         if k % nworkers != widx: continue
