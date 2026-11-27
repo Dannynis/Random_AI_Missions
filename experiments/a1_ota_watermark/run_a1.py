@@ -200,6 +200,8 @@ PRIMARY_RULE = {"ours": "crc@1", "audioseal": "top", "audioseal_ft": "top", "wav
 
 def make_method(m, seed):
     """Method object from its name: ours, ours_k<bits> (same model, longer message), audioseal, wavmark, dear."""
+    if m.startswith("ours_dec"):                          # same embedder, decoder retrained (fm_decoder.py)
+        return OursDec(seed, m[8:])
     if m in ("ours_eqinv", "ours_eqwf"):
         return OursEQ(seed, m[7:])
     if m == "ours" or m.startswith("ours_k"):
@@ -333,6 +335,17 @@ class Ours:
         return {"slot_ber": p, "n_chunks": int(full.sum()), "cap_cal_bps": cap_cal,
                 "cap_refit_bps": wc.capacity_bits(ev) * sps, "cap_bsc_bps": (1 - h) * sps,
                 "payload_bps": self.k_info / (4 * wmx.N / wmx.SR), "rec_s": REC_S}
+
+
+class OursDec(Ours):
+    """Ours with a decoder retrained on the frozen embedder (fm_decoder.py: ``wavlm`` on a speech foundation model,
+    ``ours`` the original architecture by the same recipe)."""
+
+    def __init__(self, seed, arch):
+        super().__init__(seed)
+        from fm_decoder import load_decoder
+        self.name = f"ours_dec{arch}"
+        self.dec = load_decoder(arch, seed)
 
 
 class OursEQ(Ours):

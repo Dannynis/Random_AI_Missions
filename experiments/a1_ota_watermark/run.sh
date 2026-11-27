@@ -131,6 +131,13 @@ if [ "$MODE" = audibility ]; then         # SQUIM MOS, PEAQ-style NMR, STOI at t
   python audibility.py --seed "${SEED:-0}" --n "${N_AUD:-40}" --methods ${METHODS:-ours audioseal wavmark dear}     --targets ${PESQ_TARGETS:-4.0 4.3 4.5} --kit "$RUN_DIR/out/abx_kit"
   exit 0
 fi
+if [ "$MODE" = fm_dec ]; then             # decoder retrained on the frozen embedder ($DEC_ARCH wavlm | ours), then evaluated
+  for s in ${SEEDS:-0}; do
+    python fm_decoder.py --seed "$s" --arch "${DEC_ARCH:-wavlm}" --steps "${STEPS:-10000}" ${DEC_ARGS:-}
+    python run_a1.py eval --seed "$s" --tag "_dec${DEC_ARCH:-wavlm}" --no_native --methods "ours_dec${DEC_ARCH:-wavlm}"       --conditions ${CONDS:-clean ota ota_mp3 ota_mit ota_mit_mp3} --pesq_targets ${PESQ_TARGETS:-4.0 4.3 4.5}
+  done
+  exit 0
+fi
 if [ "$MODE" = speed ]; then
   python run_a1.py train --seed 99 --steps 400 --batch 32 --ckpt_every 200
   exit 0

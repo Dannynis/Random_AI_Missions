@@ -165,15 +165,23 @@ def score(a):
     truth = R.truth_for(g0, phi0, t0, np.zeros(B), np.ones(B))
     names = list(dict.fromkeys(g["method"] for g in man["gains"]))
     names = [m for m in names if m in a.methods] if a.methods != DEFAULT_METHODS else names
-    for m in load_methods(names, man["seed"], need_cal=True):
+    objs = load_methods(names, man["seed"], need_cal=True)
+    for spec in a.decode_as:                              # e.g. ours=ours_decwavlm: decode ours' items with another decoder
+        src_m, dst_m = spec.split("=")
+        if src_m in names:
+            o = load_methods([dst_m], man["seed"], need_cal=True)[0]
+            o.src_name = src_m
+            objs.append(o)
+    for m in objs:
+        sname = getattr(m, "src_name", m.name)
         for p in ([] if a.skip_plain else [None]) + list(a.post):
             cond = "real" if p is None else f"real+{p}"
             yn, okn = windows("unmarked", "-", p)
             if isinstance(m, R.AudioSealM):             # oracle rule: host sample 0 sits at -t0 in each window
                 m.oracle_shift = (-t0.astype(int)) % m.PERIOD
             dn = m.decode(yn, truth)
-            for tgt in sorted({g["target"] for g in man["gains"] if g["method"] == m.name}):
-                yp, okp = windows(m.name, tgt, p)
+            for tgt in sorted({g["target"] for g in man["gains"] if g["method"] == sname}):
+                yp, okp = windows(sname, tgt, p)
                 t1 = time.time()
                 dp = m.decode(yp, truth)
                 k = getattr(m, "k_info", 16); im = R.info_for(info, k)
@@ -222,6 +230,7 @@ def main():
                     help="also score the recording after a codec, e.g. mp3_64k opus_12k aac_32k phone")
     ap.add_argument("--skip_plain", action="store_true", help="only the --post conditions")
     ap.add_argument("--recording", default="recording.wav")
+    ap.add_argument("--decode_as", nargs="*", default=[], help='re-decode the items of one method with another, e.g. ours=ours_decwavlm')
     a = ap.parse_args()
     make(a) if a.cmd == "make" else score(a)
 
