@@ -195,7 +195,7 @@ def info_for(info, k):
 # one pre-registered decision rule per method for every table (simulated and real): ours and its payload variants use
 # the CRC with a list of 4; baselines their own decoder ("top"); "oracle" (AudioSeal on its known grid) is an upper bound
 PRIMARY_RULE = {"ours": "crc@4", "audioseal": "top", "audioseal_ft": "top", "wavmark": "top", "wavmark_soft": "top",
-                "dear": "top"}
+                "dear": "top", "aware": "top"}
 
 
 def make_method(m, seed):
@@ -210,6 +210,8 @@ def make_method(m, seed):
         return WavMarkM()
     if m == "wavmark_soft":
         return WavMarkSoftM()
+    if m == "aware":
+        return AwareM()
     if m == "dear":
         from dear import DeARM
         return DeARM(seed)
@@ -433,6 +435,47 @@ class AudioSealFTM(AudioSealM):
         st = torch.load(path, map_location=DEV, weights_only=False)
         self.gen.load_state_dict(st["gen"]); self.det.load_state_dict(st["det"])
         self.gen.eval(); self.det.eval()
+
+
+class AwareM:
+    """AWARE (arXiv 2510.17512): per-clip adversarial embedding against a fixed, randomly initialised detector, 20-bit
+    payload over the whole clip ("AWARE" profile). Imported from its source tree (path in $A1_AWARE_SRC); the two
+    modules only its silence check needs (webrtcvad, resampy) are stubbed when absent, and the embedder is called
+    directly, as its embed_watermark does after that check. 16 info bits + 4 zero bits; 16 compared."""
+    name = "aware"
+
+    def __init__(self):
+        import sys
+        import types
+        sys.path.insert(0, os.environ["A1_AWARE_SRC"])
+        for mod in ("webrtcvad", "resampy"):
+            try:
+                __import__(mod)
+            except ImportError:
+                sys.modules[mod] = types.ModuleType(mod)
+        from aware.service import detect_watermark
+        from aware.utils.models import load
+        from aware.utils.watermark import PatternEncoder
+        self.emb, self.det = load(name="AWARE")
+        self.enc = PatternEncoder(mode=self.emb.pattern_mode)
+        self.detect = detect_watermark
+
+    def residual(self, host, g0, info, phi0):
+        out = []
+        for i in range(len(host)):
+            x = host[i].numpy().astype(np.float32)
+            w = self.enc(np.concatenate([info[i], np.zeros(4, np.int64)]).astype(np.int32))
+            y = np.max(x) * np.asarray(self.emb.embed(x, wmx.SR, w), np.float32)
+            out.append(torch.from_numpy(y[:len(x)] - x))
+        return torch.stack(out)
+
+    def decode(self, y, truth):
+        B = len(y)
+        ms = np.zeros((B, 16), np.int64); sc = np.zeros(B)
+        for i in range(B):
+            bits, conf = self.detect(y[i].numpy().astype(np.float32), wmx.SR, self.det)
+            ms[i] = np.asarray(bits)[:16]; sc[i] = float(conf)
+        return {"top": (ms, np.ones(B, bool), sc)}
 
 
 class WavMarkM:
