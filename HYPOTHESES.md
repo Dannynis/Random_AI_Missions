@@ -39,7 +39,7 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
 
 ## Tier B: scale checks that settle open questions
 
-### B1. Forward-Forward: is the loss the problem, not locality?  (`running`: `experiments/b1_ff_depth`, CIFAR depth sweep launched 2026-11-26)
+### B1. Forward-Forward: is the loss the problem, not locality?  (`running`: depth sweep done, `reports/2026-11-27-b1-ff-depth` — H1 FAIL, H2 PASS with plateau; B1b running)
 - **Origin:** PR #46 (MNIST: Hinton recipe 7.26 % error, pairwise loss 1.98 %, local cross-entropy 1.49 %, backprop
   1.85 %) and PR #60 (label-free pairwise FF 2.11 %, threshold 4.03 %). Both found locality is free and the threshold
   loss is the cost, but on MNIST **depth adds nothing** for a local learner.
@@ -47,6 +47,15 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   epochs, depth sweep {4,8,12}, 3 seeds. Two pre-stated questions: H1 parity (best local within 3 pp of bp on
   CIFAR-10), H2 composition (deepest-block probe beats first by ≥5 pp — does locality compose with depth on a hard
   task, unlike MNIST?). Prior work: Belilovsky et al. greedy layerwise (ICML 2019), Nøkland & Eidnes local errors.
+- **Result (2026-11-27, 54 cells):** H1 FAIL — greedy local CE trails backprop by 12.5/16.4/16.7 pp on CIFAR-10 at
+  depth 4/8/12 (CIFAR-100: 14.5-23.3 pp). H2 PASS as stated (+33 pp block 1 → best) but local CE **plateaus at ~block
+  7** while bp keeps composing to block 10-12. FF goodness (pairwise) is far worse at conv depth (0.43-0.46 CIFAR-10,
+  peaks at block 6 then degrades). The MNIST finding "locality is free" does not carry to CIFAR.
+- **B1b (running):** does a stronger local objective (Belilovsky aux head `local_aux`, InfoPro-style reconstruction
+  `local_rec`) close the gap and lift the plateau? Pre-stated: within 3 pp of bp at d8 CIFAR-10; block 12 beats block 6
+  by ≥2 pp.
+- **Possible LLM-scale sequel:** greedy local learning for language-model pretraining (arXiv 2610.04867 studies the
+  gap and objective design) — check that paper before building.
 
 ### B2. Differentiable logic-gate networks at depth  (`todo`)
 - **Origin:** PR #56. Straight-through forward took depth-12 training from 10 % to 86.7 %.
@@ -87,6 +96,15 @@ Origin links point at the Random-Ideas daily PRs. Status: `todo`, `running`, `do
   prior exactly where coverage (long-tail) or uncertainty (symmetric noise) is the right geometry. The policy build is
   justified but its real bar is DIRECT (arXiv 2312.09196) and the ICML-2026 foundation-prior AL method, not just the
   generic rules.
+
+### B8. Exemplar selection for a memory (nearest-neighbour) classifier at scale  (`todo`, low GPU need)
+- **Origin:** Random-Ideas PR #62 (`2026-11-27-memory-exemplar-select`). On 47-way class-incremental EMNIST with a
+  frozen 93k-param encoder, k-center (k-means medoid) writes beat random by +0.062 at 20/class and +0.127 at 5/class
+  (5 seeds); a readout-optimised swap selector overfits and doubles forgetting.
+- **Strong test:** same protocol on class-incremental ImageNet-100 / CIFAR-100 with a frozen foundation encoder
+  (DINOv2 / CLIP), budgets 1-40 per class, versus random, herding, and the pretrained-feature CIL baselines
+  (prototype / RanPAC-style). Mostly feature extraction plus kNN — small tier. Check prior work on coreset selection
+  for prototype/kNN CIL first.
 
 ## Tier C: cheap sweeps
 - Seeds and ablations for any Tier A/B experiment.
