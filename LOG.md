@@ -195,6 +195,30 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1, playback level test, real room.** Set B replayed on the external speakers 6 dB quieter than its first two
+  plays (same laptop mic position; the phone had been moved closer when re-attached), 40 per cell, laptop / phone mic,
+  PESQ 4.0 / 4.3 / 4.4 / 4.5: ours 0.98 / 0.90 / 0.73 / 0.40 and 0.98 / 0.98 / 0.95 / 0.68 (first plays at the original
+  level, laptop mic: 0.93 / 0.80 / 0.63-0.65 / 0.18-0.28); 4 bit/s at 4.0 0.93 / 0.95, 6 bit/s at 4.0 0.90 / 0.98; DeAR
+  native 0.10 / 0.25, 0 at PESQ 4.0 and 4.3. The quieter level did not hurt on the unmoved laptop mic (if anything
+  slightly better, possibly less loudspeaker distortion), so the lower 32 s scores of the previous entry are not
+  explained by the playback level alone. Results: `results/a1_ota_watermark/1305315` (laptop), `1305316` (phone).
+- **A1 review (fairness audit and prior-art check, before any paper).** Fair: same PESQ calibration for all methods on
+  separate streams, blind timing for every method, leakage-free two-fold thresholds, one shuffled playlist and global
+  gain in the room, disjoint host audio. To fix: (1) the simulated `ota` / `reverb` conditions are drawn from the same
+  channel generator and parameter ranges as training (only the rooms are new), so they are in-distribution for ours;
+  claims of unseen-channel robustness rest on the stress set and the real rooms; (2) AudioSeal reads 0.69 even clean,
+  so an oracle-aligned AudioSeal decode is needed as an upper bound; WavMark should get soft combining across the
+  window; (3) the DeAR reimplementation is far weaker than the paper (bit error 0.12 clean at native strength against
+  ~1 %), so it is "DeAR-style" until it reproduces a paper number; (4) decision rules differ between tables (`crc@1` in
+  the simulated summary, `crc@4` in the room tables) and `summary()` scores `ours_k*` with `top`; (5) audibility rests
+  on speech PESQ only; (6) "<= 1 % false alarm" in the room rests on ~20 unmarked items per fold; (7) the capacity
+  figure is a genie-timed, condition-calibrated soft-slot information rate, not an achievable blind rate; (8) PESQ over
+  32 s windows is not comparable to PESQ over 8 s; (9) no confidence intervals. Closest prior work: DeAR (AAAI 2023,
+  real speaker/mic, bit accuracy only), AWARE (arXiv 2510.17512, simulated replay, AudioSeal / WavMark fail), the SoK
+  2503.19176 (small real re-recording test), Tai & Mansour (ICASSP 2019, classical over-the-air with sync), DRAW (TIFS
+  2024, not read in full). SilentCipher makes no over-the-air claim. Plausibly new: message-level comparison at matched
+  audibility on real hardware against several learned methods; learned embedding with blind sync, CRC and list decoding
+  end to end over the air; stealth as a function of listening time; measured information rate against delivered rate.
 - **A1, is the long-window gain fair to the baselines? Rate at equal bit rate; punctured code on 3 seeds.**
   - Baselines with a 32 s window, simulated (seed 0, 60 recordings, PESQ 4.0, message success at <= 1 % false alarm):
     WavMark clean 1.000, over the air 0.650 (8 s window: 0.31); AudioSeal 0.567 / 0.000; DeAR 0.067 / 0.000. So
