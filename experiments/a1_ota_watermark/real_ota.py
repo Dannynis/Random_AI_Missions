@@ -53,12 +53,11 @@ _NC = {}
 
 def neural_codec(y, p):
     """Re-synthesis by a neural audio codec after the room (removal attack): ``encodec_<kbps>`` (Meta EnCodec 24 kHz at
-    1.5 / 3 / 6 / 12 kbps; audio resampled 16 -> 24 -> 16 kHz) or ``dac`` (Descript DAC 16 kHz, all codebooks)."""
+    1.5 / 3 / 6 / 12 kbps; audio resampled 16 -> 24 -> 16 kHz)."""
     import torchaudio.functional as AF
     if p not in _NC:
         if p == "dac":
-            from transformers import DacModel
-            _NC[p] = DacModel.from_pretrained("descript/dac_16khz").to(R.DEV).eval()
+            raise ValueError("dac: not available in this environment")
         else:
             from encodec import EncodecModel
             mdl = EncodecModel.encodec_model_24khz().to(R.DEV).eval()

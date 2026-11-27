@@ -1,8 +1,8 @@
 """A1 decoder on a speech foundation model (WavLM), and the matched control.
 
 The trained embedder (ours, seed s) is frozen; only a new decoder is trained, through the same training channel and
-timing jitter as the original. ``--arch wavlm``: a frozen WavLM-base-plus (Hugging Face ``microsoft/wavlm-base-plus``;
-``--unfreeze N`` also trains its top N transformer layers) gives hidden states at 50 Hz; a learned softmax-weighted sum
+timing jitter as the original. ``--arch wavlm``: a frozen WavLM-base-plus (torchaudio's ``WAVLM_BASE_PLUS`` pipeline;
+``--unfreeze N`` also trains its top N transformer layers) gives the 12 transformer layers' outputs at 50 Hz; a learned softmax-weighted sum
 of all layers -> linear 768 -> 256 -> resampled to the original decoder's frame grid (hop 256, frame t centred at
 t * 256) -> two temporal conv layers. ``--arch ours``: the original decoder architecture, trained from scratch by the same
 recipe (the control: same embedder, data, channel, steps). Both keep the decoder interface (``frames`` per-frame
@@ -24,25 +24,23 @@ import torch.nn.functional as F
 import run_a1 as R
 import wmx
 
-WAVLM = "microsoft/wavlm-base-plus"
 
 
 class WavLMDecoder(nn.Module):
     def __init__(self, unfreeze=0, d=256):
         super().__init__()
-        from transformers import WavLMModel
-        self.fm = WavLMModel.from_pretrained(WAVLM)
-        self.fm.config.apply_spec_augment = False
+        import torchaudio
+        self.fm = torchaudio.pipelines.WAVLM_BASE_PLUS.get_model()
         for p in self.fm.parameters():
             p.requires_grad = False
         self.unfreeze = unfreeze
         if unfreeze:
-            for layer in self.fm.encoder.layers[-unfreeze:]:
+            for layer in self.fm.encoder.transformer.layers[-unfreeze:]:
                 for p in layer.parameters():
                     p.requires_grad = True
-        nl = self.fm.config.num_hidden_layers + 1
+        nl = len(self.fm.encoder.transformer.layers)
         self.layer_w = nn.Parameter(torch.zeros(nl))
-        self.proj = nn.Linear(self.fm.config.hidden_size, d)
+        self.proj = nn.Linear(768, d)
         self.conv = nn.Sequential(nn.Conv1d(d, d, 5, padding=2), nn.GELU(), nn.Conv1d(d, d, 5, padding=2), nn.GELU())
         self.head = nn.Sequential(nn.Linear(d, 512), nn.GELU(), nn.Linear(512, 512), nn.GELU(), nn.Linear(512, wmx.K))
 
@@ -50,7 +48,7 @@ class WavLMDecoder(nn.Module):
         """(B, n) -> (B, n // HOP + 1, d) on the original decoder's frame grid."""
         x = (y - y.mean(-1, keepdim=True)) / (y.std(-1, keepdim=True) + 1e-5)
         with torch.set_grad_enabled(self.training and self.unfreeze > 0):
-            hs = self.fm(x, output_hidden_states=True).hidden_states           # (nl) x (B, T50, 768)
+            hs, _ = self.fm.extract_features(x)                                # nl x (B, T50, 768)
         h = (torch.softmax(self.layer_w, 0)[:, None, None, None] * torch.stack(hs)).sum(0)
         h = self.proj(h).transpose(1, 2)                                     # (B, d, T50)
         T = y.shape[-1] // wmx.HOP + 1
