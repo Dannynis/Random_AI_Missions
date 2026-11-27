@@ -200,6 +200,8 @@ PRIMARY_RULE = {"ours": "crc@1", "audioseal": "top", "audioseal_ft": "top", "wav
 
 def make_method(m, seed):
     """Method object from its name: ours, ours_k<bits> (same model, longer message), audioseal, wavmark, dear."""
+    if m in ("ours_eqinv", "ours_eqwf"):
+        return OursEQ(seed, m[7:])
     if m == "ours" or m.startswith("ours_k"):
         return Ours(seed, int(m[6:]) if m != "ours" else 16)
     if m == "audioseal":
@@ -331,6 +333,24 @@ class Ours:
         return {"slot_ber": p, "n_chunks": int(full.sum()), "cap_cal_bps": cap_cal,
                 "cap_refit_bps": wc.capacity_bits(ev) * sps, "cap_bsc_bps": (1 - h) * sps,
                 "payload_bps": self.k_info / (4 * wmx.N / wmx.SR), "rec_s": REC_S}
+
+
+class OursEQ(Ours):
+    """Ours with a room-calibrated transmit equaliser on the watermark residual (room_channel.py; curve file in
+    $A1_ROOM_EQ, keys inv_db / wf_db over rFFT bins of 512): zero-phase gain over the whole residual. The decoder is
+    unchanged; audibility is re-matched by PESQ like every method."""
+
+    def __init__(self, seed, kind):
+        super().__init__(seed)
+        self.name = f"ours_eq{kind}"
+        eq = np.load(os.environ["A1_ROOM_EQ"])
+        self.eq_f, self.eq_db = eq["f"], eq[f"{kind}_db"]
+
+    def residual(self, host, g0, info, phi0):
+        r = super().residual(host, g0, info, phi0)
+        f = np.fft.rfftfreq(r.shape[-1], 1 / wmx.SR)
+        gain = torch.from_numpy(10 ** (np.interp(f, self.eq_f, self.eq_db) / 20)).float()
+        return torch.fft.irfft(torch.fft.rfft(r) * gain, r.shape[-1])
 
 
 class AudioSealM:
@@ -751,7 +771,7 @@ def summary(a):
         return
     tab = {}
     for r in rows:
-        best = r["rule"] == PRIMARY_RULE.get(r["method"].split("_k")[0] if r["method"].startswith("ours") else r["method"], "top")
+        best = r["rule"] == PRIMARY_RULE.get("ours" if r["method"].startswith("ours") else r["method"], "top")
         if not best:
             continue
         k = (r["method"], r["target"], r["condition"])

@@ -4,6 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 MODE=${1:-full}
+# confirm the job runs on the GPU it was assigned (a CUDA tensor on the visible device)
+python -c "import os, torch; t = torch.ones(1).cuda(); print('gpu check:', t.device, torch.cuda.get_device_name(t.device), 'visible =', os.environ.get('CUDA_VISIBLE_DEVICES'), flush=True)"
 python prep_data.py
 if [ "$MODE" = tiny ]; then
   python run_a1.py train --seed 0 --steps 300 --batch 8 --ckpt_every 100
