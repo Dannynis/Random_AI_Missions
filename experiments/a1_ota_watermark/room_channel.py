@@ -118,7 +118,7 @@ def main():
     out, specs = sys.argv[1], sys.argv[2:]
     est = []
     for sp in specs:
-        d, _, r = sp.partition(":")
+        d, r = (sp.split(":", 1) + [""])[:2] if ":" in sp[2:] else (sp, "")
         e = estimate(d, r or "recording.wav")
         print(os.path.basename(d.rstrip("/\\")), r or "recording.wav", "coherence 0.3-4 kHz",
               round(float(np.mean(e["coh"][(e["f"] > 300) & (e["f"] < 4000)])), 3), flush=True)
