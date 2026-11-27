@@ -195,6 +195,32 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1 review fixes, part 1** (code: one pre-registered decision rule per method, `crc@4` for ours and its payload
+  variants, `top` for baselines, used by `summary()`, `make_figures.py` and the new `tables.py`, which adds Wilson 95 %
+  intervals; AudioSeal oracle-grid and genie-shift upper bounds; WavMark soft combining; a held-out channel `ota_mit` /
+  `ota_mit_mp3` with 270 measured rooms from the MIT IR Survey instead of simulated ones; PESQ always the mean over 8 s
+  sub-windows; paired decoding windows on the same streams; `audibility.py`; AudioSeal fine-tuned on our channel).
+  - Paired listening windows (seed 0, 150 streams of 32 s, the first 8 / 16 / 32 s decoded; PESQ over 8 s sub-windows),
+    ours, message success at <= 1 % false alarm, PESQ 4.3 / 4.5 / 4.6: simulated air 8 s 0.993 / 0.780 / 0.120, 16 s
+    1.000 / 0.933 / 0.293, 32 s 1.000 / 0.973 / 0.520; measured rooms (`ota_mit`) 8 s 0.987 / 0.860 / 0.187, 16 s
+    0.993 / 0.920 / 0.320, 32 s 1.000 / 0.973 / 0.540. The long-window gain holds on identical streams and on measured
+    rooms. Results: `results/a1_ota_watermark/1305476`.
+  - Audibility beyond PESQ (seed 0, 40 fresh streams, at the PESQ-matched gains; PEAQ-style noise-to-mask ratio without
+    an absolute hearing threshold, share of Bark band-frames where the mark exceeds the host's masking threshold),
+    speech / music, at PESQ 4.0 / 4.3 / 4.5: ours 4.7 / 4.7 %, 2.9 / 3.0 %, 1.5 / 1.5 %; AudioSeal 14.2 / 11.1 %,
+    11.5 / 9.0 %, 7.4 / 5.4 %; WavMark 31.2 / 18.7 %, 24.1 / 12.8 %, 15.7 / 7.3 %; DeAR 23.0 / 15.6 %, 15.3 / 9.5 %,
+    8.7 / 4.8 %. Ours' mark follows the host (it is zero where the host is silent), the others add energy in quiet
+    passages, where the masking threshold is low; without an absolute threshold this measure may overstate how audible
+    very quiet additions are. The SQUIM predicted MOS does not separate the methods (4.52-4.55 for speech, host 4.55),
+    so it is not informative here. STOI >= 0.99 for all. A listening-test kit (hosts and marked versions at every
+    target for 3 speech and 3 music hosts, with an ABX page) is in the results folder; no listening test has been run.
+    Results: `results/a1_ota_watermark/1305485`.
+  - AudioSeal fine-tuned on our training channel, first attempt (8k steps, lr 1e-5): did not learn (training bit error
+    0.42 -> 0.36) and lost its clean decoding (0.00 after fine-tuning); not a valid control. Retrying at lr 1e-4, 20k
+    steps. Results: `results/a1_ota_watermark/1305475`.
+  - Smoke test (16 recordings, PESQ 4.0, measured rooms): AudioSeal with the genie shift (best of 80 grid shifts by the
+    true message) 0.13 over the air (clean 0.94), so its failure is not a synchronisation artefact; WavMark with soft
+    combining 0.75 against 0.63 with its own decoder; ours 0.88. The full 3-seed run is going.
 - **A1, playback level test, real room.** Set B replayed on the external speakers 6 dB quieter than its first two
   plays (same laptop mic position; the phone had been moved closer when re-attached), 40 per cell, laptop / phone mic,
   PESQ 4.0 / 4.3 / 4.4 / 4.5: ours 0.98 / 0.90 / 0.73 / 0.40 and 0.98 / 0.98 / 0.95 / 0.68 (first plays at the original

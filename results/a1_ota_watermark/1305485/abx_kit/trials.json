@@ -1,0 +1,506 @@
+[
+ {
+  "host": "host000.wav",
+  "marked": "host000_ours_pesq4.wav",
+  "method": "ours",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_ours_pesq4.wav",
+  "method": "ours",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_ours_pesq4.wav",
+  "method": "ours",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_ours_pesq4.wav",
+  "method": "ours",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_ours_pesq4.wav",
+  "method": "ours",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_ours_pesq4.wav",
+  "method": "ours",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_ours_pesq4.3.wav",
+  "method": "ours",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_ours_pesq4.3.wav",
+  "method": "ours",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_ours_pesq4.3.wav",
+  "method": "ours",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_ours_pesq4.3.wav",
+  "method": "ours",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_ours_pesq4.3.wav",
+  "method": "ours",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_ours_pesq4.3.wav",
+  "method": "ours",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_ours_pesq4.5.wav",
+  "method": "ours",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_ours_pesq4.5.wav",
+  "method": "ours",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_ours_pesq4.5.wav",
+  "method": "ours",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_ours_pesq4.5.wav",
+  "method": "ours",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_ours_pesq4.5.wav",
+  "method": "ours",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_ours_pesq4.5.wav",
+  "method": "ours",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_audioseal_pesq4.wav",
+  "method": "audioseal",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_audioseal_pesq4.wav",
+  "method": "audioseal",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_audioseal_pesq4.wav",
+  "method": "audioseal",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_audioseal_pesq4.wav",
+  "method": "audioseal",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_audioseal_pesq4.wav",
+  "method": "audioseal",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_audioseal_pesq4.wav",
+  "method": "audioseal",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_audioseal_pesq4.3.wav",
+  "method": "audioseal",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_audioseal_pesq4.3.wav",
+  "method": "audioseal",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_audioseal_pesq4.3.wav",
+  "method": "audioseal",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_audioseal_pesq4.3.wav",
+  "method": "audioseal",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_audioseal_pesq4.3.wav",
+  "method": "audioseal",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_audioseal_pesq4.3.wav",
+  "method": "audioseal",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_audioseal_pesq4.5.wav",
+  "method": "audioseal",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_audioseal_pesq4.5.wav",
+  "method": "audioseal",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_audioseal_pesq4.5.wav",
+  "method": "audioseal",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_audioseal_pesq4.5.wav",
+  "method": "audioseal",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_audioseal_pesq4.5.wav",
+  "method": "audioseal",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_audioseal_pesq4.5.wav",
+  "method": "audioseal",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_wavmark_pesq4.wav",
+  "method": "wavmark",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_wavmark_pesq4.wav",
+  "method": "wavmark",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_wavmark_pesq4.wav",
+  "method": "wavmark",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_wavmark_pesq4.wav",
+  "method": "wavmark",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_wavmark_pesq4.wav",
+  "method": "wavmark",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_wavmark_pesq4.wav",
+  "method": "wavmark",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_wavmark_pesq4.3.wav",
+  "method": "wavmark",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_wavmark_pesq4.3.wav",
+  "method": "wavmark",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_wavmark_pesq4.3.wav",
+  "method": "wavmark",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_wavmark_pesq4.3.wav",
+  "method": "wavmark",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_wavmark_pesq4.3.wav",
+  "method": "wavmark",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_wavmark_pesq4.3.wav",
+  "method": "wavmark",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_wavmark_pesq4.5.wav",
+  "method": "wavmark",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_wavmark_pesq4.5.wav",
+  "method": "wavmark",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_wavmark_pesq4.5.wav",
+  "method": "wavmark",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_wavmark_pesq4.5.wav",
+  "method": "wavmark",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_wavmark_pesq4.5.wav",
+  "method": "wavmark",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_wavmark_pesq4.5.wav",
+  "method": "wavmark",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_dear_pesq4.wav",
+  "method": "dear",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_dear_pesq4.wav",
+  "method": "dear",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_dear_pesq4.wav",
+  "method": "dear",
+  "target": "pesq4",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_dear_pesq4.wav",
+  "method": "dear",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_dear_pesq4.wav",
+  "method": "dear",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_dear_pesq4.wav",
+  "method": "dear",
+  "target": "pesq4",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_dear_pesq4.3.wav",
+  "method": "dear",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_dear_pesq4.3.wav",
+  "method": "dear",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_dear_pesq4.3.wav",
+  "method": "dear",
+  "target": "pesq4.3",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_dear_pesq4.3.wav",
+  "method": "dear",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_dear_pesq4.3.wav",
+  "method": "dear",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_dear_pesq4.3.wav",
+  "method": "dear",
+  "target": "pesq4.3",
+  "type": "music"
+ },
+ {
+  "host": "host000.wav",
+  "marked": "host000_dear_pesq4.5.wav",
+  "method": "dear",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host001.wav",
+  "marked": "host001_dear_pesq4.5.wav",
+  "method": "dear",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host002.wav",
+  "marked": "host002_dear_pesq4.5.wav",
+  "method": "dear",
+  "target": "pesq4.5",
+  "type": "speech"
+ },
+ {
+  "host": "host020.wav",
+  "marked": "host020_dear_pesq4.5.wav",
+  "method": "dear",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host021.wav",
+  "marked": "host021_dear_pesq4.5.wav",
+  "method": "dear",
+  "target": "pesq4.5",
+  "type": "music"
+ },
+ {
+  "host": "host022.wav",
+  "marked": "host022_dear_pesq4.5.wav",
+  "method": "dear",
+  "target": "pesq4.5",
+  "type": "music"
+ }
+]
