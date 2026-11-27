@@ -195,6 +195,29 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1 review fixes, part 2: AWARE baseline, room false alarms, room seeds, decision rule.**
+  - AWARE (arXiv 2510.17512, code pinned at commit 402041a, imported from its source; 16 info + 4 zero bits of its
+    20), 3 seeds x 300, message success at <= 1 % false alarm with Wilson 95 % intervals, PESQ 4.0 / 4.3: clean 0.973
+    [0.96, 0.98] / 0.836; simulated air 0.439 [0.41, 0.47] / 0.201; measured rooms 0.699 [0.67, 0.73] / 0.448; measured
+    rooms + MP3 0.662 / 0.404. The strongest baseline so far (AudioSeal and WavMark are near 0 over the simulated air),
+    but well below ours at equal PESQ. Results: `results/a1_ota_watermark/1305700`, `1305701`, `1305702`.
+  - Room false alarms (external speakers at the 6 dB lower level, 150 unmarked clips and 150 per marked cell, both
+    mics): with the list of 4 (`crc@4`) the CRC passed on 4/150 (laptop) and 5/150 (phone) unmarked clips, about 3 %,
+    above the 1 % claimed; with the CRC on the best candidate only (`crc@1`) 1/150 and 0/150 (1 in 300, 95 % upper bound
+    1.9 %), at almost the same success: PESQ 4.0 0.89 [0.83, 0.93] / 0.87 [0.81, 0.92], PESQ 4.3 0.64 / 0.63 (laptop /
+    phone, at <= 1 % false alarm). The pre-registered rule for ours is now `crc@1` everywhere (code, tables, figures);
+    the earlier room tables above used `crc@4` and their false-alarm claim is withdrawn. This set (new streams, quieter
+    playback, phone moved) reads lower than the earlier ones at PESQ 4.3. Results: `results/a1_ota_watermark/1306098`
+    (laptop), `1306103` (phone).
+  - Room, model seeds 1 and 2 (same setup, 60 per cell, `crc@1`, laptop / phone): seed 1 PESQ 4.0 0.72 / 0.72, 4.3
+    0.62 / 0.57; seed 2 1.00 / 1.00, 0.88 / 0.98; no false alarm (0/60). Seed 0 in comparable sets: 0.87-0.98 at 4.0.
+    The spread across model seeds in the room is larger than in the simulator (3 seeds within 0.01 there), so real-room
+    numbers need several seeds. Results: `results/a1_ota_watermark/1306102`, `1306104` (seed 1), `1306094`, `1306099`
+    (seed 2).
+  - AudioSeal fine-tuned on our channel, second attempt (lr 1e-4, 20k steps): again no learning (training bit error
+    0.39) and 0 decoding after fine-tuning. Cause found: our channel shifts the audio by up to 1600 samples and the
+    public 16-bit decoder only reads its message on a 320-sample grid, so the message loss saw unaligned audio from
+    the first step. Third attempt decodes a grid-aligned crop. Results: `results/a1_ota_watermark/1305598`.
 - **A1 review fixes, part 1** (code: one pre-registered decision rule per method, `crc@4` for ours and its payload
   variants, `top` for baselines, used by `summary()`, `make_figures.py` and the new `tables.py`, which adds Wilson 95 %
   intervals; AudioSeal oracle-grid and genie-shift upper bounds; WavMark soft combining; a held-out channel `ota_mit` /

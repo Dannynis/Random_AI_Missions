@@ -16,7 +16,7 @@ import math
 import os
 from collections import defaultdict
 
-RULE = {"ours": "crc@4", "audioseal": "top", "wavmark": "top", "wavmark_soft": "top", "dear": "top"}
+RULE = {"ours": "crc@1", "audioseal": "top", "wavmark": "top", "wavmark_soft": "top", "dear": "top"}
 
 
 def rule_for(method, rule_map):

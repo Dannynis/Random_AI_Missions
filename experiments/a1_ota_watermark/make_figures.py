@@ -24,7 +24,7 @@ def load(root):
     return rows, aud, train
 
 
-PRIMARY = {"ours": "crc@4", "audioseal": "top", "wavmark": "top", "wavmark_soft": "top", "dear": "top"}
+PRIMARY = {"ours": "crc@1", "audioseal": "top", "wavmark": "top", "wavmark_soft": "top", "dear": "top"}
 CONDS = ["clean", "mp3_64k", "opus_32k", "reverb", "ota_legacy", "ota", "ota_mp3"]
 
 

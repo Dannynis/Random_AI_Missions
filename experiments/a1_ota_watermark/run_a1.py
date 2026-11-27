@@ -193,8 +193,8 @@ def info_for(info, k):
 
 
 # one pre-registered decision rule per method for every table (simulated and real): ours and its payload variants use
-# the CRC with a list of 4; baselines their own decoder ("top"); "oracle" (AudioSeal on its known grid) is an upper bound
-PRIMARY_RULE = {"ours": "crc@4", "audioseal": "top", "audioseal_ft": "top", "wavmark": "top", "wavmark_soft": "top",
+# the CRC check on the best candidate (crc@1: a list of 4 let 3 % of unmarked room clips through); baselines their own decoder ("top"); "oracle" (AudioSeal on its known grid) is an upper bound
+PRIMARY_RULE = {"ours": "crc@1", "audioseal": "top", "audioseal_ft": "top", "wavmark": "top", "wavmark_soft": "top",
                 "dear": "top", "aware": "top"}
 
 
