@@ -23,6 +23,7 @@ import time
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 import run_a1 as R
 import wmx
@@ -45,6 +46,92 @@ def load_methods(names, seed, need_cal):
             o.calibrate((wmx.Corpus("speech_train"), wmx.Corpus("music_train")), wmx.Channel(R.DEV, "train"))
         out.append(o)
     return out
+
+
+_NC = {}
+
+
+def neural_codec(y, p):
+    """Re-synthesis by a neural audio codec after the room (removal attack): ``encodec_<kbps>`` (Meta EnCodec 24 kHz at
+    1.5 / 3 / 6 / 12 kbps; audio resampled 16 -> 24 -> 16 kHz) or ``dac`` (Descript DAC 16 kHz, all codebooks)."""
+    import torchaudio.functional as AF
+    if p not in _NC:
+        if p == "dac":
+            from transformers import DacModel
+            _NC[p] = DacModel.from_pretrained("descript/dac_16khz").to(R.DEV).eval()
+        else:
+            from encodec import EncodecModel
+            mdl = EncodecModel.encodec_model_24khz().to(R.DEV).eval()
+            mdl.set_target_bandwidth(float(p.split("_")[1]))
+            _NC[p] = mdl
+    mdl, out = _NC[p], []
+    with torch.no_grad():
+        for i in range(0, len(y), 8):
+            x = y[i:i + 8].to(R.DEV)
+            if p == "dac":
+                z = mdl(x[:, None]).audio_values
+                z = z[:, 0] if z.dim() == 3 else z
+            else:
+                x24 = AF.resample(x, wmx.SR, 24000)
+                z = AF.resample(mdl(x24[:, None])[:, 0], 24000, wmx.SR)
+            out.append(z[:, :x.shape[-1]].float().cpu())
+    return torch.cat(out)
+
+
+def adapt_ours(m, a, sname):
+    """Receiver-side room adaptation for ours: refit the per-slot LLR calibration (``cal``), or also fine-tune the
+    decoder head (``head``), on the marked windows of another playlist recorded in the same room with the same microphone
+    (``--adapt TAG[:recording]``), using its known messages and timing. The target playlist is never used."""
+    tag, _, recname = a.adapt.partition(":")
+    d = real_dir(tag)
+    man = json.load(open(os.path.join(d, "manifest.json")))
+    st = np.load(os.path.join(d, "streams.npz"))
+    g0, phi0, t0, info, L = st["g0"], st["phi0"], st["t0"], st["info"], int(st["L"])
+    import scipy.io.wavfile as wf
+    _, pl = wf.read(os.path.join(d, "playlist.wav")); pl = pl.astype(np.float32) / 32767
+    _, rec = wf.read(os.path.join(d, recname or "recording.wav"))
+    rec = rec.astype(np.float32) / (32767 if rec.dtype == np.int16 else 1)
+    rec = rec.mean(1) if rec.ndim > 1 else rec
+    starts, _, _ = align(rec, pl, man["items"], L)
+    n, B = R.REC_S * wmx.SR, man["n"]
+    zs, bs = [], []
+    lay = m.lay
+    for tgt in sorted({g["target"] for g in man["gains"] if g["method"] == sname}):
+        y = np.zeros((B, n), np.float32); ok = np.zeros(B, bool)
+        for it, s0 in zip(man["items"], starts):
+            if it["method"] == sname and it["target"] == tgt and s0 >= 0:
+                b = it["stream"]; w = rec[s0 + t0[b]: s0 + t0[b] + n]
+                if len(w) == n:
+                    y[b] = w; ok[b] = True
+        y = wmx.normalize(torch.from_numpy(y[ok]), 0.0)
+        tr = R.truth_for(g0[ok], phi0[ok], t0[ok], np.zeros(ok.sum()), np.ones(ok.sum()))
+        with torch.no_grad():
+            feats = torch.cat([m.dec.frames(y[i:i + 16].to(R.DEV)).float().cpu() for i in range(0, len(y), 16)])
+        f0 = np.round(np.asarray(tr.f0)).astype(int); J = feats.shape[1] // wmx.FPC + 1
+        st_ = f0[:, None] + np.arange(J)[None] * wmx.FPC
+        T = feats.shape[1]
+        cs = torch.cat([torch.zeros(len(feats), 1, feats.shape[-1]), feats.cumsum(1)], 1)
+        sI = torch.from_numpy(np.clip(st_, 0, T)).long(); eI = torch.from_numpy(np.clip(st_ + wmx.FPC, 0, T)).long()
+        gat = lambda idx: cs.gather(1, idx[..., None].expand(-1, -1, feats.shape[-1]))
+        mean = (gat(eI) - gat(sI)) / (eI - sI).clamp(min=1).float()[..., None]
+        full = ((eI - sI) == wmx.FPC).numpy()
+        bits = lay.chunk_bits(lay.frame(R.info_for(info[ok], m.k_info)))
+        bits = bits[np.arange(len(y))[:, None], (np.asarray(tr.phase)[:, None] + np.arange(J)[None]) % 4]
+        zs.append(mean[torch.from_numpy(full)]); bs.append(torch.from_numpy(bits[full]))
+    X, Y = torch.cat(zs), torch.cat(bs).float()
+    if a.adapt_mode == "head":
+        head = m.dec.head; head.train()
+        opt = torch.optim.AdamW(head.parameters(), lr=1e-4, weight_decay=1e-3)
+        for step in range(a.adapt_steps):
+            idx = torch.randint(0, len(X), (min(256, len(X)),))
+            loss = F.binary_cross_entropy_with_logits(head(X[idx].to(R.DEV)).float(), Y[idx].to(R.DEV))
+            opt.zero_grad(); loss.backward(); opt.step()
+        head.eval()
+    with torch.no_grad():
+        z = torch.cat([m.dec.head(X[i:i + 512].to(R.DEV)).float().cpu() for i in range(0, len(X), 512)]).numpy()
+    m.cal = R.wc.fit_llr(z, Y.numpy().astype(int), m.name)
+    m.name = f"{m.name}_adapt{a.adapt_mode}"
+    R.say("adapted", m.name, "on", tag, recname, "chunks", len(X), "cal nll", round(m.cal.nll, 3))
 
 
 def make(a):
@@ -149,6 +236,8 @@ def score(a):
         if p == "phone":
             f = torch.fft.rfftfreq(y.shape[-1], 1 / wmx.SR)[None]
             return wmx.mulaw(wmx.freq_gain(y, ((f >= 300) & (f <= 3400)).float().expand(len(y), -1)))
+        if p.startswith("encodec") or p == "dac":
+            return neural_codec(y, p)
         kind, br = p.split("_")
         return wmx.codec(y, kind, br)[0].cpu()
 
@@ -172,8 +261,18 @@ def score(a):
             o = load_methods([dst_m], man["seed"], need_cal=True)[0]
             o.src_name = src_m
             objs.append(o)
+    if a.adapt:                                           # adapted copies of ours-family methods, scored alongside
+        extra = []
+        for o in list(objs):
+            if isinstance(o, R.Ours):
+                c = load_methods([o.name], man["seed"], need_cal=True)[0] if not hasattr(o, "src_name") else None
+                if c is None:
+                    continue
+                adapt_ours(c, a, o.name)
+                extra.append(c)
+        objs += extra
     for m in objs:
-        sname = getattr(m, "src_name", m.name)
+        sname = getattr(m, "src_name", m.name.split("_adapt")[0])
         for p in ([] if a.skip_plain else [None]) + list(a.post):
             cond = "real" if p is None else f"real+{p}"
             yn, okn = windows("unmarked", "-", p)
@@ -230,6 +329,9 @@ def main():
                     help="also score the recording after a codec, e.g. mp3_64k opus_12k aac_32k phone")
     ap.add_argument("--skip_plain", action="store_true", help="only the --post conditions")
     ap.add_argument("--recording", default="recording.wav")
+    ap.add_argument("--adapt", default="", help="TAG[:recording] of another playlist in the same room / mic")
+    ap.add_argument("--adapt_mode", default="cal", choices=["cal", "head"])
+    ap.add_argument("--adapt_steps", type=int, default=300)
     ap.add_argument("--decode_as", nargs="*", default=[], help='re-decode the items of one method with another, e.g. ours=ours_decwavlm')
     a = ap.parse_args()
     make(a) if a.cmd == "make" else score(a)
