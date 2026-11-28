@@ -277,6 +277,29 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1 new directions, part 2: what the room-calibration gain is, 64 s in the room, decoder and AudioSeal controls.**
+  - Calibration curves in the simulator (2 seeds x 300, the external-speaker room's curves applied to ours' residual,
+    PESQ re-matched), PESQ 4.3 / 4.5, simulated air | measured rooms: plain 0.982 / 0.758 | 0.983 / 0.820; water-filling
+    `wf` 0.998 / 0.930 | 0.990 / 0.938; inverse `inv` 0.970 / 0.670 | 0.980 / 0.755; `wf` reversed (`neg`) 0.833 / 0.277 |
+    0.898 / 0.363. The same curve helps in simulated and measured rooms the room was never measured in, and its reverse
+    hurts badly: the gain is mostly a better spectral allocation of the mark under the PESQ constraint (more energy
+    above 2 kHz, less below 1 kHz) that our training objective (an LSD bound) did not find, rather than adaptation to
+    this particular room. Whether a room-specific curve adds beyond that needs the set-B run (this room's curve vs the
+    other room's vs reversed), which was stopped after 1 minute and still has to be played. Results:
+    `results/a1_ota_watermark/1307346`, `1307349`.
+  - Calibration set replayed in the room (same streams, laptop / phone): PESQ 4.5 plain 0.52 / 0.74, `wf` 0.84 / 0.90,
+    `inv` 0.40 / 0.52; PESQ 4.3 plain 0.98 / 0.98, `wf` 0.98 / 1.00. Repeats the first play (0.46 / 0.72 -> 0.88 / 0.94).
+    Results: `results/a1_ota_watermark/1308521` (laptop), `1308524` (phone).
+  - Real room, 64 s window (30 per cell, laptop mic): PESQ 4.5 1.00 [0.89, 1.00], PESQ 4.6 0.50. Phone mic still scoring.
+    Results: `results/a1_ota_watermark/1308523`.
+  - Retrained decoders at batch 32 with a clean warm-up (20k steps): WavLM-base-plus decoder reached training bit error
+    0.35 and decodes 0.10 clean / 0.03 over the air at PESQ 4.0; the control (our architecture, same recipe) stayed at
+    0.50. A decoder trained from scratch on the frozen embedder does not reach the jointly trained one (0.004 on the same
+    batches) in this budget; the foundation-model features learn faster than our trunk from scratch but the direction
+    is not competitive yet. Results: `results/a1_ota_watermark/1307339`, `1307340`.
+  - AudioSeal fine-tuned on our channel, fourth attempt (output high-passed and held at its native level): training bit
+    error 0.03, evaluation still 0.49-0.50 (also clean and on the known grid). An unresolved train / evaluation mismatch
+    in our wrapper; this control remains open. Results: `results/a1_ota_watermark/1307360`.
 - **A1 new directions, part 1: full fair baseline table, stealth vs listening time, room calibration, attacks after
   the air, receiver adaptation, foundation-model decoder** (rule for ours `crc@1` throughout; Wilson 95 % intervals).
   - Fair baselines, 3 seeds x 300, message success at <= 1 % false alarm, PESQ 4.0 / 4.3, simulated air | measured rooms
