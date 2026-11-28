@@ -86,6 +86,7 @@ def main():
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--lr", type=float, default=3e-4)
     ap.add_argument("--unfreeze", type=int, default=0)
+    ap.add_argument("--clean_frac", type=float, default=0.0, help="share of steps on the clean channel before the ramp")
     a = ap.parse_args()
     dev = R.DEV
     global BF16
@@ -114,7 +115,9 @@ def main():
         bits = torch.randint(0, 2, (a.batch, S, wmx.K), generator=g, device=dev)
         with torch.no_grad():
             w = wmx.embed_chunks(enc, host, bits, ar["whr"]).float()
-            y, off = chan.train(host + w, g, strength=min(1.0, step / (0.3 * a.steps)))
+            frac = step / a.steps
+            strength = 0.0 if frac < a.clean_frac else min(1.0, (frac - a.clean_frac) / 0.3)
+            y, off = chan.train(host + w, g, strength=strength)
         if step == 1 or step % 1000 == 0:                                     # sanity: the original decoder on this batch
             with torch.no_grad():
                 s_ = torch.round((wmx.N + off) / wmx.HOP).long()
