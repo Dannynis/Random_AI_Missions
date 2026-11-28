@@ -456,6 +456,13 @@ class AudioSealM:
         return res
 
 
+def audioseal_ft_shape(w, host, whr_db=-24.0):
+    """Fine-tuned AudioSeal output: high-passed at 50 Hz and scaled to a fixed watermark-to-host ratio per row."""
+    f = torch.fft.rfftfreq(w.shape[-1], 1 / wmx.SR, device=w.device)
+    w = torch.fft.irfft(torch.fft.rfft(w) * (f >= 50).float(), w.shape[-1])
+    return w * (10 ** (whr_db / 20) * host.pow(2).mean(-1, keepdim=True).sqrt() / (w.pow(2).mean(-1, keepdim=True).sqrt() + 1e-9))
+
+
 class AudioSealFTM(AudioSealM):
     """AudioSeal after fine-tuning on our training channel (ft_audioseal.py); same decoder and sync search."""
     name = "audioseal_ft"
@@ -470,6 +477,9 @@ class AudioSealFTM(AudioSealM):
         st = torch.load(path, map_location=DEV, weights_only=False)
         self.gen.load_state_dict(st["gen"]); self.det.load_state_dict(st["det"])
         self.gen.eval(); self.det.eval()
+
+    def residual(self, host, g0, info, phi0):
+        return audioseal_ft_shape(super().residual(host, g0, info, phi0), host)
 
 
 class AwareM:

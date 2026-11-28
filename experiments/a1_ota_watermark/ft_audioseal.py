@@ -5,7 +5,10 @@ that ours is trained on (``wmx.Channel(...).train``, same schedule of channel st
 "trained for the acoustic channel" from "our architecture and link layer". Losses: message BCE on the detector's
 window-averaged message logits, frame-level detection cross-entropy on the marked recording against an unmarked twin
 through the same channel, and a log-spectral-distance hinge that keeps the mark no more visible than the public model's
-(its initial LSD on the first batches). Audibility is matched at evaluation by PESQ, as for every method.
+(its initial LSD on the first batches). The generator's output is high-passed at 50 Hz and held at the public model's
+native level (-24 dB below the host, ``run_a1.audioseal_ft_shape``, the same at evaluation): without this the first
+attempts learned a huge DC / sub-audible carrier that the LSD loss and PESQ hardly see. Audibility is matched at
+evaluation by PESQ, as for every method.
 
 usage: python ft_audioseal.py --seed 0 --steps 8000   (writes $RUN_DIR/ckpt/audioseal_ft_seed<seed>.pt)
 """
@@ -37,7 +40,7 @@ def main():
     gen = AudioSeal.load_generator("audioseal_wm_16bits").to(dev).train()
     det = AudioSeal.load_detector("audioseal_detector_16bits").to(dev).train()
     os.makedirs(R.CK, exist_ok=True)
-    final = os.path.join(R.CK, f"audioseal_ft_seed{a.seed}.pt")
+    final = os.path.join(R.CK, f"audioseal_ft_seed{a.seed}.pt")   # (a fresh RUN_DIR per attempt)
     if os.path.exists(final):
         R.say("already trained"); return
     params = list(gen.parameters()) + list(det.parameters())
@@ -51,7 +54,7 @@ def main():
         g = torch.Generator(device=dev).manual_seed(a.seed * 10 ** 7 + 900_000 + step)
         host = R.host_batch(corp, rng, a.batch, L)
         bits = torch.randint(0, 2, (a.batch, 16), generator=g, device=dev)
-        w = gen.get_watermark(host[:, None], wmx.SR, message=bits)[:, 0]
+        w = R.audioseal_ft_shape(gen.get_watermark(host[:, None], wmx.SR, message=bits)[:, 0], host)
         strength = min(1.0, step / (0.3 * a.steps))
         g_state = g.get_state()
         y, off = chan.train(host + w, g, strength=strength)
