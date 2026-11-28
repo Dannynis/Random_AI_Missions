@@ -22,6 +22,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import run_a1 as R
+
+BF16 = False
 import wmx
 
 
@@ -86,12 +88,15 @@ def main():
     ap.add_argument("--unfreeze", type=int, default=0)
     a = ap.parse_args()
     dev = R.DEV
+    global BF16
+    BF16 = dev.type == "cuda" and torch.cuda.is_bf16_supported(including_emulation=False)
+    R.say("bf16 autocast", BF16)
     os.makedirs(R.CK, exist_ok=True)
     final = os.path.join(R.CK, f"dec_{a.arch}_seed{a.seed}.pt")
     if os.path.exists(final):
         R.say("already trained"); return
     torch.manual_seed(a.seed)
-    enc, _, ar = R.load_ours(a.seed)                                         # frozen embedder of the main run
+    enc, dec0, ar = R.load_ours(a.seed)                                      # frozen embedder of the main run
     for p in enc.parameters():
         p.requires_grad = False
     dec = build(a.arch, a.unfreeze).to(dev).train()
@@ -110,7 +115,12 @@ def main():
         with torch.no_grad():
             w = wmx.embed_chunks(enc, host, bits, ar["whr"]).float()
             y, off = chan.train(host + w, g, strength=min(1.0, step / (0.3 * a.steps)))
-        with torch.autocast(dev.type, dtype=torch.bfloat16, enabled=dev.type == "cuda"):
+        if step == 1 or step % 1000 == 0:                                     # sanity: the original decoder on this batch
+            with torch.no_grad():
+                s_ = torch.round((wmx.N + off) / wmx.HOP).long()
+                l0 = dec0.head(R.window_mean(dec0.frames(y).float(), s_)).float()
+                R.say(f"step {step} original decoder ber on this batch: {((l0 > 0).long() != bits[:, 1]).float().mean().item():.4f}")
+        with torch.autocast(dev.type, dtype=torch.bfloat16, enabled=BF16):
             feats = dec.frames(y)
             jit = torch.randint(-3, 4, (a.batch,), generator=g, device=dev)
             s = torch.round((wmx.N + off) / wmx.HOP).long() + jit
