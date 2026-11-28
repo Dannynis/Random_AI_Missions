@@ -202,7 +202,7 @@ def make_method(m, seed):
     """Method object from its name: ours, ours_k<bits> (same model, longer message), audioseal, wavmark, dear."""
     if m.startswith("ours_dec"):                          # same embedder, decoder retrained (fm_decoder.py)
         return OursDec(seed, m[8:])
-    if m in ("ours_eqinv", "ours_eqwf"):
+    if m in ("ours_eqinv", "ours_eqwf", "ours_eqwf2", "ours_eqneg"):
         return OursEQ(seed, m[7:])
     if m == "ours" or m.startswith("ours_k"):
         return Ours(seed, int(m[6:]) if m != "ours" else 16)
@@ -356,8 +356,10 @@ class OursEQ(Ours):
     def __init__(self, seed, kind):
         super().__init__(seed)
         self.name = f"ours_eq{kind}"
-        eq = np.load(os.environ["A1_ROOM_EQ"])
-        self.eq_f, self.eq_db = eq["f"], eq[f"{kind}_db"]
+        # wf2: the water-filling curve of a second room ($A1_ROOM_EQ2); neg: the first room's curve reversed (control)
+        eq = np.load(os.environ["A1_ROOM_EQ2" if kind == "wf2" else "A1_ROOM_EQ"])
+        key = {"wf2": "wf_db", "neg": "wf_db"}.get(kind, f"{kind}_db")
+        self.eq_f, self.eq_db = eq["f"], (-1 if kind == "neg" else 1) * eq[key]
 
     def residual(self, host, g0, info, phi0):
         r = super().residual(host, g0, info, phi0)
