@@ -277,6 +277,45 @@ for more real rooms, so this session moved the lab's compute onto the open B-tie
   audibility of the comparison (PESQ 4.0 / 4.3) it decodes nothing over the air (ours: 0.998 / 0.981). Caveats:
   reimplementation with guessed details (module docstring), no CRC / detection head (it has to rely on its score to
   hold false alarm). Results: `results/a1_ota_watermark/1295468`.
+- **A1 new directions, part 1: full fair baseline table, stealth vs listening time, room calibration, attacks after
+  the air, receiver adaptation, foundation-model decoder** (rule for ours `crc@1` throughout; Wilson 95 % intervals).
+  - Fair baselines, 3 seeds x 300, message success at <= 1 % false alarm, PESQ 4.0 / 4.3, simulated air | measured rooms
+    (MIT IR Survey, never seen in training): ours 1.000 / 0.981 | 0.998 / 0.982 (CRC false alarm 0.3-0.8 %); WavMark
+    with soft combining 0.514 / 0.248 | 0.802 / 0.618; WavMark 0.368 / 0.137 | 0.724 / 0.492; AWARE (entry below)
+    0.439 / 0.201 | 0.699 / 0.448; AudioSeal 0.044 / 0.053 | 0.080 / 0.101 (with the genie shift, an upper bound that
+    ignores false alarms: 0.121 / 0.117 | 0.234 / 0.270; clean 0.90); DeAR-style 0.000 | 0.001. Measured rooms are
+    easier than our simulated air for every method; the ranking does not change. Results:
+    `results/a1_ota_watermark/1305484`.
+  - Stealth vs listening time, fine sweep (seed 0, the same 150 streams of 32 s decoded with 8 / 16 / 32 s windows, PESQ
+    4.3-4.6 in 0.05 steps): the watermark gain at which 90 % of messages decode is -8.9 / -10.7 / -12.3 dB over the
+    simulated air and -8.8 / -10.7 / -12.5 dB over measured rooms, i.e. 1.7-1.8 dB per doubling of the window (ideal
+    combining of repeats: 3 dB), PESQ about 4.45 / 4.51 / 4.55 at that point. Results: `results/a1_ota_watermark/1307155`.
+  - Room calibration (transmit side): the channel response and noise of the current external-speaker room were
+    estimated from two earlier playlists' recordings (`room_channel.py`, both mics); a water-filling equaliser (`wf`,
+    +-6 dB: about +5-6 dB above 2 kHz, -2 dB below 1 kHz, where the room noise is highest) and an inverse-channel one
+    (`inv`) were applied to ours' residual, audibility re-matched by PESQ. New streams, 50 per cell, laptop / phone mic:
+    PESQ 4.5 plain 0.46 / 0.72, `wf` 0.88 / 0.94, `inv` 0.38 / 0.64; PESQ 4.3 plain 0.96 / 1.00, `wf` 0.98 / 1.00, `inv`
+    0.92 / 1.00. Measured information rate at PESQ 4.5: plain 4.3 / 5.4, `wf` 6.6 / 8.1 bit/s. A single run; a repeat with
+    controls (the other room's curve, the curve reversed, and the same curves in the simulator) is under way.
+    Results: `results/a1_ota_watermark/1307333` (laptop), `1307334` (phone).
+  - Removal by re-synthesis after the room (150-stream set, both mics): EnCodec at 6 and 3 kbps takes ours to 0.00
+    at PESQ 4.0 and 4.3; Opus 12k after the room 0.09-0.12 at 4.0, about 0 at 4.3 (plain 0.87-0.89 / 0.63-0.64). A
+    neural codec after the air removes the mark. Results: `results/a1_ota_watermark/1307057`, `1307129`.
+  - Receiver-side adaptation (LLR recalibration or decoder-head fine-tuning on another playlist recorded in the same
+    room with the same mic; the target playlist unused): recalibration +0.00 at PESQ 4.0 and +0.02 to +0.10 at 4.3 over
+    4 cases; head fine-tuning -0.10 to +0.10 (overfits). Small effect. Results: `results/a1_ota_watermark/1307083`,
+    `1307096`, `1307118`, `1307124`, `1307136`, `1307142`, `1307146`, `1307149`.
+  - Room seeds, replays: seed 1 0.93 / 0.92 at PESQ 4.0 (first play 0.72 / 0.72), 0.57 / 0.57 at 4.3 (0.62 / 0.57); seed 2
+    1.00 everywhere (first play 1.00 / 1.00, 0.88 / 0.98). Session-to-session variation is up to 0.2 at 4.0; seed 1 is
+    weaker at 4.3. Results: `results/a1_ota_watermark/1306292`, `1306293`, `1307285`, `1307286`.
+  - Foundation-model decoder (frozen WavLM-base-plus + head on the frozen embedder) and its control (our decoder
+    architecture retrained by the same recipe): neither learned at batch 8 (training bit error 0.50 after 10k steps,
+    and in a 600-step fp32 check), although the original decoder reads the same training batches at bit error 0.004;
+    the recipe, not the backbone, failed. Retrying both at batch 32 with a clean-channel warm-up. Results:
+    `results/a1_ota_watermark/1307061`, `1307024`.
+  - AudioSeal fine-tuned on our channel, third attempt (grid-aligned crops): learned in training (bit error 0.01) but
+    decodes nothing at evaluation (bit error 0.49, even clean); a train / evaluation mismatch in our wrapper, still to
+    find. Not yet a valid control. Results: `results/a1_ota_watermark/1306105`.
 - **A1 review fixes, part 2: AWARE baseline, room false alarms, room seeds, decision rule.**
   - AWARE (arXiv 2510.17512, code pinned at commit 402041a, imported from its source; 16 info + 4 zero bits of its
     20), 3 seeds x 300, message success at <= 1 % false alarm with Wilson 95 % intervals, PESQ 4.0 / 4.3: clean 0.973
